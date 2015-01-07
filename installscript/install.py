@@ -76,16 +76,18 @@ except sh.CommandNotFound as err:
         "git not found. For instll see: http://git-scm.com/"
     )
 
-if SYSTEM_DEPENDENCIES_ERRORS:
-    errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
-    msg = "System Error found:\n\t{}".format(errors)
-    logger.error(msg)
-    sys.exit(1)
-
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
+
+def check_system_dependencies():
+    if SYSTEM_DEPENDENCIES_ERRORS:
+        errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
+        msg = "System Error found:\n\t{}".format(errors)
+        logger.error(msg)
+        sys.exit(1)
+
 
 def get_parser():
 
@@ -125,10 +127,14 @@ def git_clone_otree_project(path):
 
 
 def main():
+    # check system
+    check_system_dependencies()
+
+    # retrieve parser
     parser = get_parser()
     args = parser.parse_args()
 
-    # main loop
+    # start install
     logger.info("Initiating installer on '{}'".format(args.wrkpath))
     #~ logger.info("
 
