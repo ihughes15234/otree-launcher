@@ -18,10 +18,14 @@ import os
 import sys
 import subprocess
 import shlex
+import shutil
 import logging
 import argparse
+import contextlib
 
 import sh
+
+import virtualenv
 
 
 # =============================================================================
@@ -40,6 +44,8 @@ STR_VERSION = ".".join(VERSION)
 __version__ = STR_VERSION
 
 OTREE_REPO = "git@github.com:oTree-org/oTree.git"
+
+OTREE_DIR = "oTree"
 
 IS_WINDOWS = sys.platform.startswith("win")
 
@@ -73,27 +79,32 @@ try:
     sh.git(help=True)
 except sh.CommandNotFound as err:
     SYSTEM_DEPENDENCIES_ERRORS.append(
-        "git not found. For instll see: http://git-scm.com/"
+        "'git' command not found. For install see: http://git-scm.com/"
     )
 
 
 # =============================================================================
-# FUNCTIONS
+# HELPER FUNCTIONS AND CONTEXT
 # =============================================================================
 
-def check_system_dependencies():
-    if SYSTEM_DEPENDENCIES_ERRORS:
-        errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
-        msg = "System Error found:\n\t{}".format(errors)
-        logger.error(msg)
-        sys.exit(1)
+@contextlib.contextmanager
+def cd(path):
+    original = os.getcwdu()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(original)
 
 
 def get_parser():
 
     def dirpath(value):
         value = os.path.abspath(value)
-        if os.path.isdir(value):
+        force = "-f" in sys.argv or "--force" in sys.argv
+        if force and os.path.isdir(value):
+            shutil.rmtree(value)
+        elif os.path.isdir(value):
             msg = "'{}' directory already exists".format(value)
             raise argparse.ArgumentTypeError(msg)
         os.makedirs(value)
@@ -103,17 +114,33 @@ def get_parser():
         prog=PRJ, version=STR_VERSION, description=DOC
     )
     parser.add_argument(
+        "-f", "--force", dest="force", action="store_true",
+        help="If the destination directory already exist remove it first."
+    )
+    parser.add_argument(
         dest="wrkpath", type=dirpath, metavar="WORK_PATH",
-        help=(
-            "Local path to clone oTree. "
-            "The destination directory must not already exist."
-        )
+        help="Local path to clone oTree. "
     )
     return parser
 
 
-def git_clone_otree_project(path):
-    pass
+# =============================================================================
+# LOGIC ITSELF
+# =============================================================================
+
+def validate_system_dependencies():
+    if SYSTEM_DEPENDENCIES_ERRORS:
+        errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
+        msg = "System Error found:\n\t{}".format(errors)
+        raise SystemError(msg)
+
+
+def git_clone_otree_project(path, out=None, verbose=True):
+    clonepath = os.path.join(path, OTREE_DIR)
+    sh.git.clone(OTREE_REPO, clonepath, _out=out, _err=out, verbose=verbose)
+
+
+
 
 
 
@@ -128,15 +155,33 @@ def git_clone_otree_project(path):
 
 def main():
     # check system
-    check_system_dependencies()
+    try:
+        validate_system_dependencies()
+    except SystemError as err:
+        logger.error(err.message)
+        sys.exit(1)
 
     # retrieve parser
     parser = get_parser()
     args = parser.parse_args()
 
     # start install
-    logger.info("Initiating installer on '{}'".format(args.wrkpath))
-    #~ logger.info("
+    wrkpath = args.wrkpath
+    logger.info("Initiating installer on '{}'".format(wrkpath))
+
+    logger.info("Creating virtualenv...")
+    virtualenv.create_environment(wrkpath)
+
+    logger.info("Starting Git Clone...")
+    git_clone_otree_project(wrkpath, logger.info)
+
+    logger.info("Installing...")
+    install_otree(wrkpath, logger.info)
+
+
+
+
+
 
 
 
