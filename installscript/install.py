@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
+# =============================================================================
+# FUTURE
+# =============================================================================
+
+from __future__ import unicode_literals
+
+
 # =============================================================================
 # DOCS
 # =============================================================================
@@ -22,10 +30,12 @@ import shutil
 import logging
 import argparse
 import contextlib
+import string
+import select
+import codecs
+import tempfile
 
-import sh
-
-import virtualenv
+from libs import sh, virtualenv
 
 
 # =============================================================================
@@ -40,23 +50,48 @@ DOC = __doc__
 VERSION = ("0", "1")
 
 # : The project version as string
-STR_VERSION = ".".join(VERSION)
-__version__ = STR_VERSION
+STR_VERSION = __version__ = ".".join(VERSION)
 
 OTREE_REPO = "git@github.com:oTree-org/oTree.git"
 
 OTREE_DIR = "oTree"
 
+REQUIREMENTS_FILE = "requirements_base.txt"
+
 IS_WINDOWS = sys.platform.startswith("win")
 
-SYSTEM_DEPENDENCIES_ERRORS = []
+ENCODING = "UTF-8"
 
+INTERPRETER = "cmd" if IS_WINDOWS else "bash"
+
+PRINT = "@echo" if IS_WINDOWS else "echo"
+
+END_CMD = "\n" if IS_WINDOWS else ";\n"
+
+CMDS = """
+python $VIRTUALENV_PATH $WRK_PATH
+$ACTIVATE
+git clone $REPO $OTREE_PATH
+pip install --upgrade -r $REQUIREMENTS_PATH
+cd $OTREE_PATH
+python otree resetdb --noinput
+python otree runserver
+"""
+
+RUNNER = "run.bat" if IS_WINDOWS else "run.sh"
+
+
+RUN_CMDS = """
+$ACTIVATE
+cd $OTREE_PATH
+python otree runserver
+"""
 
 # =============================================================================
 # LOGGER
 # =============================================================================
 
-def _get_logger():
+def get_logger():
     logger = logging.getLogger(PRJ)
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -68,33 +103,38 @@ def _get_logger():
     logger.addHandler(ch)
     return logger
 
-logger = _get_logger()
+logger = get_logger()
 
 
 # =============================================================================
 # SYSTEM DEPENDENCIES CHECK
 # =============================================================================
 
+# sde = system dependencies errors
+_sde = []
 try:
     sh.git(help=True)
 except sh.CommandNotFound as err:
-    SYSTEM_DEPENDENCIES_ERRORS.append(
+    _sde.append(
         "'git' command not found. For install see: http://git-scm.com/"
     )
 
 
 # =============================================================================
-# HELPER FUNCTIONS AND CONTEXT
+# HELPER FUNCTIONS
 # =============================================================================
 
 @contextlib.contextmanager
-def cd(path):
-    original = os.getcwdu()
+def tempscript(content):
+    fd, fname = None, None
     try:
-        os.chdir(path)
-        yield
+        fd, fname = tempfile.mkstemp(suffix=PRJ)
+        with codecs.open(fname, "w", encoding=ENCODING) as fp:
+            fp.write(content)
+        yield fname
     finally:
-        os.chdir(original)
+        if fd:
+            os.close(fd)
 
 
 def get_parser():
@@ -124,34 +164,91 @@ def get_parser():
     return parser
 
 
+def generate_script(wrkpath):
+    # vars
+    activate_cmd = None
+    if IS_WINDOWS:
+        activate_cmd =  os.path.join(wrkpath, "Scripts", "activate")
+    else:
+        activate_cmd = "source {}".format(
+            os.path.join(wrkpath, "bin", "activate")
+        )
+
+    otree_path = os.path.join(wrkpath, OTREE_DIR)
+    requirements_path = os.path.join(otree_path, REQUIREMENTS_FILE)
+
+    tpl = string.Template(CMDS.strip())
+    src = tpl.substitute(
+        WRK_PATH=wrkpath,
+        VIRTUALENV_PATH=os.path.abspath(virtualenv.__file__),
+        ACTIVATE=activate_cmd,
+        REPO=OTREE_REPO,
+        OTREE_PATH=otree_path,
+        REQUIREMENTS_PATH=requirements_path
+    )
+    script = "".join([
+        "{}{}".format(line, END_CMD) for line in src.splitlines()
+    ])
+    return script
+
+
+def logcall(popenargs, logger, stdout_log_level=logging.INFO,
+         stderr_log_level=logging.ERROR, **kwargs):
+    """
+    Variant of subprocess.call that accepts a logger instead of stdout/stderr,
+    and logs stdout messages via logger.debug and stderr messages via
+    logger.error.
+    """
+    child = subprocess.Popen(popenargs, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, **kwargs)
+    log_level = {
+        child.stdout: stdout_log_level,
+        child.stderr: stderr_log_level
+    }
+
+    def check_io():
+        ready_to_read = select.select(
+            [child.stdout, child.stderr], [], [], 1000
+        )[0]
+        for io in ready_to_read:
+            line = io.readline()
+            msg = line[:-1]
+            if msg:
+                logger.log(log_level[io], msg)
+
+    # keep checking stdout/stderr until the child exits
+    while child.poll() is None:
+        check_io()
+    check_io() # check again to catch anything after the process exits
+    return child.wait()
+
+
 # =============================================================================
 # LOGIC ITSELF
 # =============================================================================
 
 def validate_system_dependencies():
-    if SYSTEM_DEPENDENCIES_ERRORS:
+    global _sde
+    if _sde:
         errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
         msg = "System Error found:\n\t{}".format(errors)
         raise SystemError(msg)
 
 
-def git_clone_otree_project(path, out=None, verbose=True):
-    clonepath = os.path.join(path, OTREE_DIR)
-    sh.git.clone(OTREE_REPO, clonepath, _out=out, _err=out, verbose=verbose)
-
-
-
-
-
-
-
-
+def install_otree(wrkpath, out=None):
+    script = generate_script(wrkpath)
+    import ipdb; ipdb.set_trace()
+    with tempscript(script) as script_path:
+        command = [INTERPRETER, script_path]
+        if isinstance(out, logging.Logger):
+            return logcall(command, out)
+        else:
+            return subprocess.call(command, stdout=out, stdin=out)
 
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-
 
 def main():
     # check system
@@ -167,23 +264,10 @@ def main():
 
     # start install
     wrkpath = args.wrkpath
-    logger.info("Initiating installer on '{}'".format(wrkpath))
-
-    logger.info("Creating virtualenv...")
-    virtualenv.create_environment(wrkpath)
-
-    logger.info("Starting Git Clone...")
-    git_clone_otree_project(wrkpath, logger.info)
-
-    logger.info("Installing...")
-    install_otree(wrkpath, logger.info)
-
-
-
-
-
-
-
+    runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
+    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
+    install_otree(wrkpath, logger)
+    logger.info("If you want to run again execute {}".format(runner_path))
 
 
 # =============================================================================
