@@ -34,6 +34,9 @@ import string
 import select
 import codecs
 import tempfile
+import webbrowser
+import atexit
+import time
 
 from libs import sh, virtualenv
 
@@ -58,30 +61,30 @@ OTREE_DIR = "oTree"
 
 REQUIREMENTS_FILE = "requirements_base.txt"
 
+OTREE_SPAN_SLEEP = 5
+
 IS_WINDOWS = sys.platform.startswith("win")
 
 ENCODING = "UTF-8"
 
-INTERPRETER = "cmd" if IS_WINDOWS else "bash"
+DEFAULT_OTREE_URL = "http://localhost:8000/"
 
-PRINT = "@echo" if IS_WINDOWS else "echo"
+INTERPRETER = "cmd" if IS_WINDOWS else "bash"
 
 END_CMD = "\n" if IS_WINDOWS else ";\n"
 
-CMDS = """
+INSTALL_CMDS = """
 python $VIRTUALENV_PATH $WRK_PATH
 $ACTIVATE
 git clone $REPO $OTREE_PATH
 pip install --upgrade -r $REQUIREMENTS_PATH
 cd $OTREE_PATH
 python otree resetdb --noinput
-python otree runserver
 """
 
 RUNNER = "run.bat" if IS_WINDOWS else "run.sh"
 
-
-RUN_CMDS = """
+RUNNER_CMDS = """
 $ACTIVATE
 cd $OTREE_PATH
 python otree runserver
@@ -166,7 +169,7 @@ def get_parser():
     return parser
 
 
-def generate_script(wrkpath):
+def render(template, wrkpath):
     # vars
     activate_cmd = None
     if IS_WINDOWS:
@@ -179,8 +182,7 @@ def generate_script(wrkpath):
     otree_path = os.path.join(wrkpath, OTREE_DIR)
     requirements_path = os.path.join(otree_path, REQUIREMENTS_FILE)
 
-    tpl = string.Template(CMDS.strip())
-    src = tpl.substitute(
+    src = string.Template(template.strip()).substitute(
         WRK_PATH=wrkpath,
         VIRTUALENV_PATH=os.path.abspath(virtualenv.__file__),
         ACTIVATE=activate_cmd,
@@ -195,7 +197,7 @@ def generate_script(wrkpath):
 
 
 def logcall(popenargs, logger, stdout_log_level=logging.INFO,
-         stderr_log_level=logging.ERROR, **kwargs):
+            stderr_log_level=logging.ERROR, **kwargs):
     """
     Variant of subprocess.call that accepts a logger instead of stdout/stderr,
     and logs stdout messages via logger.debug and stderr messages via
@@ -238,19 +240,19 @@ def validate_system_dependencies():
 
 
 def install_otree(wrkpath, out=None):
-    script = generate_script(wrkpath)
+    installer_src = render(INSTALL_CMDS, wrkpath)
     retcode = 0
-    with tempscript(script) as script_path:
-        command = [INTERPRETER, script_path]
+    with tempscript(installer_src) as installer_path:
+        command = [INTERPRETER, installer_path]
         if isinstance(out, logging.Logger):
             retcode = logcall(command, out)
         else:
             retcode = subprocess.call(command, stdout=out, stdin=out)
     if not retcode:
-        runner_script = generate_runner(wrkpath)
+        runner_src = render(RUNNER_CMDS, wrkpath)
         runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
-        with codecs.open(fname, "w", encoding=ENCODING) as fp:
-            fp.write(runner_script)
+        with codecs.open(runner_path, "w", encoding=ENCODING) as fp:
+            fp.write(runner_src)
     return retcode
 
 
@@ -275,8 +277,23 @@ def main():
     runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
     logger.info("Initiating oTree installer on '{}'".format(wrkpath))
     install_otree(wrkpath, logger)
-    logger.info("If you want to run again execute {}".format(runner_path))
 
+    # run
+    command = [INTERPRETER, runner_path]
+    logger.info("Starting oTree on '{}'".format(wrkpath))
+    time.sleep(OTREE_SPAN_SLEEP)
+    proc = subprocess.Popen(command)
+    time.sleep(OTREE_SPAN_SLEEP)
+    webbrowser.open_new_tab(DEFAULT_OTREE_URL)
+
+    # clean
+    @atexit.register
+    def exit_msg():
+        logger.info("=" * 20)
+        logger.info("If you want to run again execute {}".format(runner_path))
+        logger.info("=" * 20)
+
+    proc.wait()
 
 # =============================================================================
 # MAIN
