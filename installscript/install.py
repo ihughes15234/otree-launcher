@@ -133,6 +133,8 @@ def tempscript(content):
             fp.write(content)
         yield fname
     finally:
+        if fd and os.path.isfile(fname):
+            os.remove(fname)
         if fd:
             os.close(fd)
 
@@ -237,13 +239,19 @@ def validate_system_dependencies():
 
 def install_otree(wrkpath, out=None):
     script = generate_script(wrkpath)
-    import ipdb; ipdb.set_trace()
+    retcode = 0
     with tempscript(script) as script_path:
         command = [INTERPRETER, script_path]
         if isinstance(out, logging.Logger):
-            return logcall(command, out)
+            retcode = logcall(command, out)
         else:
-            return subprocess.call(command, stdout=out, stdin=out)
+            retcode = subprocess.call(command, stdout=out, stdin=out)
+    if not retcode:
+        runner_script = generate_runner(wrkpath)
+        runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
+        with codecs.open(fname, "w", encoding=ENCODING) as fp:
+            fp.write(runner_script)
+    return retcode
 
 
 # =============================================================================
