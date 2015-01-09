@@ -290,9 +290,13 @@ def main():
     def clean(proc):
         if proc.returncode is None:
             proc.kill()
-        logger.info("=" * 20)
-        logger.info("If you want to run again execute {}".format(runner_path))
-        logger.info("=" * 20)
+
+        msg = "If you want to run again execute {}".format(runner_path)
+        msglen = len(msg)
+
+        logger.info("=" * msglen)
+        logger.info(msg)
+        logger.info("=" * msglen)
 
     atexit.register(clean, proc)
 
