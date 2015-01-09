@@ -287,11 +287,14 @@ def main():
     webbrowser.open_new_tab(DEFAULT_OTREE_URL)
 
     # clean
-    @atexit.register
-    def exit_msg():
+    def clean(proc):
+        if proc.returncode is None:
+            proc.kill()
         logger.info("=" * 20)
         logger.info("If you want to run again execute {}".format(runner_path))
         logger.info("=" * 20)
+
+    atexit.register(clean, proc)
 
     proc.wait()
 
