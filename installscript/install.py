@@ -25,7 +25,6 @@ from __future__ import unicode_literals
 import os
 import sys
 import subprocess
-import shlex
 import shutil
 import logging
 import argparse
@@ -89,6 +88,7 @@ $ACTIVATE
 cd $OTREE_PATH
 python otree runserver
 """
+
 
 # =============================================================================
 # LOGGER
@@ -173,7 +173,7 @@ def render(template, wrkpath):
     # vars
     activate_cmd = None
     if IS_WINDOWS:
-        activate_cmd =  os.path.join(wrkpath, "Scripts", "activate")
+        activate_cmd = os.path.join(wrkpath, "Scripts", "activate")
     else:
         activate_cmd = "source {}".format(
             os.path.join(wrkpath, "bin", "activate")
@@ -223,7 +223,9 @@ def logcall(popenargs, logger, stdout_log_level=logging.INFO,
     # keep checking stdout/stderr until the child exits
     while child.poll() is None:
         check_io()
-    check_io() # check again to catch anything after the process exits
+
+    # check again to catch anything after the process exits
+    check_io()
     return child.wait()
 
 
@@ -234,7 +236,7 @@ def logcall(popenargs, logger, stdout_log_level=logging.INFO,
 def validate_system_dependencies():
     global _sde
     if _sde:
-        errors = "\n\t".join(SYSTEM_DEPENDENCIES_ERRORS)
+        errors = "\n\t".join(_sde)
         msg = "System Error found:\n\t{}".format(errors)
         raise SystemError(msg)
 
