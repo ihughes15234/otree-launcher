@@ -37,7 +37,7 @@ import webbrowser
 import atexit
 import time
 
-from libs import sh, virtualenv
+from libs import virtualenv
 
 
 # =============================================================================
@@ -62,20 +62,28 @@ REQUIREMENTS_FILE = "requirements_base.txt"
 
 OTREE_SPAN_SLEEP = 5
 
+DEFAULT_OTREE_URL = "http://localhost:8000/"
+
+# PLATAFORM DEPENDENT CONSTANTS
+
 IS_WINDOWS = sys.platform.startswith("win")
 
 ENCODING = "UTF-8"
 
-DEFAULT_OTREE_URL = "http://localhost:8000/"
+DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
 
 INTERPRETER = "cmd" if IS_WINDOWS else "bash"
 
 END_CMD = "\n" if IS_WINDOWS else ";\n"
 
+
+# SCRIPTS TEMPLATES
+
 INSTALL_CMDS = """
 python $VIRTUALENV_PATH $WRK_PATH
 $ACTIVATE
-git clone $REPO $OTREE_PATH
+pip install $DULWICH_PKG
+dulwich clone $REPO $OTREE_PATH
 pip install --upgrade -r $REQUIREMENTS_PATH
 cd $OTREE_PATH
 python otree resetdb --noinput
@@ -107,20 +115,6 @@ def get_logger():
     return logger
 
 logger = get_logger()
-
-
-# =============================================================================
-# SYSTEM DEPENDENCIES CHECK
-# =============================================================================
-
-# sde = system dependencies errors
-_sde = []
-try:
-    sh.git(help=True)
-except sh.CommandNotFound as err:
-    _sde.append(
-        "'git' command not found. For install see: http://git-scm.com/"
-    )
 
 
 # =============================================================================
@@ -188,7 +182,8 @@ def render(template, wrkpath):
         ACTIVATE=activate_cmd,
         REPO=OTREE_REPO,
         OTREE_PATH=otree_path,
-        REQUIREMENTS_PATH=requirements_path
+        REQUIREMENTS_PATH=requirements_path,
+        DULWICH_PKG=DULWICH_PKG
     )
     script = "".join([
         "{}{}".format(line, END_CMD) for line in src.splitlines()
@@ -233,14 +228,6 @@ def logcall(popenargs, logger, stdout_log_level=logging.INFO,
 # LOGIC ITSELF
 # =============================================================================
 
-def validate_system_dependencies():
-    global _sde
-    if _sde:
-        errors = "\n\t".join(_sde)
-        msg = "System Error found:\n\t{}".format(errors)
-        raise SystemError(msg)
-
-
 def install_otree(wrkpath, out=None):
     installer_src = render(INSTALL_CMDS, wrkpath)
     retcode = 0
@@ -263,12 +250,6 @@ def install_otree(wrkpath, out=None):
 # =============================================================================
 
 def main():
-    # check system
-    try:
-        validate_system_dependencies()
-    except SystemError as err:
-        logger.error(err.message)
-        sys.exit(1)
 
     # retrieve parser
     parser = get_parser()
@@ -285,6 +266,8 @@ def main():
     logger.info("Starting oTree on '{}'".format(wrkpath))
     time.sleep(OTREE_SPAN_SLEEP)
     proc = subprocess.Popen(command)
+
+    logger.info("Lunching webbrowser...")
     time.sleep(OTREE_SPAN_SLEEP)
     webbrowser.open_new_tab(DEFAULT_OTREE_URL)
 
