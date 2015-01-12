@@ -32,10 +32,10 @@ import contextlib
 import string
 import select
 import codecs
-import tempfile
 import webbrowser
 import atexit
 import time
+import uuid
 
 from libs import virtualenv
 
@@ -77,7 +77,10 @@ INTERPRETER = "cmd" if IS_WINDOWS else "bash"
 END_CMD = "\n" if IS_WINDOWS else ";\n"
 
 
+SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
+
 # SCRIPTS TEMPLATES
+
 
 INSTALL_CMDS = """
 python $VIRTUALENV_PATH $WRK_PATH
@@ -89,7 +92,7 @@ cd $OTREE_PATH
 python otree resetdb --noinput
 """
 
-RUNNER = "run.bat" if IS_WINDOWS else "run.sh"
+RUNNER = "run.{}".format(SCRIPT_EXTENSION)
 
 RUNNER_CMDS = """
 $ACTIVATE
@@ -122,18 +125,16 @@ logger = get_logger()
 # =============================================================================
 
 @contextlib.contextmanager
-def tempscript(content):
-    fd, fname = None, None
+def tempscript(wrkpath, content):
+    fname = "installer_{}.{}".format(uuid.uuid4().int, SCRIPT_EXTENSION)
+    fpath = os.path.join(wrkpath, fname)
     try:
-        fd, fname = tempfile.mkstemp(suffix=PRJ)
-        with codecs.open(fname, "w", encoding=ENCODING) as fp:
+        with codecs.open(fpath, "w", encoding=ENCODING) as fp:
             fp.write(content)
-        yield fname
+        yield fpath
     finally:
-        if fd and os.path.isfile(fname):
-            os.remove(fname)
-        if fd:
-            os.close(fd)
+        if os.path.isfile(fpath):
+            os.remove(fpath)
 
 
 def get_parser():
@@ -231,7 +232,7 @@ def logcall(popenargs, logger, stdout_log_level=logging.INFO,
 def install_otree(wrkpath, out=None):
     installer_src = render(INSTALL_CMDS, wrkpath)
     retcode = 0
-    with tempscript(installer_src) as installer_path:
+    with tempscript(wrkpath, installer_src) as installer_path:
         command = [INTERPRETER, installer_path]
         if isinstance(out, logging.Logger):
             retcode = logcall(command, out)
