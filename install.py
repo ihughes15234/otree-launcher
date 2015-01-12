@@ -30,7 +30,6 @@ import logging
 import argparse
 import contextlib
 import string
-import select
 import codecs
 import webbrowser
 import atexit
@@ -41,7 +40,7 @@ from libs import virtualenv
 
 
 # =============================================================================
-# CONSTANTS
+# PROJECT CONSTANTS
 # =============================================================================
 
 PRJ = "install"
@@ -64,7 +63,10 @@ OTREE_SPAN_SLEEP = 5
 
 DEFAULT_OTREE_URL = "http://localhost:8000/"
 
+
+# =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
+# =============================================================================
 
 IS_WINDOWS = sys.platform.startswith("win")
 
@@ -72,15 +74,20 @@ ENCODING = "UTF-8"
 
 DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
 
-INTERPRETER = "cmd" if IS_WINDOWS else "bash"
+INTERPRETER = "" if IS_WINDOWS else "bash"
 
-END_CMD = "\n" if IS_WINDOWS else ";\n"
-
+END_CMD = " || goto :error \n" if IS_WINDOWS else ";\n"
 
 SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
 
-# SCRIPTS TEMPLATES
+SCRIPT_HEADER = [] if IS_WINDOWS else ["set -e;"]
 
+SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
+
+
+# =============================================================================
+# TEMPLATES FOS SCRIPTS
+# =============================================================================
 
 INSTALL_CMDS = """
 python $VIRTUALENV_PATH $WRK_PATH
@@ -121,6 +128,19 @@ logger = get_logger()
 
 
 # =============================================================================
+# EXCEPTION
+# =============================================================================
+
+class InstallError(Exception):
+
+    def __init__(self, code):
+        self.code = code
+        super(InstallError, self).__init__(
+            "Exit code with value '{}'".format(code)
+        )
+
+
+# =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 
@@ -138,6 +158,7 @@ def tempscript(wrkpath, content):
 
 
 def get_parser():
+    """Create a parser for install from command line"""
 
     def dirpath(value):
         value = os.path.abspath(value)
@@ -168,7 +189,9 @@ def render(template, wrkpath):
     # vars
     activate_cmd = None
     if IS_WINDOWS:
-        activate_cmd = os.path.join(wrkpath, "Scripts", "activate")
+        activate_cmd = "call {}".format(
+            os.path.join(wrkpath, "Scripts", "activate.bat")
+        )
     else:
         activate_cmd = "source {}".format(
             os.path.join(wrkpath, "bin", "activate")
@@ -184,66 +207,40 @@ def render(template, wrkpath):
         REPO=OTREE_REPO,
         OTREE_PATH=otree_path,
         REQUIREMENTS_PATH=requirements_path,
-        DULWICH_PKG=DULWICH_PKG
+        DULWICH_PKG=DULWICH_PKG,
     )
-    script = "".join([
-        "{}{}".format(line, END_CMD) for line in src.splitlines()
-    ])
+    script = "".join(
+        ["\n".join(SCRIPT_HEADER), "\n"] +
+        ["{}{}".format(line, END_CMD) for line in src.splitlines()] +
+        ["\n".join(SCRIPT_FOOTER), "\n"]
+    ).strip()
     return script
-
-
-def logcall(popenargs, logger, stdout_log_level=logging.INFO,
-            stderr_log_level=logging.ERROR, **kwargs):
-    """
-    Variant of subprocess.call that accepts a logger instead of stdout/stderr,
-    and logs stdout messages via logger.debug and stderr messages via
-    logger.error.
-    """
-    child = subprocess.Popen(popenargs, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, **kwargs)
-    log_level = {
-        child.stdout: stdout_log_level,
-        child.stderr: stderr_log_level
-    }
-
-    def check_io():
-        ready_to_read = select.select(
-            [child.stdout, child.stderr], [], [], 1000
-        )[0]
-        for io in ready_to_read:
-            line = io.readline()
-            msg = line[:-1]
-            if msg:
-                logger.log(log_level[io], msg)
-
-    # keep checking stdout/stderr until the child exits
-    while child.poll() is None:
-        check_io()
-
-    # check again to catch anything after the process exits
-    check_io()
-    return child.wait()
 
 
 # =============================================================================
 # LOGIC ITSELF
 # =============================================================================
 
-def install_otree(wrkpath, out=None):
+def install_otree(wrkpath, out=None, err=None):
+    """Install oTree on a given *wrkpath*
+
+    """
     installer_src = render(INSTALL_CMDS, wrkpath)
     retcode = 0
     with tempscript(wrkpath, installer_src) as installer_path:
-        command = [INTERPRETER, installer_path]
-        if isinstance(out, logging.Logger):
-            retcode = logcall(command, out)
+        if INTERPRETER:
+            command = [INTERPRETER, installer_path]
         else:
-            retcode = subprocess.call(command, stdout=out, stdin=out)
+            command = [installer_path]
+        import ipdb; ipdb.set_trace()
+        retcode = subprocess.call(command, stdout=out, stdin=err)
     if not retcode:
         runner_src = render(RUNNER_CMDS, wrkpath)
         runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
         with codecs.open(runner_path, "w", encoding=ENCODING) as fp:
             fp.write(runner_src)
-    return retcode
+    if retcode:
+        raise InstallError(retcode)
 
 
 # =============================================================================
@@ -260,7 +257,7 @@ def main():
     wrkpath = args.wrkpath
     runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
     logger.info("Initiating oTree installer on '{}'".format(wrkpath))
-    install_otree(wrkpath, logger)
+    install_otree(wrkpath)
 
     # run
     command = [INTERPRETER, runner_path]
