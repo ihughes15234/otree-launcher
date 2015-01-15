@@ -98,15 +98,15 @@ python $VIRTUALENV_PATH $WRK_PATH
 $ACTIVATE
 pip install --upgrade -r $REQUIREMENTS_PATH
 cd $OTREE_PATH
-python otree resetdb --noinput
+python $RUNSCRIPT resetdb --noinput
 """
 
-RUNNER = "run.{}".format(SCRIPT_EXTENSION)
+RUNNER = "otree.{}".format(SCRIPT_EXTENSION)
 
 RUNNER_CMDS = """
 $ACTIVATE
 cd $OTREE_PATH
-python otree runserver
+python $RUNSCRIPT runserver
 """
 
 
@@ -120,7 +120,7 @@ def get_logger():
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
-        '[%(levelname)s|%(asctime)s] %(name)s > %(message)s'
+        '[%(levelname)s] %(name)s > %(message)s'
     )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
@@ -201,6 +201,7 @@ def render(template, wrkpath):
 
     otree_path = os.path.join(wrkpath, OTREE_DIR)
     requirements_path = os.path.join(otree_path, REQUIREMENTS_FILE)
+    runscript = os.path.join(otree_path, "otree")
 
     src = string.Template(template.strip()).substitute(
         WRK_PATH=wrkpath,
@@ -208,6 +209,7 @@ def render(template, wrkpath):
         ACTIVATE=activate_cmd,
         OTREE_PATH=otree_path,
         REQUIREMENTS_PATH=requirements_path,
+        RUNSCRIPT=runscript
     )
     script = "".join(
         ["\n".join(SCRIPT_HEADER), "\n"] +
@@ -282,7 +284,10 @@ def main():
     install_otree(wrkpath)
 
     # run
-    command = [INTERPRETER, runner_path]
+    if INTERPRETER:
+        command = [INTERPRETER, runner_path]
+    else:
+        command = [runner_path]
     logger.info("Starting oTree on '{}'".format(wrkpath))
     time.sleep(OTREE_SPAN_SLEEP)
     proc = subprocess.Popen(command)
