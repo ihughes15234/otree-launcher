@@ -35,6 +35,8 @@ import webbrowser
 import atexit
 import time
 import uuid
+import urllib2
+import zipfile
 
 from libs import virtualenv
 
@@ -53,7 +55,9 @@ VERSION = ("0", "1")
 # : The project version as string
 STR_VERSION = __version__ = ".".join(VERSION)
 
-OTREE_REPO = "git@github.com:oTree-org/oTree.git"
+OTREE_CODE_URL = "https://github.com/oTree-org/oTree/archive/master.zip"
+
+OTREE_CODE_FNAME = "otree_master.zip"
 
 OTREE_DIR = "oTree"
 
@@ -92,8 +96,6 @@ SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 INSTALL_CMDS = """
 python $VIRTUALENV_PATH $WRK_PATH
 $ACTIVATE
-pip install $DULWICH_PKG
-dulwich clone $REPO $OTREE_PATH
 pip install --upgrade -r $REQUIREMENTS_PATH
 cd $OTREE_PATH
 python otree resetdb --noinput
@@ -204,10 +206,8 @@ def render(template, wrkpath):
         WRK_PATH=wrkpath,
         VIRTUALENV_PATH=os.path.abspath(virtualenv.__file__),
         ACTIVATE=activate_cmd,
-        REPO=OTREE_REPO,
         OTREE_PATH=otree_path,
         REQUIREMENTS_PATH=requirements_path,
-        DULWICH_PKG=DULWICH_PKG,
     )
     script = "".join(
         ["\n".join(SCRIPT_HEADER), "\n"] +
@@ -232,7 +232,6 @@ def install_otree(wrkpath, out=None, err=None):
             command = [INTERPRETER, installer_path]
         else:
             command = [installer_path]
-        import ipdb; ipdb.set_trace()
         retcode = subprocess.call(command, stdout=out, stdin=err)
     if not retcode:
         runner_src = render(RUNNER_CMDS, wrkpath)
@@ -241,6 +240,26 @@ def install_otree(wrkpath, out=None, err=None):
             fp.write(runner_src)
     if retcode:
         raise InstallError(retcode)
+
+
+def download_otree(wrkpath):
+    response, fpath = None, None
+    try:
+        response = urllib2.urlopen(OTREE_CODE_URL)
+        fpath = os.path.join(wrkpath, OTREE_CODE_FNAME)
+        with open(fpath, "w") as fp:
+            fp.write(response.read())
+        with zipfile.ZipFile(fpath, "r") as zfp:
+            zfp.extractall(wrkpath)
+
+        otree_dwld_path = os.path.join(wrkpath, "oTree-master")
+        otreepath = os.path.join(wrkpath, OTREE_DIR)
+        os.rename(otree_dwld_path, otreepath)
+    finally:
+        if response:
+            response.close()
+        if fpath:
+            os.remove(fpath)
 
 
 # =============================================================================
@@ -256,6 +275,9 @@ def main():
     # start install
     wrkpath = args.wrkpath
     runner_path = os.path.join(wrkpath, OTREE_DIR, RUNNER)
+    logger.info("Downloading oTree on '{}'".format(wrkpath))
+    download_otree(wrkpath)
+
     logger.info("Initiating oTree installer on '{}'".format(wrkpath))
     install_otree(wrkpath)
 
