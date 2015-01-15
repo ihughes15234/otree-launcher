@@ -247,7 +247,7 @@ def download_otree(wrkpath):
     try:
         response = urllib2.urlopen(OTREE_CODE_URL)
         fpath = os.path.join(wrkpath, OTREE_CODE_FNAME)
-        with open(fpath, "w") as fp:
+        with open(fpath, "wb") as fp:
             fp.write(response.read())
         with zipfile.ZipFile(fpath, "r") as zfp:
             zfp.extractall(wrkpath)
