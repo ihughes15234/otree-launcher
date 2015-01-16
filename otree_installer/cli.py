@@ -102,7 +102,9 @@ def run():
         if proc.returncode is None:
             proc.kill()
 
-        runner_path = os.path.join(wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME)
+        runner_path = os.path.join(
+            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
+        )
         msg = "If you want to run again execute {}".format(runner_path)
         msglen = len(msg)
 

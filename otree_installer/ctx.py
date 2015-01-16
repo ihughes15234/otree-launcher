@@ -37,6 +37,9 @@ from . import cons
 
 @contextlib.contextmanager
 def tempfile(wrkpath, prefix, extension):
+    """Create a temporary fule in the wrkpath
+
+    """
     fname = "{}_{}.{}".format(prefix, uuid.uuid4().int, extension)
     fpath = os.path.join(wrkpath, fname)
     try:
@@ -48,6 +51,9 @@ def tempfile(wrkpath, prefix, extension):
 
 @contextlib.contextmanager
 def open(fname, mode, *args, **kwargs):
+    """Open a file. If encoding is not seted the default encoding is used
+
+    """
     if "encoding" not in kwargs:
         kwargs["encoding"] = cons.ENCODING
     with codecs.open(fname, mode, *args, **kwargs) as fp:
@@ -56,6 +62,9 @@ def open(fname, mode, *args, **kwargs):
 
 @contextlib.contextmanager
 def urlget(url, *args, **kwargs):
+    """Open an url with get method
+
+    """
     with contextlib.closing(urllib2.urlopen(url, *args, **kwargs)) as response:
         yield response
 
