@@ -54,7 +54,7 @@ class InstallError(Exception):
 
 def call(command, span=False, *args, **kwargs):
     """Call an external command"""
-    cleaned_cmd = [cmd.strip() for cmd in command]
+    cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
     if span:
         proc = subprocess.Popen(cleaned_cmd, *args, **kwargs)
         return proc
