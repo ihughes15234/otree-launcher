@@ -63,6 +63,9 @@ def call(command, span=False, *args, **kwargs):
 
 
 def render(template, wrkpath):
+    """Render template acoring the working path
+
+    """
     # vars
     activate_cmd = None
     if cons.IS_WINDOWS:
@@ -75,7 +78,7 @@ def render(template, wrkpath):
         )
 
     otree_path = os.path.join(wrkpath, cons.OTREE_DIR)
-    requirements_path = os.path.join(otree_path, cons.REQUIREMENTS_FILE)
+    requirements_path = os.path.join(otree_path, cons.REQUIREMENTS_FNAME)
     runscript = os.path.join(otree_path, "otree")
 
     src = string.Template(template.strip()).substitute(
@@ -126,7 +129,9 @@ def install(wrkpath):
         retcode = call(command)
     if not retcode:
         runner_src = render(cons.RUNNER_CMDS_TEMPLATE, wrkpath)
-        runner_path = os.path.join(wrkpath, cons.OTREE_DIR, cons.RUNNER)
+        runner_path = os.path.join(
+            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
+        )
         with ctx.open(runner_path, "w") as fp:
             fp.write(runner_src)
     if retcode:
@@ -134,13 +139,21 @@ def install(wrkpath):
 
 
 def execute(wrkpath):
-    runner_path = os.path.join(wrkpath, cons.OTREE_DIR, cons.RUNNER)
+    """Execute the runner script of the working path installation
+
+    """
+    runner_path = os.path.join(
+        wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
+    )
     command = [cons.INTERPRETER, runner_path]
     return call(command, span=True)
 
 
-def open_browser():
-    webbrowser.open_new_tab(cons.DEFAULT_OTREE_URL)
+def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
+    """Open the web browser on the given url
+
+    """
+    webbrowser.open_new_tab(url)
 
 
 # =============================================================================
