@@ -29,9 +29,19 @@ import logging
 # PROJECT CONSTANTS
 # =============================================================================
 
-PRJ = "install"
+PRJ = "oTree-installer"
 
-DOC = __doc__
+DOC = "Installer of oTree (http://otree.org)"
+
+URL = "http://otree.org"
+
+EMAIL = "chris@otree.org"
+
+LICENSE = "License :: OSI Approved :: MIT License"
+
+AUTHOR = "The oTree team"
+
+SHORT_DESCRIPTION = DOC.splitlines()[0]
 
 # : The project version as tuple of strings
 VERSION = ("0", "2dev")
