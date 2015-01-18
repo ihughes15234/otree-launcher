@@ -42,9 +42,9 @@ MAIN_FILE_PATH = os.path.join(PATH, "install.py")
 
 BUILD_DEPS_PATH = os.path.join(PATH, "build_deps")
 
-PACKAGE_FNAME = "otree_ip.zip"
+PACKAGE_FNAME = "installer_VERSION.zip"
 
-EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh" ".bat", ".cfg", ".fish")
+EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
 
 
 #==============================================================================
@@ -76,7 +76,9 @@ def main():
     with zipfile.ZipFile(zip_path, mode='w', allowZip64=True) as fp:
         for fpath, aname in list_zip_files(OTREE_PKG_PATH, EXTENSIONS_TO_ZIP):
             fp.write(filename=fpath, arcname=aname)
-        fp.write(filename=MAIN_FILE_PATH, arcname="__main__.py")
+        for fpath, aname in list_zip_files(BUILD_DEPS_PATH, EXTENSIONS_TO_ZIP):
+            fp.write(filename=fpath, arcname=os.path.basename(aname))
+        fp.write(filename=MAIN_FILE_PATH, arcname="install.py")
 
 
 
