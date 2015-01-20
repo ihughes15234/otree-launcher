@@ -27,9 +27,18 @@ import subprocess
 import string
 import webbrowser
 import zipfile
+import atexit
+import time
 
 from . import cons, ctx
 from .libs import virtualenv
+
+
+# =============================================================================
+# LOGGER
+# =============================================================================
+
+logger = cons.logger
 
 
 # =============================================================================
@@ -154,6 +163,44 @@ def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
 
     """
     webbrowser.open_new_tab(url)
+
+
+def full_install_and_run(wrkpath):
+    """Execute all the commands of instalation and run the installed proyect
+    on finish
+
+    """
+    logger.info("Downloading oTree on '{}'".format(wrkpath))
+    download(wrkpath)
+
+    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
+    install(wrkpath)
+
+    # run
+    proc = execute(wrkpath)
+
+    logger.info("Lunching webbrowser...")
+    time.sleep(cons.OTREE_SPAN_SLEEP)
+    open_webbrowser()
+
+    # clean
+    def clean(proc):
+        if proc.returncode is None:
+            proc.kill()
+
+        runner_path = os.path.join(
+            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
+        )
+        msg = "If you want to run again execute {}".format(runner_path)
+        msglen = len(msg)
+
+        logger.info("=" * msglen)
+        logger.info(msg)
+        logger.info("=" * msglen)
+
+    atexit.register(clean, proc)
+
+    proc.wait()
 
 
 # =============================================================================

@@ -22,6 +22,7 @@ __doc__ = """Constants for all oTree installer
 # =============================================================================
 
 import sys
+import os
 import logging
 
 
@@ -47,6 +48,8 @@ SHORT_DESCRIPTION = DOC.splitlines()[0]
 VERSION = ("0", "2dev")
 
 STR_VERSION = __version__ = ".".join(VERSION)
+
+HOME_DIR = os.path.expanduser("~")
 
 OTREE_CODE_URL = "https://github.com/oTree-org/oTree/archive/master.zip"
 

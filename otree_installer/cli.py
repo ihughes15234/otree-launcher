@@ -26,10 +26,8 @@ import os
 import sys
 import shutil
 import argparse
-import atexit
-import time
 
-from . import cons, core
+from . import cons, core, gui
 
 
 # =============================================================================
@@ -50,10 +48,7 @@ def get_parser():
 
     def dirpath(value):
         value = os.path.abspath(value)
-        force = "-f" in sys.argv or "--force" in sys.argv
-        if force and os.path.isdir(value):
-            shutil.rmtree(value)
-        elif os.path.isdir(value):
+        if os.path.isdir(value):
             msg = "'{}' directory already exists".format(value)
             raise argparse.ArgumentTypeError(msg)
         os.makedirs(value)
@@ -62,13 +57,14 @@ def get_parser():
     parser = argparse.ArgumentParser(
         prog=cons.PRJ, version=cons.STR_VERSION, description=cons.DOC
     )
-    parser.add_argument(
-        "-f", "--force", dest="force", action="store_true",
-        help="If the destination directory already exist remove it first."
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--gui", dest="gui", action="store_true",
+        help="execute the the visual enviroment of the installer"
     )
-    parser.add_argument(
-        dest="wrkpath", type=dirpath, metavar="WORK_PATH",
-        help="Local path to clone oTree. "
+    group.add_argument(
+        "-w", "--wrkpath", dest="wrkpath", type=dirpath,
+        metavar="WORK_PATH", help="The directory must not exists "
     )
     return parser
 
@@ -77,44 +73,13 @@ def run():
     """Execute the command line installer
 
     """
-
-    # retrieve parser
     parser = get_parser()
     args = parser.parse_args()
+    if args.gui:
+        gui.run()
+    else:
+        core.full_install_and_run(args.wrkpath)
 
-    # start install
-    wrkpath = args.wrkpath
-    logger.info("Downloading oTree on '{}'".format(wrkpath))
-    core.download(wrkpath)
-
-    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
-    core.install(wrkpath)
-
-    # run
-    proc = core.execute(wrkpath)
-
-    logger.info("Lunching webbrowser...")
-    time.sleep(cons.OTREE_SPAN_SLEEP)
-    core.open_webbrowser()
-
-    # clean
-    def clean(proc):
-        if proc.returncode is None:
-            proc.kill()
-
-        runner_path = os.path.join(
-            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
-        )
-        msg = "If you want to run again execute {}".format(runner_path)
-        msglen = len(msg)
-
-        logger.info("=" * msglen)
-        logger.info(msg)
-        logger.info("=" * msglen)
-
-    atexit.register(clean, proc)
-
-    proc.wait()
 
 # =============================================================================
 # MAIN
