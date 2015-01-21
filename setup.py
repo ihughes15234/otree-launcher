@@ -12,9 +12,8 @@ from __future__ import unicode_literals
 # DOCS
 #==============================================================================
 
-__doc__  = """This file is for package otree installer
+__doc__ = """This file is for package otree launcher"""
 
-"""
 
 # =============================================================================
 # IMPORTS
@@ -112,16 +111,9 @@ def main():
     logger.info("Your launcher is here: '{}'".format(zip_path))
 
 
-
-
-
-
 # =============================================================================
 # MAIN
 # =============================================================================
 
 if __name__ == "__main__":
     main()
-
-
-
