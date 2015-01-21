@@ -24,11 +24,14 @@ import sys
 import zipfile
 import shutil
 import logging
+import datetime
 
 
 # =============================================================================
 # CONSTANTS
 # =============================================================================
+
+BUILD = datetime.datetime.now().isoformat()
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,7 +45,7 @@ MAIN_FILE_PATH = os.path.join(PATH, "run.py")
 
 BUILD_DEPS_PATH = os.path.join(PATH, "build_deps")
 
-PACKAGE_FNAME = "otree_deployer_VERSION.zip"
+PACKAGE_FNAME = "otree_deployer_VERSION_{}.zip".format(BUILD)
 
 EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
 
@@ -91,6 +94,7 @@ def main():
     create_dirs(WORK_PATH, DIST_PATH)
 
     zip_path = os.path.join(WORK_PATH, PACKAGE_FNAME)
+    zip_dist_path = os.path.join(DIST_PATH, PACKAGE_FNAME)
 
     logger.info("Start compress...")
     with zipfile.ZipFile(zip_path, mode='w', allowZip64=True) as fp:
@@ -106,9 +110,10 @@ def main():
         logger.debug("Adding '{}' -> '{}'".format(MAIN_FILE_PATH, "run.py"))
         fp.write(filename=MAIN_FILE_PATH, arcname="run.py")
 
-        logger.info("Finishing...")
+    logger.debug("Moving package to dist directory...")
+    shutil.copyfile(zip_path, zip_dist_path)
 
-    logger.info("Your launcher is here: '{}'".format(zip_path))
+    logger.info("Your launcher is here: '{}'".format(zip_dist_path))
 
 
 # =============================================================================
