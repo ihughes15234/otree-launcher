@@ -31,7 +31,7 @@ import atexit
 import time
 
 from . import cons, ctx
-from .libs import virtualenv
+from .libs.virtualenv import virtualenv
 
 
 # =============================================================================
