@@ -47,7 +47,7 @@ BUILD_DEPS_PATH = os.path.join(PATH, "build_deps")
 
 PACKAGE_FNAME = "otree_deployer_VERSION_{}.zip".format(BUILD)
 
-EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
+EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish", ".exe")
 
 
 # =============================================================================
