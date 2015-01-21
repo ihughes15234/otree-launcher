@@ -38,11 +38,11 @@ WORK_PATH = os.path.join(PATH, "_wrk")
 
 DIST_PATH = os.path.join(PATH, "_dist")
 
-MAIN_FILE_PATH = os.path.join(PATH, "install.py")
+MAIN_FILE_PATH = os.path.join(PATH, "run.py")
 
 BUILD_DEPS_PATH = os.path.join(PATH, "build_deps")
 
-PACKAGE_FNAME = "installer_VERSION.zip"
+PACKAGE_FNAME = "otree_deployer_VERSION.zip"
 
 EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
 
@@ -78,7 +78,7 @@ def main():
             fp.write(filename=fpath, arcname=aname)
         for fpath, aname in list_zip_files(BUILD_DEPS_PATH, EXTENSIONS_TO_ZIP):
             fp.write(filename=fpath, arcname=os.path.basename(aname))
-        fp.write(filename=MAIN_FILE_PATH, arcname="install.py")
+        fp.write(filename=MAIN_FILE_PATH, arcname="run.py")
 
 
 
