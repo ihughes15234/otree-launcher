@@ -24,6 +24,7 @@ import os
 import sys
 import zipfile
 import shutil
+import logging
 
 
 # =============================================================================
@@ -32,7 +33,7 @@ import shutil
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 
-OTREE_PKG_PATH = os.path.join(PATH, "otree_installer")
+OTREE_PKG_PATH = os.path.join(PATH, "otree_launcher")
 
 WORK_PATH = os.path.join(PATH, "_wrk")
 
@@ -47,6 +48,15 @@ PACKAGE_FNAME = "otree_deployer_VERSION.zip"
 EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
 
 
+# =============================================================================
+# LOGGER
+# =============================================================================
+
+logger = logging.getLogger(__file__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.CRITICAL)
+
+
 #==============================================================================
 # FUNCTIONS
 #==============================================================================
@@ -54,7 +64,9 @@ EXTENSIONS_TO_ZIP = (".py", ".csh", ".sh", ".bat", ".cfg", ".fish")
 def create_dirs(*dirs_paths):
     for dpath in dirs_paths:
         if os.path.exists(dpath):
+            logger.debug("Removing existing dir '{}' ".format(dpath))
             shutil.rmtree(dpath)
+        logger.debug("Creating dir '{}' ".format(dpath))
         os.makedirs(dpath)
 
 
@@ -71,14 +83,33 @@ def list_zip_files(base_path, extensions):
 
 
 def main():
+    if "-v" in sys.argv or "--verbose" in sys.argv:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
+    logger.info("Creating dir structures")
     create_dirs(WORK_PATH, DIST_PATH)
+
     zip_path = os.path.join(WORK_PATH, PACKAGE_FNAME)
+
+    logger.info("Start compress...")
     with zipfile.ZipFile(zip_path, mode='w', allowZip64=True) as fp:
+
         for fpath, aname in list_zip_files(OTREE_PKG_PATH, EXTENSIONS_TO_ZIP):
+            logger.debug("Adding '{}' -> '{}'".format(fpath, aname))
             fp.write(filename=fpath, arcname=aname)
+
         for fpath, aname in list_zip_files(BUILD_DEPS_PATH, EXTENSIONS_TO_ZIP):
+            logger.debug("Adding '{}' -> '{}'".format(fpath, aname))
             fp.write(filename=fpath, arcname=os.path.basename(aname))
+
+        logger.debug("Adding '{}' -> '{}'".format(MAIN_FILE_PATH, "run.py"))
         fp.write(filename=MAIN_FILE_PATH, arcname="run.py")
+
+        logger.info("Finishing...")
+
+    logger.info("Your launcher is here: '{}'".format(zip_path))
 
 
 
