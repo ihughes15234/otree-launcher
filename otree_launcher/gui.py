@@ -132,12 +132,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
         self.deploy_listbox.delete(0, len(self.deploys)-1)
         self.deploys = []
         for deploy in db.Deploy.select():
-            text = "{} - {} (Created at: {} - Last Update: {})".format(
-                str(deploy.id).ljust(4), deploy.path.ljust(80),
-                deploy.created_date.isoformat().rsplit(".", 1)[0],
-                deploy.last_update.isoformat().rsplit(".", 1)[0]
-            )
-            self.deploy_listbox.insert(Tkinter.END, text)
+            self.deploy_listbox.insert(Tkinter.END, deploy.resume())
             self.deploys.append(deploy.id)
 
     def do_run(self):

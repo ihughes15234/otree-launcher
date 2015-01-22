@@ -57,6 +57,14 @@ class Deploy(BaseModel):
     created_date = peewee.DateTimeField(default=datetime.datetime.now)
     last_update = peewee.DateTimeField(default=datetime.datetime.now)
 
+    def resume(self):
+        text = "{} - {} (Created at: {} - Last Update: {})".format(
+            str(self.id).zfill(4), self.path.ljust(50),
+            self.created_date.isoformat().rsplit(".", 1)[0],
+            self.last_update.isoformat().rsplit(".", 1)[0]
+        )
+        return text
+
 
 # =============================================================================
 # SETUP

@@ -25,7 +25,7 @@ from __future__ import unicode_literals
 import os
 import argparse
 
-from . import cons, core, gui
+from . import cons, core, gui, db
 
 
 # =============================================================================
@@ -64,6 +64,14 @@ def get_parser():
         "-w", "--wrkpath", dest="wrkpath", type=dirpath,
         metavar="WORK_PATH", help="The directory must not exists "
     )
+    group.add_argument(
+        "-l", "--list", dest="list", action="store_true",
+        help="Show alredy existing deploys"
+    )
+    group.add_argument(
+        "-r", "--run", dest="run", type=int,
+        metavar="DEPLOY_ID", help="Run an existing deploy"
+    )
     return parser
 
 
@@ -75,6 +83,14 @@ def run():
     args = parser.parse_args()
     if args.gui:
         gui.run()
+    if args.list:
+        for deploy in db.Deploy.select():
+            logger.info(deploy.resume())
+    elif args.run:
+        deploy = db.Deploy.get(id=args.run)
+        proc = core.execute(deploy.path)
+        core.open_webbrowser()
+        proc.wait()
     else:
         proc = core.full_install_and_run(args.wrkpath)
         proc.wait()
