@@ -26,12 +26,10 @@ import logging
 import webbrowser
 
 import Tkinter
-import Tkconstants
 import tkMessageBox
 import tkFileDialog
 
 from . import cons, core, db
-
 
 # =============================================================================
 # LOGGER
@@ -64,7 +62,6 @@ class LoggingToGUI(logging.Handler):
         self.console.update()
 
 
-
 # =============================================================================
 # GUI
 # =============================================================================
@@ -86,6 +83,9 @@ class OTreeLauncherFrame(Tkinter.Frame):
         Tkinter.Frame.__init__(self, root)
         self.root = root
 
+        # some internal data
+        self.run_proc = None
+
         # menu
         self.menu = Tkinter.Menu(self)
         root.config(menu=self.menu)
@@ -105,22 +105,60 @@ class OTreeLauncherFrame(Tkinter.Frame):
 
         # components
         self.deploys = []
-        self.deploy_listbox = Tkinter.Listbox(self, selectmode=Tkinter.SINGLE)
+
+        listFrame = Tkinter.Frame(self)
+        listFrame.pack(fill="both")
+        scrollBar = Tkinter.Scrollbar(listFrame)
+        scrollBar.pack(side=Tkinter.RIGHT, fill="y")
+
+        self.deploy_listbox = Tkinter.Listbox(
+            listFrame, selectmode=Tkinter.SINGLE
+        )
         self.refresh_deploy_list()
-        self.deploy_listbox.pack()
+        self.deploy_listbox.pack(side="left", fill="both", expand=1)
+
+        scrollBar.config(command=self.deploy_listbox.yview)
+        self.deploy_listbox.config(yscrollcommand=scrollBar.set)
+
+        self.run_button = Tkinter.Button(
+            self, text="Run Selected Deploy", command=self.do_run
+        )
+        self.run_button.pack(side=Tkinter.RIGHT)
 
         self.log_display = LogDisplay(root)
-        self.log_display.pack()
+        self.log_display.pack(fill="x", side="bottom")
 
     def refresh_deploy_list(self):
         self.deploy_listbox.delete(0, len(self.deploys)-1)
         self.deploys = []
         for deploy in db.Deploy.select():
-            text = "{} - {} (Created at: - Last Update: {})".format(
-                deploy.id, deploy.path, deploy.created_date, deploy.last_update
+            text = "{} - {} (Created at: {} - Last Update: {})".format(
+                str(deploy.id).ljust(4), deploy.path.ljust(80),
+                deploy.created_date.isoformat().rsplit(".", 1)[0],
+                deploy.last_update.isoformat().rsplit(".", 1)[0]
             )
             self.deploy_listbox.insert(Tkinter.END, text)
-            self.deploys.append(deploy)
+            self.deploys.append(deploy.id)
+
+    def do_run(self):
+        selected = self.deploy_listbox.curselection()
+        if selected:
+            idx = selected[0]
+            deploy = db.Deploy.get(id=self.deploys[idx])
+            proc = core.execute(deploy.path)
+            core.open_webbrowser()
+            tkMessageBox.showinfo(
+                "Deploy running", "runing '{}'".format(deploy.path)
+            )
+            core.kill_proc(proc)
+            logger.info("Deploy Stoped")
+        else:
+            body = (
+                "Pleae select a deploy"
+                if self.deploys else
+                "Pleae create and select a deploy"
+            )
+            tkMessageBox.showerror("No deploy selected", body)
 
     def do_about(self):
         title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
@@ -128,7 +166,10 @@ class OTreeLauncherFrame(Tkinter.Frame):
             "{doc}"
             "A modern open platform for social science experiment\n"
             "Version: {version}"
-        ).format(prj=cons.PRJ, url=cons.URL, doc=cons.DOC, version=cons.STR_VERSION)
+        ).format(
+            prj=cons.PRJ, url=cons.URL, doc=cons.DOC,
+            version=cons.STR_VERSION
+        )
         tkMessageBox.showinfo(title, body)
 
     def do_open_homepage(self):
@@ -161,7 +202,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 break
         if wrkpath:
             try:
-                core.full_install_and_run(wrkpath)
+                self.run_proc = core.full_install_and_run(wrkpath)
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             else:
@@ -176,10 +217,11 @@ def run():
     # create gui
     root = Tkinter.Tk()
     root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
+    root.geometry("900x600+50+50")
 
     # add main frame
     frame = OTreeLauncherFrame(root)
-    frame.pack(**{'fill': Tkconstants.BOTH})
+    frame.pack(fill="both")
 
     # setup logger
     logger.handlers = []
@@ -190,5 +232,9 @@ def run():
     root.mainloop()
 
 
-if __name__=='__main__':
-  run()
+# =============================================================================
+# MAIN
+# =============================================================================
+
+if __name__ == "__main__":
+    print(__doc__)

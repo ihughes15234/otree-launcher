@@ -22,7 +22,6 @@ from __future__ import unicode_literals
 # IMPORTS
 # =============================================================================
 
-import os
 import datetime
 
 from . import cons

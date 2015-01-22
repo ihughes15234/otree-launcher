@@ -129,8 +129,8 @@ logger.setLevel(logging.INFO)
 # DIRECTORIES
 # =============================================================================
 
-if not os.path.isdir(LAUNCHER_DIR):
-    os.makedirs(LAUNCHER_DIR)
+if not os.path.isdir(LAUNCHER_DIR_PATH):
+    os.makedirs(LAUNCHER_DIR_PATH)
 
 
 # =============================================================================

@@ -61,11 +61,30 @@ class InstallError(Exception):
 # HELPER FUNCTIONS
 # =============================================================================
 
+def kill_proc(proc):
+    if cons.IS_WINDOWS:
+        call(["TASKKILL", "/F", "/PID", str(proc.pid), "/T"])
+    else:
+        import signal
+        os.killpg(proc.pid, signal.SIGTERM)
+
+
+def clean_proc(proc):
+    """Clean process if is still runing on exit"""
+    if proc.returncode is None:
+        kill_proc(proc)
+
+
 def call(command, span=False, *args, **kwargs):
     """Call an external command"""
     cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
-    if span:
+    if span and cons.IS_WINDOWS:
         proc = subprocess.Popen(cleaned_cmd, *args, **kwargs)
+        return proc
+    elif span:
+        proc = subprocess.Popen(
+            cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
+        )
         return proc
     retcode = subprocess.call(cleaned_cmd, *args, **kwargs)
     return retcode
@@ -114,6 +133,7 @@ def download(wrkpath):
     """Download otree code into working dir
 
     """
+    logger.info("Downloading oTree on '{}'".format(wrkpath))
     with ctx.urlget(cons.OTREE_CODE_URL) as response:
         with ctx.tempfile(wrkpath, "otree", "zip") as fpath:
             with ctx.open(fpath, "wb", encoding=None) as fp:
@@ -129,6 +149,7 @@ def install(wrkpath):
     """Install oTree on a given *wrkpath*
 
     """
+    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
     retcode = 0
     with ctx.tempfile(wrkpath, "installer", cons.SCRIPT_EXTENSION) as fpath:
         with ctx.open(fpath, "w") as fp:
@@ -152,17 +173,22 @@ def execute(wrkpath):
     """Execute the runner script of the working path installation
 
     """
+    logger.info("Running otree on'{}'".format(wrkpath))
     runner_path = os.path.join(
         wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
     )
     command = [cons.INTERPRETER, runner_path]
-    return call(command, span=True)
+    proc = call(command, span=True)
+    atexit.register(clean_proc, proc)
+    return proc
 
 
 def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
     """Open the web browser on the given url
 
     """
+    logger.info("Launching webbrowser...")
+    time.sleep(cons.OTREE_SPAN_SLEEP)
     webbrowser.open_new_tab(url)
 
 
@@ -171,24 +197,16 @@ def full_install_and_run(wrkpath):
     on finish
 
     """
-    logger.info("Downloading oTree on '{}'".format(wrkpath))
     download(wrkpath)
 
-    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
     install(wrkpath)
 
     # run
     proc = execute(wrkpath)
-
-    logger.info("Lunching webbrowser...")
-    time.sleep(cons.OTREE_SPAN_SLEEP)
     open_webbrowser()
 
     # clean
-    def clean(proc):
-        if proc.returncode is None:
-            proc.kill()
-
+    def last_msg():
         runner_path = os.path.join(
             wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
         )
@@ -199,9 +217,8 @@ def full_install_and_run(wrkpath):
         logger.info(msg)
         logger.info("=" * msglen)
 
-    atexit.register(clean, proc)
-
-    proc.wait()
+    atexit.register(last_msg)
+    return proc
 
 
 # =============================================================================

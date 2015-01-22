@@ -23,8 +23,6 @@ from __future__ import unicode_literals
 # =============================================================================
 
 import os
-import sys
-import shutil
 import argparse
 
 from . import cons, core, gui
@@ -78,7 +76,8 @@ def run():
     if args.gui:
         gui.run()
     else:
-        core.full_install_and_run(args.wrkpath)
+        proc = core.full_install_and_run(args.wrkpath)
+        proc.wait()
 
 
 # =============================================================================
