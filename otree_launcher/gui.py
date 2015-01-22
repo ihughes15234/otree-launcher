@@ -57,9 +57,10 @@ class LoggingToGUI(logging.Handler):
     def emit(self, message):
         formattedMessage = self.format(message)
         self.console.configure(state=Tkinter.NORMAL)
-        self.console.insert(Tkinter.END, formattedMessage)
+        self.console.insert(Tkinter.END, formattedMessage + "\n")
         self.console.configure(state=Tkinter.DISABLED)
         self.console.see(Tkinter.END)
+        self.console.update()
 
 
 
@@ -71,10 +72,12 @@ class LogDisplay(Tkinter.LabelFrame):
     """A simple 'console' to place at the bottom of a Tkinter window """
 
     def __init__(self, root, **options):
-        Tkinter.LabelFrame.__init__(self, root, **options);
+        Tkinter.LabelFrame.__init__(self, root, **options)
         self.console = Tkinter.Text(self, height=10)
-        self.console.pack(fill=Tkinter.BOTH)
         self.console.configure(state=Tkinter.DISABLED)
+        self.console.configure(bg="#222222", fg="white")
+        self.console.pack(fill=Tkinter.BOTH)
+
 
 
 def ask_directory(parent):
@@ -102,8 +105,9 @@ def run():
     root = Tkinter.Tk()
     log_display = LogDisplay(root)
     log_display.pack()
+    logger.handlers = []
     logger.addHandler(LoggingToGUI(log_display.console))
-    logger.info("puto")
+    logger.info("oTree Launcher says 'Hello'")
 
     wrkpath = ask_directory(root)
     if wrkpath:

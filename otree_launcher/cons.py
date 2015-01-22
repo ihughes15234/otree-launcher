@@ -72,6 +72,14 @@ DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
 IS_WINDOWS = sys.platform.startswith("win")
 
+APP_DATA = os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR
+
+LAUNCHER_DIR = "otree-launcher" if IS_WINDOWS else ".otree-launcher"
+
+LAUNCHER_DIR_PATH = os.path.join(HOME_DIR, ".otree-launcher")
+
+DB_PATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.sqlite3")
+
 ENCODING = "UTF-8"
 
 DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
@@ -115,6 +123,14 @@ python $RUNSCRIPT runserver
 logger = logging.getLogger(__file__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+
+
+# =============================================================================
+# DIRECTORIES
+# =============================================================================
+
+if not os.path.isdir(LAUNCHER_DIR):
+    os.makedirs(LAUNCHER_DIR)
 
 
 # =============================================================================

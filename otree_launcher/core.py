@@ -30,7 +30,7 @@ import zipfile
 import atexit
 import time
 
-from . import cons, ctx
+from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
 
 
@@ -145,6 +145,7 @@ def install(wrkpath):
             fp.write(runner_src)
     if retcode:
         raise InstallError(retcode)
+    db.Deploy.create(path=wrkpath)
 
 
 def execute(wrkpath):
