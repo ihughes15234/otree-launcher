@@ -149,9 +149,9 @@ class OTreeLauncherFrame(Tkinter.Frame):
             logger.info("Run Stop")
         else:
             body = (
-                "Pleae select a deploy"
+                "Please select a deploy"
                 if self.deploys else
-                "Pleae create and select a deploy"
+                "Please create and select a deploy"
             )
             tkMessageBox.showerror("No deploy selected", body)
 
@@ -207,11 +207,10 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 logger.info("Run Stop")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
-            else:
-                self.refresh_deploy_list()
             finally:
                 self.run_button.config(state='normal')
                 self.deploy_listbox.config(state='normal')
+                self.refresh_deploy_list()
 
 
 # =============================================================================
