@@ -23,13 +23,14 @@ __doc__ = """Constants for all oTree launcher
 
 import os
 import logging
+import webbrowser
 
 import Tkinter
 import Tkconstants
 import tkMessageBox
 import tkFileDialog
 
-from . import cons, core
+from . import cons, core, db
 
 
 # =============================================================================
@@ -86,18 +87,52 @@ class OTreeLauncherFrame(Tkinter.Frame):
         self.root = root
 
         # menu
-        menu = Tkinter.Menu(self)
-        root.config(menu=menu)
+        self.menu = Tkinter.Menu(self)
+        root.config(menu=self.menu)
 
-        deploy_menu = Tkinter.Menu(menu)
+        deploy_menu = Tkinter.Menu(self.menu)
         deploy_menu.add_command(label="New Deploy", command=self.do_deploy)
         deploy_menu.add_separator()
         deploy_menu.add_command(label="Exit", command=self.do_exit)
-        menu.add_cascade(label="Deploys", menu=deploy_menu)
+        self.menu.add_cascade(label="Deploys", menu=deploy_menu)
+
+        about_menu = Tkinter.Menu(self.menu)
+        about_menu.add_command(
+            label="oTree Homepage", command=self.do_open_homepage
+        )
+        about_menu.add_command(label="About me...", command=self.do_about)
+        self.menu.add_cascade(label="About", menu=about_menu)
 
         # components
+        self.deploys = []
+        self.deploy_listbox = Tkinter.Listbox(self, selectmode=Tkinter.SINGLE)
+        self.refresh_deploy_list()
+        self.deploy_listbox.pack()
+
         self.log_display = LogDisplay(root)
         self.log_display.pack()
+
+    def refresh_deploy_list(self):
+        self.deploy_listbox.delete(0, len(self.deploys)-1)
+        self.deploys = []
+        for deploy in db.Deploy.select():
+            text = "{} - {} (Created at: - Last Update: {})".format(
+                deploy.id, deploy.path, deploy.created_date, deploy.last_update
+            )
+            self.deploy_listbox.insert(Tkinter.END, text)
+            self.deploys.append(deploy)
+
+    def do_about(self):
+        title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
+        body = (
+            "{doc}"
+            "A modern open platform for social science experiment\n"
+            "Version: {version}"
+        ).format(prj=cons.PRJ, url=cons.URL, doc=cons.DOC, version=cons.STR_VERSION)
+        tkMessageBox.showinfo(title, body)
+
+    def do_open_homepage(self):
+        webbrowser.open_new_tab(cons.URL)
 
     def do_exit(self):
         self.root.quit()
@@ -120,7 +155,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
             if len(os.listdir(dpath)):
                 options["initialdir"] = dpath
                 msg = "Please select an empty directory"
-                tkMessageBox.showerror("Directory is not empty", msg)
+                tkMessageBox.showwarning("Directory is not empty", msg)
             else:
                 wrkpath = dpath
                 break
@@ -129,8 +164,13 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 core.full_install_and_run(wrkpath)
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
+            else:
+                self.refresh_deploy_list()
 
 
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
 
 def run():
     # create gui
