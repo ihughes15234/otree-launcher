@@ -151,7 +151,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 "Deploy running", "runing '{}'".format(deploy.path)
             )
             core.kill_proc(proc)
-            logger.info("Deploy Stoped")
+            logger.info("Run Stop")
         else:
             body = (
                 "Pleae select a deploy"
@@ -202,11 +202,21 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 break
         if wrkpath:
             try:
-                self.run_proc = core.full_install_and_run(wrkpath)
+                self.run_button.config(state='disabled')
+                self.deploy_listbox.config(state='disabled')
+                proc = core.full_install_and_run(wrkpath)
+                tkMessageBox.showinfo(
+                    "Deploy running", "runing '{}'".format(wrkpath)
+                )
+                core.kill_proc(proc)
+                logger.info("Run Stop")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             else:
                 self.refresh_deploy_list()
+            finally:
+                self.run_button.config(state='normal')
+                self.deploy_listbox.config(state='normal')
 
 
 # =============================================================================

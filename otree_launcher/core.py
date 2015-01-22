@@ -152,12 +152,15 @@ def install(wrkpath):
     logger.info("Initiating oTree installer on '{}'".format(wrkpath))
     retcode = 0
     with ctx.tempfile(wrkpath, "installer", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating install script...")
         with ctx.open(fpath, "w") as fp:
             installer_src = render(cons.INSTALL_CMDS_TEMPLATE, wrkpath)
             fp.write(installer_src)
         command = [cons.INTERPRETER, fpath]
+        logger.info("Install please wait (this can be take some minutes)...")
         retcode = call(command)
     if not retcode:
+        logger.info("Creating run script...")
         runner_src = render(cons.RUNNER_CMDS_TEMPLATE, wrkpath)
         runner_path = os.path.join(
             wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
@@ -166,6 +169,7 @@ def install(wrkpath):
             fp.write(runner_src)
     if retcode:
         raise InstallError(retcode)
+    logger.info("Registering...")
     db.Deploy.create(path=wrkpath)
 
 
