@@ -79,41 +79,74 @@ class LogDisplay(Tkinter.LabelFrame):
         self.console.pack(fill=Tkinter.BOTH)
 
 
+class OTreeLauncherFrame(Tkinter.Frame):
 
-def ask_directory(parent):
-    # define options for opening or saving a file
-    options = {
-        'parent': parent,
-        'initialdir': cons.HOME_DIR,
-        'mustexist': False,
-        'title': 'Select directory for install oTree'
-    }
-    while True:
-        dpath = tkFileDialog.askdirectory(**options)
-        if not dpath:
-            return None
-        elif not os.path.isdir(dpath):
-            os.makedirs(dpath)
-        if len(os.listdir(dpath)):
-            options["initialdir"] = dpath
-            msg = "Please select an empty directory"
-            tkMessageBox.showerror("Directory is not empty", msg)
-        else:
-            return dpath
+    def __init__(self, root):
+        Tkinter.Frame.__init__(self, root)
+        self.root = root
+
+        # menu
+        menu = Tkinter.Menu(self)
+        root.config(menu=menu)
+
+        deploy_menu = Tkinter.Menu(menu)
+        deploy_menu.add_command(label="New Deploy", command=self.do_deploy)
+        deploy_menu.add_separator()
+        deploy_menu.add_command(label="Exit", command=self.do_exit)
+        menu.add_cascade(label="Deploys", menu=deploy_menu)
+
+        # components
+        self.log_display = LogDisplay(root)
+        self.log_display.pack()
+
+    def do_exit(self):
+        self.root.quit()
+
+    def do_deploy(self):
+        # define options for opening or saving a file
+        options = {
+            'parent': self,
+            'initialdir': cons.HOME_DIR,
+            'mustexist': False,
+            'title': 'Select directory for install oTree'
+        }
+        wrkpath = None
+        while True:
+            dpath = tkFileDialog.askdirectory(**options)
+            if not dpath:
+                return None
+            elif not os.path.isdir(dpath):
+                os.makedirs(dpath)
+            if len(os.listdir(dpath)):
+                options["initialdir"] = dpath
+                msg = "Please select an empty directory"
+                tkMessageBox.showerror("Directory is not empty", msg)
+            else:
+                wrkpath = dpath
+                break
+        if wrkpath:
+            try:
+                core.full_install_and_run(wrkpath)
+            except Exception as err:
+                tkMessageBox.showerror("Something gone wrong", unicode(err))
+
+
 
 def run():
+    # create gui
     root = Tkinter.Tk()
-    log_display = LogDisplay(root)
-    log_display.pack()
+    root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
+
+    # add main frame
+    frame = OTreeLauncherFrame(root)
+    frame.pack(**{'fill': Tkconstants.BOTH})
+
+    # setup logger
     logger.handlers = []
-    logger.addHandler(LoggingToGUI(log_display.console))
+    logger.addHandler(LoggingToGUI(frame.log_display.console))
     logger.info("oTree Launcher says 'Hello'")
 
-    wrkpath = ask_directory(root)
-    if wrkpath:
-        core.full_install_and_run(wrkpath)
-
-    root.destroy()
+    # start
     root.mainloop()
 
 
