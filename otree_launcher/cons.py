@@ -102,7 +102,7 @@ SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 INSTALL_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$WRK_PATH"
 $ACTIVATE
-python "$PIP_PATH" install --upgrade -r "$REQUIREMENTS_PATH"
+$PIP install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
 RESET_SCRIPT_FNAME = "otree_reset.{}".format(SCRIPT_EXTENSION)

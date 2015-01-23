@@ -96,14 +96,20 @@ def render(template, wrkpath):
 
     """
     # vars
-    activate_cmd = None
+    activate_cmd = pip = None
     if cons.IS_WINDOWS:
         activate_cmd = "call \"{}\"".format(
             os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate.bat")
         )
+        pip = "\"{}\"".format(
+            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip.exe")
+        )
     else:
         activate_cmd = "source \"{}\"".format(
             os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate")
+        )
+        pip = "python \"{}\"".format(
+            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip")
         )
 
     otree_path = os.path.join(wrkpath, cons.OTREE_DIR)
@@ -119,7 +125,7 @@ def render(template, wrkpath):
         OTREE_PATH=otree_path,
         REQUIREMENTS_PATH=requirements_path,
         RUNSCRIPT=runscript,
-        PIP_PATH=pip_path
+        PIP=pip
     )
     script = "".join(
         ["\n".join(cons.SCRIPT_HEADER), "\n"] +

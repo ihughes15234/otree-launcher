@@ -87,15 +87,15 @@ class OTreeLauncherFrame(Tkinter.Frame):
         self.root = root
 
         # icons
-        self.icon_new = Tkinter.PhotoImage(file=res.get("new.png"))
-        self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.png"))
-        self.icon_exit = Tkinter.PhotoImage(file=res.get("exit.png"))
-        self.icon_homepage = Tkinter.PhotoImage(file=res.get("homepage.png"))
-        self.icon_about = Tkinter.PhotoImage(file=res.get("about.png"))
+        self.icon_new = Tkinter.PhotoImage(file=res.get("new.gif"))
+        self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.gif"))
+        self.icon_exit = Tkinter.PhotoImage(file=res.get("exit.gif"))
+        self.icon_homepage = Tkinter.PhotoImage(file=res.get("homepage.gif"))
+        self.icon_about = Tkinter.PhotoImage(file=res.get("about.gif"))
 
-        self.icon_run = Tkinter.PhotoImage(file=res.get("run.png"))
-        self.icon_delete = Tkinter.PhotoImage(file=res.get("delete.png"))
-        self.icon_reset = Tkinter.PhotoImage(file=res.get("reset.png"))
+        self.icon_run = Tkinter.PhotoImage(file=res.get("run.gif"))
+        self.icon_delete = Tkinter.PhotoImage(file=res.get("delete.gif"))
+        self.icon_reset = Tkinter.PhotoImage(file=res.get("reset.gif"))
 
         # menu
         self.menu = Tkinter.Menu(self)
@@ -318,12 +318,12 @@ def run():
     # create gui
     root = Tkinter.Tk()
 
-    with splash.Splash(root, res.get("splash.png"), 1.9):
+    with splash.Splash(root, res.get("splash.gif"), 1.9):
         root.geometry("900x600+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
         # set icon
-        icon = Tkinter.PhotoImage(file=res.get("otree.png"))
+        icon = Tkinter.PhotoImage(file=res.get("otree.gif"))
         root.tk.call('wm', 'iconphoto', root._w, icon)
 
         # add main frame

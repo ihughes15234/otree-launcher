@@ -26,10 +26,7 @@ def main():
 
     """
     from otree_launcher import cli
-    try:
-        cli.run()
-    except Exception as err:
-        print str(err)
+    cli.run()
 
 
 # =============================================================================
