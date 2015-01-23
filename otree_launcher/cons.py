@@ -103,6 +103,12 @@ INSTALL_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$WRK_PATH"
 $ACTIVATE
 pip install --upgrade -r "$REQUIREMENTS_PATH"
+"""
+
+RESET_SCRIPT_FNAME = "otree_reset.{}".format(SCRIPT_EXTENSION)
+
+RESET_CMDS_TEMPLATE = """
+$ACTIVATE
 cd "$OTREE_PATH"
 python $RUNSCRIPT resetdb --noinput
 """

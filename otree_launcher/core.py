@@ -132,6 +132,13 @@ def resolve_runner_path(wrkpath):
     )
 
 
+def resolve_reseter_path(wrkpath):
+    """Resolve the location of the reseter script"""
+    return os.path.join(
+        wrkpath, cons.VENV_SCRIPT_DIR, cons.RESET_SCRIPT_FNAME
+    )
+
+
 # =============================================================================
 # LOGIC ITSELF
 # =============================================================================
@@ -167,6 +174,11 @@ def install(wrkpath):
         logger.info("Install please wait (this can be take some minutes)...")
         retcode = call(command)
     if not retcode:
+        logger.info("Creating reset script...")
+        reseter_src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
+        reseter_path = resolve_reseter_path(wrkpath)
+        with ctx.open(reseter_path, "w") as fp:
+            fp.write(reseter_src)
         logger.info("Creating run script...")
         runner_src = render(cons.RUNNER_CMDS_TEMPLATE, wrkpath)
         runner_path = resolve_runner_path(wrkpath)
@@ -176,6 +188,16 @@ def install(wrkpath):
         raise InstallError(retcode)
     logger.info("Registering...")
     db.Deploy.create(path=wrkpath)
+
+
+def reset(wrkpath):
+    """Execute the reset script of the working path installation
+
+    """
+    logger.info("Reset otree on '{}'".format(wrkpath))
+    reseter_path = resolve_reseter_path(wrkpath)
+    command = [cons.INTERPRETER, reseter_path]
+    return call(command, span=False)
 
 
 def execute(wrkpath):
@@ -207,6 +229,8 @@ def full_install_and_run(wrkpath):
     download(wrkpath)
 
     install(wrkpath)
+
+    reset(wrkpath)
 
     # run
     proc = execute(wrkpath)

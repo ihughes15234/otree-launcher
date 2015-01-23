@@ -69,7 +69,11 @@ def get_parser():
         help="Show alredy existing deploys"
     )
     group.add_argument(
-        "-r", "--run", dest="run", type=int,
+        "-r", "--reset", dest="reset", type=int,
+        metavar="DEPLOY_ID", help="Reset an existing deploy"
+    )
+    group.add_argument(
+        "-x", "--execute", dest="execute", type=int,
         metavar="DEPLOY_ID", help="Run an existing deploy"
     )
     return parser
@@ -86,11 +90,14 @@ def run():
     if args.list:
         for deploy in db.Deploy.select():
             logger.info(deploy.resume())
-    elif args.run:
-        deploy = db.Deploy.get(id=args.run)
-        proc = core.execute(deploy.path)
-        core.open_webbrowser()
-        proc.wait()
+    elif args.execute or args.reset:
+        deploy = db.Deploy.get(id=args.execute or args.reset)
+        if args.execute:
+            proc = core.execute(deploy.path)
+            core.open_webbrowser()
+            proc.wait()
+        elif args.reset:
+            core.reset(deploy.path)
     else:
         proc = core.full_install_and_run(args.wrkpath)
         proc.wait()
