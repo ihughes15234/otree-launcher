@@ -320,8 +320,11 @@ def run():
 
     with splash.Splash(root, res.get("splash.png"), 1.9):
         root.geometry("900x600+50+50")
-        root.iconbitmap(res.get("about.png"))
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
+
+        # set icon
+        icon = Tkinter.PhotoImage(file=res.get("otree.png"))
+        root.tk.call('wm', 'iconphoto', root._w, icon)
 
         # add main frame
         frame = OTreeLauncherFrame(root)
