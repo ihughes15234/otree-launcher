@@ -75,7 +75,7 @@ class LogDisplay(Tkinter.LabelFrame):
         Tkinter.LabelFrame.__init__(self, root, **options)
         self.console = Tkinter.Text(self, height=10)
         self.console.configure(state=Tkinter.DISABLED)
-        self.console.configure(bg="#222222", fg="white")
+        self.console.configure(bg="#222222", fg="#000000")
         self.console.pack(fill=Tkinter.BOTH, expand=True)
 
 
@@ -234,7 +234,6 @@ def run():
     # add main frame
     frame = OTreeLauncherFrame(root)
     frame.pack(expand=True, fill=Tkinter.BOTH)
-
 
 
     # setup logger
