@@ -97,12 +97,12 @@ def render(template, wrkpath):
     # vars
     activate_cmd = None
     if cons.IS_WINDOWS:
-        activate_cmd = "call {}".format(
-            os.path.join(wrkpath, "Scripts", "activate.bat")
+        activate_cmd = "call \"{}\"".format(
+            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate.bat")
         )
     else:
-        activate_cmd = "source {}".format(
-            os.path.join(wrkpath, "bin", "activate")
+        activate_cmd = "source \"{}\"".format(
+            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate")
         )
 
     otree_path = os.path.join(wrkpath, cons.OTREE_DIR)
@@ -123,6 +123,13 @@ def render(template, wrkpath):
         ["\n".join(cons.SCRIPT_FOOTER), "\n"]
     ).strip()
     return script
+
+
+def resolve_runner_path(wrkpath):
+    """Resolve the location of the runner script"""
+    return os.path.join(
+        wrkpath, cons.VENV_SCRIPT_DIR, cons.RUNNER_SCRIPT_FNAME
+    )
 
 
 # =============================================================================
@@ -162,9 +169,7 @@ def install(wrkpath):
     if not retcode:
         logger.info("Creating run script...")
         runner_src = render(cons.RUNNER_CMDS_TEMPLATE, wrkpath)
-        runner_path = os.path.join(
-            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
-        )
+        runner_path = resolve_runner_path(wrkpath)
         with ctx.open(runner_path, "w") as fp:
             fp.write(runner_src)
     if retcode:
@@ -178,9 +183,7 @@ def execute(wrkpath):
 
     """
     logger.info("Running otree on'{}'".format(wrkpath))
-    runner_path = os.path.join(
-        wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
-    )
+    runner_path = resolve_runner_path(wrkpath)
     command = [cons.INTERPRETER, runner_path]
     proc = call(command, span=True)
     atexit.register(clean_proc, proc)
@@ -209,19 +212,6 @@ def full_install_and_run(wrkpath):
     proc = execute(wrkpath)
     open_webbrowser()
 
-    # clean
-    def last_msg():
-        runner_path = os.path.join(
-            wrkpath, cons.OTREE_DIR, cons.RUNNER_SCRIPT_FNAME
-        )
-        msg = "If you want to run again execute {}".format(runner_path)
-        msglen = len(msg)
-
-        logger.info("=" * msglen)
-        logger.info(msg)
-        logger.info("=" * msglen)
-
-    atexit.register(last_msg)
     return proc
 
 

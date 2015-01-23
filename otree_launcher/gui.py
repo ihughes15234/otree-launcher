@@ -235,7 +235,6 @@ def run():
     frame = OTreeLauncherFrame(root)
     frame.pack(expand=True, fill=Tkinter.BOTH)
 
-
     # setup logger
     logger.handlers = []
     logger.addHandler(LoggingToGUI(frame.log_display.console))

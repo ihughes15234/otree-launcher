@@ -82,9 +82,9 @@ DB_PATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.sqlite3")
 
 ENCODING = "UTF-8"
 
-DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
-
 INTERPRETER = "" if IS_WINDOWS else "bash"
+
+VENV_SCRIPT_DIR = "Scripts" if IS_WINDOWS else "bin"
 
 END_CMD = " || goto :error \n" if IS_WINDOWS else ";\n"
 
@@ -100,19 +100,19 @@ SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 # =============================================================================
 
 INSTALL_CMDS_TEMPLATE = """
-python $VIRTUALENV_PATH $WRK_PATH
+python "$VIRTUALENV_PATH" "$WRK_PATH"
 $ACTIVATE
-pip install --upgrade -r $REQUIREMENTS_PATH
-cd $OTREE_PATH
+pip install --upgrade -r "$REQUIREMENTS_PATH"
+cd "$OTREE_PATH"
 python $RUNSCRIPT resetdb --noinput
 """
 
-RUNNER_SCRIPT_FNAME = "otree.{}".format(SCRIPT_EXTENSION)
+RUNNER_SCRIPT_FNAME = "otree_run.{}".format(SCRIPT_EXTENSION)
 
 RUNNER_CMDS_TEMPLATE = """
 $ACTIVATE
-cd $OTREE_PATH
-python $RUNSCRIPT runserver
+cd "$OTREE_PATH"
+python "$RUNSCRIPT" runserver
 """
 
 
