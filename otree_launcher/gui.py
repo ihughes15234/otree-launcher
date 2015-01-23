@@ -95,6 +95,10 @@ class OTreeLauncherFrame(Tkinter.Frame):
         deploy_menu = Tkinter.Menu(self.menu)
         deploy_menu.add_command(label="New Deploy", command=self.do_deploy)
         deploy_menu.add_separator()
+        deploy_menu.add_command(
+            label="Clear deploy database", command=self.do_clear
+        )
+        deploy_menu.add_separator()
         deploy_menu.add_command(label="Exit", command=self.do_exit)
         self.menu.add_cascade(label="Deploys", menu=deploy_menu)
 
@@ -134,6 +138,10 @@ class OTreeLauncherFrame(Tkinter.Frame):
             btnFrame, text="Reset Selected Deploy", command=self.do_reset
         )
         self.reset_button.pack(side=Tkinter.RIGHT)
+        self.delete_button = Tkinter.Button(
+            btnFrame, text="Delete Selected Deploy", command=self.do_delete
+        )
+        self.delete_button.pack(side=Tkinter.RIGHT)
 
         self.log_display = LogDisplay(self)
         self.log_display.pack(fill=Tkinter.X)
@@ -141,11 +149,14 @@ class OTreeLauncherFrame(Tkinter.Frame):
     def deactivate_all_widgets(self):
         self.run_button.config(state=Tkinter.DISABLED)
         self.reset_button.config(state=Tkinter.DISABLED)
+        self.delete_button.config(state=Tkinter.DISABLED)
         self.deploy_listbox.config(state=Tkinter.DISABLED)
+
 
     def activate_all_widgets(self):
         self.run_button.config(state=Tkinter.NORMAL)
         self.reset_button.config(state=Tkinter.NORMAL)
+        self.delete_button.config(state=Tkinter.NORMAL)
         self.deploy_listbox.config(state=Tkinter.NORMAL)
 
     def refresh_deploy_list(self):
@@ -166,6 +177,35 @@ class OTreeLauncherFrame(Tkinter.Frame):
             "Please create and select a deploy"
         )
         tkMessageBox.showerror("No deploy selected", body)
+
+    def do_delete(self):
+        deploy = self.selected_deploy()
+        msg = (
+            "WARNING\nAre you sure to delete the deploy '{}'?\n"
+            "(The files will not be removed)"
+        )
+        res = tkMessageBox.askokcancel(
+            "Delete Deploy", msg.format(deploy.path)
+        )
+        if res:
+            try:
+                self.deactivate_all_widgets()
+                deploy.delete_instance(True)
+            except Exception as err:
+                tkMessageBox.showerror("Something gone wrong", unicode(err))
+            finally:
+                self.activate_all_widgets()
+                self.refresh_deploy_list()
+
+    def do_clear(self):
+        msg = (
+            "WARNING:\n You are going to delete all the database?\n"
+            "(The files will not be removed)"
+        )
+        res = tkMessageBox.askokcancel("Clear", msg)
+        if res:
+            db.clear_database()
+            self.refresh_deploy_list()
 
     def do_reset(self):
         deploy = self.selected_deploy()
@@ -188,7 +228,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
         if deploy:
             proc = core.execute(deploy.path)
             core.open_webbrowser()
-            msg = "The deploy '{}' is runing\nStop the server?"
+            msg = "The deploy '{}' is running\nStop the server?"
             tkMessageBox.showwarning("Deploy running", msg.format(deploy.path))
             core.kill_proc(proc)
             logger.info("Run Stop")
@@ -237,7 +277,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
             try:
                 self.deactivate_all_widgets()
                 proc = core.full_install_and_run(wrkpath)
-                msg = "The deploy '{}' is runing\nStop the server?"
+                msg = "The deploy '{}' is running\nStop the server?"
                 tkMessageBox.showwarning("Deploy running", msg.format(wrkpath))
                 core.kill_proc(proc)
                 logger.info("Run Stop")
@@ -256,7 +296,7 @@ def run():
     # create gui
     root = Tkinter.Tk()
 
-    with splash.Splash(root, res.get("splash.png"), 3.0):
+    with splash.Splash(root, res.get("splash.png"), 1.9):
         root.geometry("900x600+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
