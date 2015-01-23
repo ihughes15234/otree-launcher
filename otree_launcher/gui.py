@@ -30,6 +30,8 @@ import tkMessageBox
 import tkFileDialog
 
 from . import cons, core, db
+from .libs import mbox
+
 
 # =============================================================================
 # LOGGER
@@ -74,7 +76,7 @@ class LogDisplay(Tkinter.LabelFrame):
         self.console = Tkinter.Text(self, height=10)
         self.console.configure(state=Tkinter.DISABLED)
         self.console.configure(bg="#222222", fg="white")
-        self.console.pack(fill=Tkinter.BOTH)
+        self.console.pack(fill=Tkinter.BOTH, expand=True)
 
 
 class OTreeLauncherFrame(Tkinter.Frame):
@@ -107,26 +109,31 @@ class OTreeLauncherFrame(Tkinter.Frame):
         self.deploys = []
 
         listFrame = Tkinter.Frame(self)
-        listFrame.pack(fill="both")
+        listFrame.pack(fill=Tkinter.BOTH, expand=True)
         scrollBar = Tkinter.Scrollbar(listFrame)
-        scrollBar.pack(side=Tkinter.RIGHT, fill="y")
+        scrollBar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
 
         self.deploy_listbox = Tkinter.Listbox(
             listFrame, selectmode=Tkinter.SINGLE
         )
         self.refresh_deploy_list()
-        self.deploy_listbox.pack(side="left", fill="both", expand=1)
+        self.deploy_listbox.pack(
+            side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=True
+        )
 
         scrollBar.config(command=self.deploy_listbox.yview)
         self.deploy_listbox.config(yscrollcommand=scrollBar.set)
 
+        runFrame = Tkinter.Frame(self)
+        runFrame.pack(fill=Tkinter.X)
         self.run_button = Tkinter.Button(
-            self, text="Run Selected Deploy", command=self.do_run
+            runFrame, text="Run Selected Deploy", command=self.do_run
         )
         self.run_button.pack(side=Tkinter.RIGHT)
 
-        self.log_display = LogDisplay(root)
-        self.log_display.pack(fill="x", side="bottom")
+        self.log_display = LogDisplay(self)
+        self.log_display.pack(fill=Tkinter.X)
+
 
     def refresh_deploy_list(self):
         self.deploy_listbox.delete(0, len(self.deploys)-1)
@@ -138,7 +145,7 @@ class OTreeLauncherFrame(Tkinter.Frame):
     def do_run(self):
         selected = self.deploy_listbox.curselection()
         if selected:
-            idx = selected[0]
+            idx = int(selected[0])
             deploy = db.Deploy.get(id=self.deploys[idx])
             proc = core.execute(deploy.path)
             core.open_webbrowser()
@@ -197,8 +204,8 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 break
         if wrkpath:
             try:
-                self.run_button.config(state='disabled')
-                self.deploy_listbox.config(state='disabled')
+                self.run_button.config(state=Tkinter.DISABLED)
+                self.deploy_listbox.config(state=Tkinter.DISABLED)
                 proc = core.full_install_and_run(wrkpath)
                 tkMessageBox.showinfo(
                     "Deploy running", "runing '{}'".format(wrkpath)
@@ -208,8 +215,8 @@ class OTreeLauncherFrame(Tkinter.Frame):
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             finally:
-                self.run_button.config(state='normal')
-                self.deploy_listbox.config(state='normal')
+                self.run_button.config(state=Tkinter.NORMAL)
+                self.deploy_listbox.config(state=Tkinter.NORMAL)
                 self.refresh_deploy_list()
 
 
@@ -220,12 +227,15 @@ class OTreeLauncherFrame(Tkinter.Frame):
 def run():
     # create gui
     root = Tkinter.Tk()
-    root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
     root.geometry("900x600+50+50")
+
+    root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
     # add main frame
     frame = OTreeLauncherFrame(root)
-    frame.pack(fill="both")
+    frame.pack(expand=True, fill=Tkinter.BOTH)
+
+
 
     # setup logger
     logger.handlers = []
