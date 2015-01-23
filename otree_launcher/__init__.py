@@ -12,4 +12,4 @@ from __future__ import unicode_literals
 # DOC
 # =============================================================================
 
-__doc__ = """oTree installer"""
+__doc__ = """oTree Launcher"""

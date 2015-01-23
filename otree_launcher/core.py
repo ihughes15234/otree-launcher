@@ -29,6 +29,7 @@ import webbrowser
 import zipfile
 import atexit
 import time
+import datetime
 
 from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
@@ -147,7 +148,7 @@ def download(wrkpath):
     """Download otree code into working dir
 
     """
-    logger.info("Downloading oTree on '{}'".format(wrkpath))
+    logger.info("Downloading oTree on '{}'...".format(wrkpath))
     with ctx.urlget(cons.OTREE_CODE_URL) as response:
         with ctx.tempfile(wrkpath, "otree", "zip") as fpath:
             with ctx.open(fpath, "wb", encoding=None) as fp:
@@ -163,7 +164,7 @@ def install(wrkpath):
     """Install oTree on a given *wrkpath*
 
     """
-    logger.info("Initiating oTree installer on '{}'".format(wrkpath))
+    logger.info("Initiating oTree installer on '{}'...".format(wrkpath))
     retcode = 0
     with ctx.tempfile(wrkpath, "installer", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating install script...")
@@ -194,17 +195,22 @@ def reset(wrkpath):
     """Execute the reset script of the working path installation
 
     """
-    logger.info("Reset otree on '{}'".format(wrkpath))
+    logger.info("Reset otree on '{}'...".format(wrkpath))
     reseter_path = resolve_reseter_path(wrkpath)
     command = [cons.INTERPRETER, reseter_path]
-    return call(command, span=False)
+    retcode = call(command, span=False)
+    if not retcode:
+        db.Deploy.update(
+            last_update=datetime.datetime.now()
+        ).where(db.Deploy.path == wrkpath).execute()
+    return retcode
 
 
 def execute(wrkpath):
     """Execute the runner script of the working path installation
 
     """
-    logger.info("Running otree on'{}'".format(wrkpath))
+    logger.info("Running otree on'{}'...".format(wrkpath))
     runner_path = resolve_runner_path(wrkpath)
     command = [cons.INTERPRETER, runner_path]
     proc = call(command, span=True)

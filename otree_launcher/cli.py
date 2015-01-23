@@ -76,7 +76,19 @@ def get_parser():
         "-x", "--execute", dest="execute", type=int,
         metavar="DEPLOY_ID", help="Run an existing deploy"
     )
+    group.add_argument(
+        "-d", "--delete", dest="delete", type=int,
+        metavar="DEPLOY_ID", help="delete an existing deploy"
+    )
+    group.add_argument(
+        "--clear", dest="clear", action="store_true",
+        help="Clear all the deployment database"
+    )
     return parser
+
+
+def ask(question):
+    return raw_input(question + " [Y|N]? ") == "Y"
 
 
 def run():
@@ -87,18 +99,28 @@ def run():
     args = parser.parse_args()
     if args.gui:
         gui.run()
-    if args.list:
+    elif args.list:
         for deploy in db.Deploy.select():
             logger.info(deploy.resume())
-    elif args.execute or args.reset:
-        deploy = db.Deploy.get(id=args.execute or args.reset)
+    elif args.execute or args.reset or args.delete:
+        deploy = db.Deploy.get(id=args.execute or args.reset or args.delete)
         if args.execute:
             proc = core.execute(deploy.path)
             core.open_webbrowser()
             proc.wait()
         elif args.reset:
             core.reset(deploy.path)
-    else:
+        elif args.delete:
+            if ask("Remove the deploy on '{}'".format(deploy.path)):
+                deploy.delete_instance(True)
+            else:
+                logger.info("Aborted!")
+    elif args.clear:
+        if ask("Remove all deployment data"):
+            db.clear_database()
+        else:
+            logger.info("Aborted!")
+    elif args.wrkpath:
         proc = core.full_install_and_run(args.wrkpath)
         proc.wait()
 

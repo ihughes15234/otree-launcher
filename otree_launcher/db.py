@@ -72,9 +72,16 @@ class Deploy(BaseModel):
 
 DB.connect()
 
-for cls in BaseModel.__subclasses__():
-    cls.create_table(fail_silently=True)
-del cls
+def create_tables():
+    for cls in BaseModel.__subclasses__():
+        cls.create_table(fail_silently=True)
+
+def clear_database():
+    logger.info("Removing data...")
+    DB.drop_tables(BaseModel.__subclasses__())
+    create_tables()
+
+create_tables()
 
 
 # =============================================================================

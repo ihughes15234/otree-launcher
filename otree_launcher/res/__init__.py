@@ -12,24 +12,32 @@ from __future__ import unicode_literals
 # DOC
 # =============================================================================
 
-__doc__ = """Entry point of oTree installer
+__doc__ = """oTree Launcher resources"""
 
-"""
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
+import os
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
 
-def main():
-    """Execute otree installer
-
-    """
-    from otree_launcher import cli
-    try:
-        cli.run()
-    except Exception as err:
-        print str(err)
+def get(fname):
+    """Retrieve a full path to resourse or raises an IOError"""
+    path = os.path.join(PATH, fname)
+    if os.path.exists(path):
+        return path
+    raise IOError("Resource '{}' not exists".format(fname))
 
 
 # =============================================================================
@@ -37,4 +45,4 @@ def main():
 # =============================================================================
 
 if __name__ == "__main__":
-    main()
+    print(__doc__)

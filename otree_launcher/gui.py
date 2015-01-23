@@ -29,8 +29,8 @@ import Tkinter
 import tkMessageBox
 import tkFileDialog
 
-from . import cons, core, db
-from .libs import mbox
+from . import cons, core, db, res
+from .libs import splash
 
 
 # =============================================================================
@@ -124,16 +124,29 @@ class OTreeLauncherFrame(Tkinter.Frame):
         scrollBar.config(command=self.deploy_listbox.yview)
         self.deploy_listbox.config(yscrollcommand=scrollBar.set)
 
-        runFrame = Tkinter.Frame(self)
-        runFrame.pack(fill=Tkinter.X)
+        btnFrame = Tkinter.Frame(self)
+        btnFrame.pack(fill=Tkinter.X)
         self.run_button = Tkinter.Button(
-            runFrame, text="Run Selected Deploy", command=self.do_run
+            btnFrame, text="Run Selected Deploy", command=self.do_run
         )
         self.run_button.pack(side=Tkinter.RIGHT)
+        self.reset_button = Tkinter.Button(
+            btnFrame, text="Reset Selected Deploy", command=self.do_reset
+        )
+        self.reset_button.pack(side=Tkinter.RIGHT)
 
         self.log_display = LogDisplay(self)
         self.log_display.pack(fill=Tkinter.X)
 
+    def deactivate_all_widgets(self):
+        self.run_button.config(state=Tkinter.DISABLED)
+        self.reset_button.config(state=Tkinter.DISABLED)
+        self.deploy_listbox.config(state=Tkinter.DISABLED)
+
+    def activate_all_widgets(self):
+        self.run_button.config(state=Tkinter.NORMAL)
+        self.reset_button.config(state=Tkinter.NORMAL)
+        self.deploy_listbox.config(state=Tkinter.NORMAL)
 
     def refresh_deploy_list(self):
         self.deploy_listbox.delete(0, len(self.deploys)-1)
@@ -142,25 +155,43 @@ class OTreeLauncherFrame(Tkinter.Frame):
             self.deploy_listbox.insert(Tkinter.END, deploy.resume())
             self.deploys.append(deploy.id)
 
-    def do_run(self):
+    def selected_deploy(self):
         selected = self.deploy_listbox.curselection()
         if selected:
             idx = int(selected[0])
-            deploy = db.Deploy.get(id=self.deploys[idx])
+            return db.Deploy.get(id=self.deploys[idx])
+        body = (
+            "Please select a deploy"
+            if self.deploys else
+            "Please create and select a deploy"
+        )
+        tkMessageBox.showerror("No deploy selected", body)
+
+    def do_reset(self):
+        deploy = self.selected_deploy()
+        res = tkMessageBox.askokcancel(
+            "Reset Deploy",
+            "Are you sure to reset the deploy '{}'?".format(deploy.path)
+        )
+        if res:
+            try:
+                self.deactivate_all_widgets()
+                core.reset(deploy.path)
+            except Exception as err:
+                tkMessageBox.showerror("Something gone wrong", unicode(err))
+            finally:
+                self.activate_all_widgets()
+                self.refresh_deploy_list()
+
+    def do_run(self):
+        deploy = self.selected_deploy()
+        if deploy:
             proc = core.execute(deploy.path)
             core.open_webbrowser()
-            tkMessageBox.showinfo(
-                "Deploy running", "runing '{}'".format(deploy.path)
-            )
+            msg = "The deploy '{}' is runing\nStop the server?"
+            tkMessageBox.showwarning("Deploy running", msg.format(deploy.path))
             core.kill_proc(proc)
             logger.info("Run Stop")
-        else:
-            body = (
-                "Please select a deploy"
-                if self.deploys else
-                "Please create and select a deploy"
-            )
-            tkMessageBox.showerror("No deploy selected", body)
 
     def do_about(self):
         title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
@@ -204,19 +235,16 @@ class OTreeLauncherFrame(Tkinter.Frame):
                 break
         if wrkpath:
             try:
-                self.run_button.config(state=Tkinter.DISABLED)
-                self.deploy_listbox.config(state=Tkinter.DISABLED)
+                self.deactivate_all_widgets()
                 proc = core.full_install_and_run(wrkpath)
-                tkMessageBox.showinfo(
-                    "Deploy running", "runing '{}'".format(wrkpath)
-                )
+                msg = "The deploy '{}' is runing\nStop the server?"
+                tkMessageBox.showwarning("Deploy running", msg.format(wrkpath))
                 core.kill_proc(proc)
                 logger.info("Run Stop")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             finally:
-                self.run_button.config(state=Tkinter.NORMAL)
-                self.deploy_listbox.config(state=Tkinter.NORMAL)
+                self.activate_all_widgets()
                 self.refresh_deploy_list()
 
 
@@ -227,20 +255,21 @@ class OTreeLauncherFrame(Tkinter.Frame):
 def run():
     # create gui
     root = Tkinter.Tk()
-    root.geometry("900x600+50+50")
 
-    root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
+    with splash.Splash(root, res.get("splash.png"), 3.0):
+        root.geometry("900x600+50+50")
+        root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
-    # add main frame
-    frame = OTreeLauncherFrame(root)
-    frame.pack(expand=True, fill=Tkinter.BOTH)
+        # add main frame
+        frame = OTreeLauncherFrame(root)
+        frame.pack(expand=True, fill=Tkinter.BOTH)
 
-    # setup logger
-    logger.handlers = []
-    logger.addHandler(LoggingToGUI(frame.log_display.console))
-    logger.info("oTree Launcher says 'Hello'")
+        # setup logger
+        logger.handlers = []
+        logger.addHandler(LoggingToGUI(frame.log_display.console))
+        logger.info("oTree Launcher says 'Hello'")
 
-    # start
+
     root.mainloop()
 
 
