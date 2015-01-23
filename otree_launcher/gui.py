@@ -33,6 +33,7 @@ from . import cons, core, db, res
 from .libs import splash
 
 
+
 # =============================================================================
 # LOGGER
 # =============================================================================
@@ -85,28 +86,47 @@ class OTreeLauncherFrame(Tkinter.Frame):
         Tkinter.Frame.__init__(self, root)
         self.root = root
 
-        # some internal data
-        self.run_proc = None
+        # icons
+        self.icon_new = Tkinter.PhotoImage(file=res.get("new.png"))
+        self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.png"))
+        self.icon_exit = Tkinter.PhotoImage(file=res.get("exit.png"))
+        self.icon_homepage = Tkinter.PhotoImage(file=res.get("homepage.png"))
+        self.icon_about = Tkinter.PhotoImage(file=res.get("about.png"))
+
+        self.icon_run = Tkinter.PhotoImage(file=res.get("run.png"))
+        self.icon_delete = Tkinter.PhotoImage(file=res.get("delete.png"))
+        self.icon_reset = Tkinter.PhotoImage(file=res.get("reset.png"))
 
         # menu
         self.menu = Tkinter.Menu(self)
         root.config(menu=self.menu)
 
         deploy_menu = Tkinter.Menu(self.menu)
-        deploy_menu.add_command(label="New Deploy", command=self.do_deploy)
-        deploy_menu.add_separator()
         deploy_menu.add_command(
-            label="Clear deploy database", command=self.do_clear
+            label="New Deploy", command=self.do_deploy,
+            compound=Tkinter.LEFT, image=self.icon_new
         )
         deploy_menu.add_separator()
-        deploy_menu.add_command(label="Exit", command=self.do_exit)
+        deploy_menu.add_command(
+            label="Clear deploy database", command=self.do_clear,
+            compound=Tkinter.LEFT, image=self.icon_clear
+        )
+        deploy_menu.add_separator()
+        deploy_menu.add_command(
+            label="Exit", command=self.do_exit,
+            compound=Tkinter.LEFT, image=self.icon_exit
+        )
         self.menu.add_cascade(label="Deploys", menu=deploy_menu)
 
         about_menu = Tkinter.Menu(self.menu)
         about_menu.add_command(
-            label="oTree Homepage", command=self.do_open_homepage
+            label="oTree Homepage", command=self.do_open_homepage,
+            compound=Tkinter.LEFT, image=self.icon_homepage
         )
-        about_menu.add_command(label="About me...", command=self.do_about)
+        about_menu.add_command(
+            label="About me...", command=self.do_about,
+            compound=Tkinter.LEFT, image=self.icon_about
+        )
         self.menu.add_cascade(label="About", menu=about_menu)
 
         # components
@@ -131,15 +151,18 @@ class OTreeLauncherFrame(Tkinter.Frame):
         btnFrame = Tkinter.Frame(self)
         btnFrame.pack(fill=Tkinter.X)
         self.run_button = Tkinter.Button(
-            btnFrame, text="Run Selected Deploy", command=self.do_run
+            btnFrame, text="Run Selected Deploy", command=self.do_run,
+            compound=Tkinter.LEFT, image=self.icon_run
         )
         self.run_button.pack(side=Tkinter.RIGHT)
         self.reset_button = Tkinter.Button(
-            btnFrame, text="Reset Selected Deploy", command=self.do_reset
+            btnFrame, text="Reset Selected Deploy", command=self.do_reset,
+            compound=Tkinter.LEFT, image=self.icon_reset
         )
         self.reset_button.pack(side=Tkinter.RIGHT)
         self.delete_button = Tkinter.Button(
-            btnFrame, text="Delete Selected Deploy", command=self.do_delete
+            btnFrame, text="Delete Selected Deploy", command=self.do_delete,
+            compound=Tkinter.LEFT, image=self.icon_delete
         )
         self.delete_button.pack(side=Tkinter.RIGHT)
 
@@ -151,7 +174,6 @@ class OTreeLauncherFrame(Tkinter.Frame):
         self.reset_button.config(state=Tkinter.DISABLED)
         self.delete_button.config(state=Tkinter.DISABLED)
         self.deploy_listbox.config(state=Tkinter.DISABLED)
-
 
     def activate_all_widgets(self):
         self.run_button.config(state=Tkinter.NORMAL)
@@ -298,6 +320,7 @@ def run():
 
     with splash.Splash(root, res.get("splash.png"), 1.9):
         root.geometry("900x600+50+50")
+        root.iconbitmap(res.get("about.png"))
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
         # add main frame

@@ -102,7 +102,7 @@ SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 INSTALL_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$WRK_PATH"
 $ACTIVATE
-pip install --upgrade -r "$REQUIREMENTS_PATH"
+python "$PIP_PATH" install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
 RESET_SCRIPT_FNAME = "otree_reset.{}".format(SCRIPT_EXTENSION)
@@ -110,7 +110,7 @@ RESET_SCRIPT_FNAME = "otree_reset.{}".format(SCRIPT_EXTENSION)
 RESET_CMDS_TEMPLATE = """
 $ACTIVATE
 cd "$OTREE_PATH"
-python $RUNSCRIPT resetdb --noinput
+python "$RUNSCRIPT" resetdb --noinput
 """
 
 RUNNER_SCRIPT_FNAME = "otree_run.{}".format(SCRIPT_EXTENSION)

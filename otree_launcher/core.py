@@ -110,13 +110,16 @@ def render(template, wrkpath):
     requirements_path = os.path.join(otree_path, cons.REQUIREMENTS_FNAME)
     runscript = os.path.join(otree_path, "otree")
 
+    pip_path = os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip")
+
     src = string.Template(template.strip()).substitute(
         WRK_PATH=wrkpath,
         VIRTUALENV_PATH=os.path.abspath(virtualenv.__file__),
         ACTIVATE=activate_cmd,
         OTREE_PATH=otree_path,
         REQUIREMENTS_PATH=requirements_path,
-        RUNSCRIPT=runscript
+        RUNSCRIPT=runscript,
+        PIP_PATH=pip_path
     )
     script = "".join(
         ["\n".join(cons.SCRIPT_HEADER), "\n"] +
