@@ -197,7 +197,8 @@ def install(wrkpath):
     if retcode:
         raise InstallError(retcode)
     logger.info("Registering...")
-    db.Deploy.create(path=wrkpath)
+    deploy = db.Deploy(path=wrkpath)
+    deploy.save()
 
 
 def reset(wrkpath):
@@ -234,24 +235,6 @@ def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
     logger.info("Launching webbrowser...")
     time.sleep(cons.OTREE_SPAN_SLEEP)
     webbrowser.open_new_tab(url)
-
-
-def full_install_and_run(wrkpath):
-    """Execute all the commands of instalation and run the installed proyect
-    on finish
-
-    """
-    download(wrkpath)
-
-    install(wrkpath)
-
-    reset(wrkpath)
-
-    # run
-    proc = execute(wrkpath)
-    open_webbrowser()
-
-    return proc
 
 
 # =============================================================================

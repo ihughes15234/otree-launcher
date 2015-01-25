@@ -56,14 +56,16 @@ class Deploy(BaseModel):
     path = peewee.TextField()
     created_date = peewee.DateTimeField(default=datetime.datetime.now)
     last_update = peewee.DateTimeField(default=datetime.datetime.now)
+    selected = peewee.BooleanField(default=True)
 
-    def resume(self):
-        text = "{} - {} (Created at: {} - Last Update: {})".format(
-            str(self.id).zfill(4), self.path.ljust(50),
-            self.created_date.isoformat().rsplit(".", 1)[0],
-            self.last_update.isoformat().rsplit(".", 1)[0]
-        )
-        return text
+    def save(self, *args, **kwargs):
+        super(Deploy, self).save(*args, **kwargs)
+        if self.selected:
+            Deploy.update(
+                selected=False
+            ).where(
+                Deploy.id != self.id
+            ).execute()
 
 
 # =============================================================================

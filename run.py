@@ -25,8 +25,8 @@ def main():
     """Execute otree installer
 
     """
-    from otree_launcher import cli
-    cli.run()
+    from otree_launcher import gui
+    gui.run()
 
 
 # =============================================================================
