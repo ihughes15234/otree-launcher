@@ -198,9 +198,6 @@ class OTreeLauncherFrame(ttk.Frame):
         deploy.selected = True
         deploy.save()
 
-    def do_stop(self):
-        pass
-
     def do_delete(self):
         deploy = self.selected_deploy()
         msg = (
@@ -221,29 +218,44 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.refresh_deploy_list()
 
     def do_clear(self):
-        deploy = self.selected_deploy()
-        res = tkMessageBox.askokcancel(
-            "Reset Deploy",
-            "Are you sure to reset the deploy '{}'?".format(deploy.path)
-        )
+        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
+        msg = "Are you sure to clear the database of the deploy '{}'?"
+        res = tkMessageBox.askokcancel("Reset Deploy", msg.format(deploy.path))
         if res:
             try:
-                self.deactivate_all_widgets()
+                self.run_button.config(state=Tkinter.DISABLED)
+                self.clear_button.config(state=Tkinter.DISABLED)
                 core.reset(deploy.path)
+                logger.info("Reset done!")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             finally:
-                self.activate_all_widgets()
-                self.refresh_deploy_list()
+                self.run_button.config(state=Tkinter.NORMAL)
+                self.clear_button.config(state=Tkinter.NORMAL)
 
     def do_run(self):
-        deploy = self.selected_deploy()
-        if deploy:
+        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
+        try:
+            self.run_button.config(state=Tkinter.DISABLED)
+            self.clear_button.config(state=Tkinter.DISABLED)
             self.proc = core.execute(deploy.path)
+        except:
+            self.run_button.config(state=Tkinter.NORMAL)
+            self.clear_button.config(state=Tkinter.NORMAL)
+            self.stop_button.config(state=Tkinter.DISABLED)
+            tkMessageBox.showerror("Something gone wrong", unicode(err))
+        else:
             core.open_webbrowser()
-            msg = "The deploy '{}' is running\nStop the server?"
-            tkMessageBox.showwarning("Deploy running", msg.format(deploy.path))
-            logger.info("Run Stop")
+            self.stop_button.config(state=Tkinter.NORMAL)
+
+    def do_stop(self):
+        if self.proc:
+            logger.info("Killing process...")
+            core.kill_proc(self.proc)
+            self.proc = None
+        self.run_button.config(state=Tkinter.NORMAL)
+        self.clear_button.config(state=Tkinter.NORMAL)
+        self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
         title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)

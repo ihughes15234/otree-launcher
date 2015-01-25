@@ -205,7 +205,7 @@ def reset(wrkpath):
     """Execute the reset script of the working path installation
 
     """
-    logger.info("Reset otree on '{}'...".format(wrkpath))
+    logger.info("Reset oTree on '{}'...".format(wrkpath))
     reseter_path = resolve_reseter_path(wrkpath)
     command = [cons.INTERPRETER, reseter_path]
     retcode = call(command, span=False)
