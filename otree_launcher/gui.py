@@ -153,8 +153,6 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         self.delete_button.pack(side=Tkinter.LEFT, padx=5, pady=5)
 
-        self.refresh_deploy_list()
-
         # =====================================================================
         # BUTTONS
         # =====================================================================
@@ -182,12 +180,14 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         self.clear_button.pack(**button_opt)
 
-
         # =====================================================================
         # CONSOLE
         # =====================================================================
+
         self.log_display = LogDisplay(self, text="Console")
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
+
+        self.refresh_deploy_list()
 
     def refresh_deploy_list(self):
         combo_values = []
@@ -196,6 +196,12 @@ class OTreeLauncherFrame(ttk.Frame):
             if deploy.selected:
                 self.selected_deploy.set(deploy.path)
         self.deploys_combobox["values"] = combo_values
+
+        state = Tkinter.NORMAL if combo_values else Tkinter.DISABLED
+        self.run_button.config(state=state)
+        self.clear_button.config(state=state)
+        self.deploys_combobox.config(state=state)
+        self.delete_button.config(state=state)
 
     # =========================================================================
     # SLOTS
@@ -221,6 +227,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.deploys_combobox.config(state=Tkinter.DISABLED)
+                self.delete_button.config(state=Tkinter.DISABLED)
                 deploy.delete_instance(True)
                 logger.info("Deploy '{}' deleted".format(deploy.path))
             except Exception as err:
@@ -234,6 +241,7 @@ class OTreeLauncherFrame(ttk.Frame):
             finally:
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
+                self.delete_button.config(state=Tkinter.NORMAL)
                 self.deploys_combobox.config(state="readonly")
                 self.refresh_deploy_list()
 
@@ -246,6 +254,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.deploys_combobox.config(state=Tkinter.DISABLED)
+                self.delete_button.config(state=Tkinter.DISABLED)
                 core.reset(deploy.path)
                 logger.info("Reset done!")
             except Exception as err:
@@ -253,6 +262,7 @@ class OTreeLauncherFrame(ttk.Frame):
             finally:
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
+                self.delete_button.config(state=Tkinter.NORMAL)
                 self.deploys_combobox.config(state="readonly")
 
     def do_run(self):
@@ -261,10 +271,12 @@ class OTreeLauncherFrame(ttk.Frame):
             self.run_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.deploys_combobox.config(state=Tkinter.DISABLED)
+            self.delete_button.config(state=Tkinter.DISABLED)
             self.proc = core.execute(deploy.path)
         except:
             self.run_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
+            self.delete_button.config(state=Tkinter.NORMAL)
             self.deploys_combobox.config(state="readonly")
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
@@ -279,13 +291,14 @@ class OTreeLauncherFrame(ttk.Frame):
             self.proc = None
         self.run_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
+        self.delete_button.config(state=Tkinter.NORMAL)
         self.deploys_combobox.config(state="readonly")
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
         title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
         body = (
-            "{doc}"
+            "{doc}\n"
             "A modern open platform for social science experiment\n"
             "Version: {version}"
         ).format(
@@ -327,6 +340,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.deploys_combobox.config(state=Tkinter.DISABLED)
+                self.delete_button.config(state=Tkinter.DISABLED)
                 core.download(wrkpath)
                 core.install(wrkpath)
                 core.reset(wrkpath)
@@ -336,6 +350,7 @@ class OTreeLauncherFrame(ttk.Frame):
             finally:
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
+                self.delete_button.config(state=Tkinter.NORMAL)
                 self.deploys_combobox.config(state="readonly")
                 self.refresh_deploy_list()
 
