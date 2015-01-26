@@ -142,16 +142,18 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploys_combobox.bind(
             "<<ComboboxSelected>>", self.do_select_deploy
         )
-        self.deploys_combobox.pack(fill=Tkinter.X, padx=5, pady=5)
-        self.refresh_deploy_list()
+        self.deploys_combobox.pack(
+            fill=Tkinter.X, padx=5, pady=5,
+            expand=True, side=Tkinter.LEFT
+        )
+
         self.delete_button = ttk.Button(
             directory_frame, text="", command=self.do_delete,
             compound=Tkinter.LEFT, image=self.icon_delete
         )
-        button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5}
-        self.run_button.pack(**button_opt)
+        self.delete_button.pack(side=Tkinter.LEFT, padx=5, pady=5)
 
-
+        self.refresh_deploy_list()
 
         # =====================================================================
         # BUTTONS
@@ -189,7 +191,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
     def refresh_deploy_list(self):
         combo_values = []
-        for deploy in db.Deploy.select():
+        for deploy in db.Deploy.select().order_by(db.Deploy.created_date):
             combo_values.append(deploy.path)
             if deploy.selected:
                 self.selected_deploy.set(deploy.path)
@@ -206,7 +208,7 @@ class OTreeLauncherFrame(ttk.Frame):
         deploy.save()
 
     def do_delete(self):
-        deploy = self.selected_deploy()
+        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
         msg = (
             "WARNING\nAre you sure to delete the deploy '{}'?\n"
             "(The files will not be removed)"
@@ -216,12 +218,23 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         if res:
             try:
-                self.deactivate_all_widgets()
+                self.run_button.config(state=Tkinter.DISABLED)
+                self.clear_button.config(state=Tkinter.DISABLED)
+                self.deploys_combobox.config(state=Tkinter.DISABLED)
                 deploy.delete_instance(True)
+                logger.info("Deploy '{}' deleted".format(deploy.path))
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
+            else:
+                selected = db.Deploy.select().order_by(
+                    db.Deploy.created_date
+                ).get()
+                selected.selected = True
+                selected.save()
             finally:
-                self.activate_all_widgets()
+                self.run_button.config(state=Tkinter.NORMAL)
+                self.clear_button.config(state=Tkinter.NORMAL)
+                self.deploys_combobox.config(state="readonly")
                 self.refresh_deploy_list()
 
     def do_clear(self):
