@@ -34,7 +34,6 @@ from . import cons, core, db, res
 from .libs import splash
 
 
-
 # =============================================================================
 # LOGGER
 # =============================================================================
@@ -43,7 +42,7 @@ logger = cons.logger
 
 
 # =============================================================================
-# LOGGER
+# LOGGER UI
 # =============================================================================
 
 class LoggingToGUI(logging.Handler):
@@ -225,6 +224,7 @@ class OTreeLauncherFrame(ttk.Frame):
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
+                self.deploys_combobox.config(state=Tkinter.DISABLED)
                 core.reset(deploy.path)
                 logger.info("Reset done!")
             except Exception as err:
@@ -232,16 +232,19 @@ class OTreeLauncherFrame(ttk.Frame):
             finally:
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
+                self.deploys_combobox.config(state="readonly")
 
     def do_run(self):
         deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
         try:
             self.run_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
+            self.deploys_combobox.config(state=Tkinter.DISABLED)
             self.proc = core.execute(deploy.path)
         except:
             self.run_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
+            self.deploys_combobox.config(state="readonly")
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
@@ -255,6 +258,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.proc = None
         self.run_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
+        self.deploys_combobox.config(state="readonly")
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
@@ -299,14 +303,19 @@ class OTreeLauncherFrame(ttk.Frame):
                 break
         if wrkpath:
             try:
-                self.deactivate_all_widgets()
-                download(wrkpath)
-                install(wrkpath)
-                reset(wrkpath)
+                self.run_button.config(state=Tkinter.DISABLED)
+                self.clear_button.config(state=Tkinter.DISABLED)
+                self.deploys_combobox.config(state=Tkinter.DISABLED)
+                core.download(wrkpath)
+                core.install(wrkpath)
+                core.reset(wrkpath)
+                logger.info("Deploy finished")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             finally:
-                self.activate_all_widgets()
+                self.run_button.config(state=Tkinter.NORMAL)
+                self.clear_button.config(state=Tkinter.NORMAL)
+                self.deploys_combobox.config(state="readonly")
                 self.refresh_deploy_list()
 
 
@@ -319,7 +328,7 @@ def run():
     root = Tkinter.Tk()
 
     with splash.Splash(root, res.get("splash.gif"), 1.9):
-        root.geometry("400x500+50+50")
+        root.geometry("500x530+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
         # set icon
