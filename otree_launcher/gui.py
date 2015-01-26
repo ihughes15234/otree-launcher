@@ -144,6 +144,14 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         self.deploys_combobox.pack(fill=Tkinter.X, padx=5, pady=5)
         self.refresh_deploy_list()
+        self.delete_button = ttk.Button(
+            directory_frame, text="", command=self.do_delete,
+            compound=Tkinter.LEFT, image=self.icon_delete
+        )
+        button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5}
+        self.run_button.pack(**button_opt)
+
+
 
         # =====================================================================
         # BUTTONS
