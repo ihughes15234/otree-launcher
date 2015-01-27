@@ -233,11 +233,12 @@ class OTreeLauncherFrame(ttk.Frame):
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
             else:
-                selected = db.Deploy.select().order_by(
-                    db.Deploy.created_date
-                ).get()
-                selected.selected = True
-                selected.save()
+                if db.Deploy.select().count():
+                    selected = db.Deploy.select().order_by(
+                        db.Deploy.created_date
+                    ).get()
+                    selected.selected = True
+                    selected.save()
             finally:
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
@@ -359,6 +360,7 @@ class OTreeLauncherFrame(ttk.Frame):
 # FUNCTIONS
 # =============================================================================
 
+
 def run():
     # create gui
     root = Tkinter.Tk()
@@ -378,9 +380,21 @@ def run():
         # setup logger
         logger.handlers = []
         logger.addHandler(LoggingToGUI(frame.log_display.console))
+
+        # opening logger file
+        logger.info("Opening log file '{}'...".format(cons.LOG_FPATH))
+        fp = open(cons.LOG_FPATH)
+        fp.seek(0, 2)
+
         logger.info("oTree Launcher says 'Hello'")
 
+    def read_log_file():
+        line = fp.readline()
+        if line:
+            logger.info(line.rstrip())
+        root.after(10, read_log_file)
 
+    read_log_file()
     root.mainloop()
 
 

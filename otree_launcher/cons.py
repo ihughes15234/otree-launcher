@@ -24,6 +24,7 @@ __doc__ = """Constants for all oTree launcher
 import sys
 import os
 import logging
+import datetime
 
 
 # =============================================================================
@@ -80,13 +81,17 @@ LAUNCHER_DIR_PATH = os.path.join(HOME_DIR, ".otree-launcher")
 
 DB_PATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.sqlite3")
 
+LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
+
 ENCODING = "UTF-8"
 
 INTERPRETER = "" if IS_WINDOWS else "bash"
 
 VENV_SCRIPT_DIR = "Scripts" if IS_WINDOWS else "bin"
 
-END_CMD = " || goto :error \n" if IS_WINDOWS else ";\n"
+END_CMD = (
+    ">> {} 2>&1 || goto :error \n" if IS_WINDOWS else ">> {} 2>&1 ;\n"
+).format(LOG_FPATH)
 
 SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
 
@@ -132,12 +137,18 @@ logger.setLevel(logging.INFO)
 
 
 # =============================================================================
-# DIRECTORIES
+# DIRECTORIES & FILES
 # =============================================================================
 
-if not os.path.isdir(LAUNCHER_DIR_PATH):
-    os.makedirs(LAUNCHER_DIR_PATH)
+for dpath in [LAUNCHER_DIR_PATH]:
+    if not os.path.isdir(dpath):
+        os.makedirs(dpath)
 
+
+if not os.path.isfile(LOG_FPATH):
+    with open(LOG_FPATH, "w"):
+        msg = "New log file '{}' (it will be removed in 31 days)"
+        logger.info(msg.format(LOG_FPATH))
 
 # =============================================================================
 # MAIN

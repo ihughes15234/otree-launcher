@@ -30,6 +30,7 @@ import zipfile
 import atexit
 import time
 import datetime
+import threading
 
 from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
@@ -79,16 +80,15 @@ def clean_proc(proc):
 def call(command, span=False, *args, **kwargs):
     """Call an external command"""
     cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
-    if span and cons.IS_WINDOWS:
+    if cons.IS_WINDOWS:
         proc = subprocess.Popen(cleaned_cmd, *args, **kwargs)
-        return proc
-    elif span:
+    else:
         proc = subprocess.Popen(
             cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
         )
-        return proc
-    retcode = subprocess.call(cleaned_cmd, *args, **kwargs)
-    return retcode
+    while proc.returncode is None and not span:
+        time.sleep(1)
+    return proc
 
 
 def render(template, wrkpath):
@@ -182,7 +182,7 @@ def install(wrkpath):
             fp.write(installer_src)
         command = [cons.INTERPRETER, fpath]
         logger.info("Install please wait (this can be take some minutes)...")
-        retcode = call(command)
+        retcode = call(command).returncode
     if not retcode:
         logger.info("Creating reset script...")
         reseter_src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
@@ -208,7 +208,7 @@ def reset(wrkpath):
     logger.info("Reset oTree on '{}'...".format(wrkpath))
     reseter_path = resolve_reseter_path(wrkpath)
     command = [cons.INTERPRETER, reseter_path]
-    retcode = call(command, span=False)
+    retcode = call(command, span=False).returncode
     if not retcode:
         db.Deploy.update(
             last_update=datetime.datetime.now()
