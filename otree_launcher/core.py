@@ -32,7 +32,7 @@ import time
 import datetime
 import threading
 
-from . import cons, ctx, db
+from . import cons, ctx
 from .libs.virtualenv import virtualenv
 
 
@@ -86,7 +86,10 @@ def call(command, span=False, *args, **kwargs):
         proc = subprocess.Popen(
             cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
         )
-    while proc.returncode is None and not span:
+    if not span:
+        proc.communicate()
+    else:
+        atexit.register(clean_proc, proc)
         time.sleep(1)
     return proc
 
@@ -96,136 +99,102 @@ def render(template, wrkpath):
 
     """
     # vars
-    activate_cmd = pip = None
-    if cons.IS_WINDOWS:
-        activate_cmd = "call \"{}\"".format(
-            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate.bat")
-        )
-        pip = "\"{}\"".format(
-            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip.exe")
-        )
-    else:
-        activate_cmd = "source \"{}\"".format(
-            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "activate")
-        )
-        pip = "python \"{}\"".format(
-            os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip")
-        )
-
-    otree_path = os.path.join(wrkpath, cons.OTREE_DIR)
-    requirements_path = os.path.join(otree_path, cons.REQUIREMENTS_FNAME)
-    runscript = os.path.join(otree_path, "otree")
-
-    pip_path = os.path.join(wrkpath, cons.VENV_SCRIPT_DIR, "pip")
-
-    src = string.Template(template.strip()).substitute(
-        WRK_PATH=wrkpath,
-        VIRTUALENV_PATH=os.path.abspath(virtualenv.__file__),
-        ACTIVATE=activate_cmd,
-        OTREE_PATH=otree_path,
-        REQUIREMENTS_PATH=requirements_path,
-        RUNSCRIPT=runscript,
-        PIP=pip
-    )
+    src = string.Template(template.strip()).substitute(**{
+        "WRK_PATH": wrkpath,
+        "VIRTUALENV_PATH": os.path.abspath(virtualenv.__file__),
+        "REQUIREMENTS_PATH": os.path.join(wrkpath, cons.REQUIREMENTS_FNAME),
+        "PIP_CMD": cons.PIP_CMD,
+        "DULWICH_PKG": cons.DULWICH_PKG,
+        "LAUNCHER_VENV_PATH": cons.LAUNCHER_VENV_PATH,
+        "DULWICH_CMD": cons.DULWICH_CMD,
+        "ACTIVATE_CMD": cons.ACTIVATE_CMD,
+        "OTREE_REPO": cons.OTREE_REPO,
+        "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME)
+    })
     script = "".join(
         ["\n".join(cons.SCRIPT_HEADER), "\n"] +
         ["{}{}".format(line, cons.END_CMD) for line in src.splitlines()] +
         ["\n".join(cons.SCRIPT_FOOTER), "\n"]
-    ).strip()
+    ).strip() + "\n"
     return script
-
-
-def resolve_runner_path(wrkpath):
-    """Resolve the location of the runner script"""
-    return os.path.join(
-        wrkpath, cons.VENV_SCRIPT_DIR, cons.RUNNER_SCRIPT_FNAME
-    )
-
-
-def resolve_reseter_path(wrkpath):
-    """Resolve the location of the reseter script"""
-    return os.path.join(
-        wrkpath, cons.VENV_SCRIPT_DIR, cons.RESET_SCRIPT_FNAME
-    )
 
 
 # =============================================================================
 # LOGIC ITSELF
 # =============================================================================
 
-def download(wrkpath):
-    """Download otree code into working dir
+def create_virtualenv():
+    """Create otree virtualenv
 
     """
-    logger.info("Downloading oTree on '{}'...".format(wrkpath))
-    with ctx.urlget(cons.OTREE_CODE_URL) as response:
-        with ctx.tempfile(wrkpath, "otree", "zip") as fpath:
-            with ctx.open(fpath, "wb", encoding=None) as fp:
-                fp.write(response.read())
-            with zipfile.ZipFile(fpath, "r") as zfp:
-                zfp.extractall(wrkpath)
-    otree_dwld_path = os.path.join(wrkpath, cons.DOWNLOAD_OTREE_DIR)
-    otreepath = os.path.join(wrkpath, cons.OTREE_DIR)
-    os.rename(otree_dwld_path, otreepath)
-
-
-def install(wrkpath):
-    """Install oTree on a given *wrkpath*
-
-    """
-    logger.info("Initiating oTree installer on '{}'...".format(wrkpath))
-    retcode = 0
-    with ctx.tempfile(wrkpath, "installer", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating install script...")
+    logger.info(
+        "Creating virtualenv on '{}'...".format(cons.LAUNCHER_VENV_PATH)
+    )
+    with ctx.tempfile("venv_installer", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating virtualenv install script...")
         with ctx.open(fpath, "w") as fp:
-            installer_src = render(cons.INSTALL_CMDS_TEMPLATE, wrkpath)
-            fp.write(installer_src)
-        command = [cons.INTERPRETER, fpath]
-        logger.info("Install please wait (this can be take some minutes)...")
-        retcode = call(command).returncode
-    if not retcode:
-        logger.info("Creating reset script...")
-        reseter_src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
-        reseter_path = resolve_reseter_path(wrkpath)
-        with ctx.open(reseter_path, "w") as fp:
-            fp.write(reseter_src)
-        logger.info("Creating run script...")
-        runner_src = render(cons.RUNNER_CMDS_TEMPLATE, wrkpath)
-        runner_path = resolve_runner_path(wrkpath)
-        with ctx.open(runner_path, "w") as fp:
-            fp.write(runner_src)
-    if retcode:
-        raise InstallError(retcode)
-    logger.info("Registering...")
-    deploy = db.Deploy(path=wrkpath)
-    deploy.save()
+            src = render(cons.CREATE_VENV_CMDS_TEMPLATE,
+                         cons.LAUNCHER_VENV_PATH)
+            fp.write(src)
+        logger.info("Creating venv please wait"
+                    "(this can be take some minutes)...")
+        return call([cons.INTERPRETER, fpath], span=True)
 
 
-def reset(wrkpath):
-    """Execute the reset script of the working path installation
+def clone(wrkpath):
+    """Clone otree code into working dir
+
+    """
+    logger.info("Clone on '{}'...".format(wrkpath))
+    with ctx.tempfile("cloner", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating cloner script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.CLONE_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Clonning...")
+        return call([cons.INTERPRETER, fpath], span=True)
+
+
+def install_requirements(wrkpath):
+    logger.info(
+        "Installing requirements of '{}'...".format(cons.LAUNCHER_VENV_PATH)
+    )
+    with ctx.tempfile("req_installer", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating requirements install script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.INSTALL_REQUIEMENTS_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Installing please wait"
+                    "(this can be take some minutes)...")
+        return call([cons.INTERPRETER, fpath], span=True)
+
+
+def reset_db(wrkpath):
+    """Reset the database of the oTree installation
 
     """
     logger.info("Reset oTree on '{}'...".format(wrkpath))
-    reseter_path = resolve_reseter_path(wrkpath)
-    command = [cons.INTERPRETER, reseter_path]
-    retcode = call(command, span=False).returncode
-    if not retcode:
-        db.Deploy.update(
-            last_update=datetime.datetime.now()
-        ).where(db.Deploy.path == wrkpath).execute()
-    return retcode
+    with ctx.tempfile("reseter", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating reseter script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Reseting (this can be take some minutes)...")
+        return call([cons.INTERPRETER, fpath], span=True)
 
 
-def execute(wrkpath):
-    """Execute the runner script of the working path installation
+def runserver(wrkpath):
+    """Run otree of the working path installation
 
     """
     logger.info("Running otree on'{}'...".format(wrkpath))
-    runner_path = resolve_runner_path(wrkpath)
-    command = [cons.INTERPRETER, runner_path]
-    proc = call(command, span=True)
-    atexit.register(clean_proc, proc)
-    return proc
+    with ctx.tempfile("runner", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating runner script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Starting...")
+        return  call([cons.INTERPRETER, fpath], span=True)
 
 
 def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):

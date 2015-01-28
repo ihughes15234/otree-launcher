@@ -36,12 +36,12 @@ from . import cons
 # =============================================================================
 
 @contextlib.contextmanager
-def tempfile(wrkpath, prefix, extension):
+def tempfile(prefix, extension):
     """Create a temporary fule in the wrkpath
 
     """
     fname = "{}_{}.{}".format(prefix, uuid.uuid4().int, extension)
-    fpath = os.path.join(wrkpath, fname)
+    fpath = os.path.join(cons.LAUNCHER_TEMP_DIR_PATH, fname)
     try:
         yield fpath
     finally:

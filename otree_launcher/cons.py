@@ -52,19 +52,15 @@ STR_VERSION = __version__ = ".".join(VERSION)
 
 HOME_DIR = os.path.expanduser("~")
 
-OTREE_CODE_URL = "https://github.com/oTree-org/oTree/archive/master.zip"
-
-OTREE_CODE_FNAME = "otree_master.zip"
-
-DOWNLOAD_OTREE_DIR = "oTree-master"
-
-OTREE_DIR = "oTree"
+OTREE_REPO = "https://github.com/oTree-org/oTree.git"
 
 REQUIREMENTS_FNAME = "requirements_base.txt"
 
 OTREE_SPAN_SLEEP = 3.5
 
 DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
+
+OTREE_SCRIPT_FNAME = "otree"
 
 
 # =============================================================================
@@ -73,13 +69,14 @@ DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
 IS_WINDOWS = sys.platform.startswith("win")
 
-APP_DATA = os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR
+LAUNCHER_DIR_PATH = os.path.join(
+    os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
+    "otree-launcher" if IS_WINDOWS else ".otree-launcher"
+)
 
-LAUNCHER_DIR = "otree-launcher" if IS_WINDOWS else ".otree-launcher"
+LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "venv")
 
-LAUNCHER_DIR_PATH = os.path.join(HOME_DIR, ".otree-launcher")
-
-DB_PATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.sqlite3")
+LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
 LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
 
@@ -87,7 +84,24 @@ ENCODING = "UTF-8"
 
 INTERPRETER = "" if IS_WINDOWS else "bash"
 
-VENV_SCRIPT_DIR = "Scripts" if IS_WINDOWS else "bin"
+VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
+                                    "Scripts" if IS_WINDOWS else "bin")
+
+ACTIVATE_CMD = (
+    "call \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat"))
+    if IS_WINDOWS else
+    "source \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "activate"))
+)
+
+DULWICH_CMD = "python \"{}\"".format(
+    os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich")
+)
+
+PIP_CMD = (
+    "\"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "pip.exe"))
+    if IS_WINDOWS else
+    "python \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "pip"))
+)
 
 END_CMD = (
     ">> {} 2>&1 || goto :error \n" if IS_WINDOWS else ">> {} 2>&1 ;\n"
@@ -95,37 +109,44 @@ END_CMD = (
 
 SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
 
-SCRIPT_HEADER = [] if IS_WINDOWS else ["set -e;"]
+SCRIPT_HEADER = ["@echo off"] if IS_WINDOWS else ["set -e;"]
 
 SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
+
+DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
 
 
 # =============================================================================
 # TEMPLATES FOS SCRIPTS
 # =============================================================================
 
-INSTALL_CMDS_TEMPLATE = """
-python "$VIRTUALENV_PATH" "$WRK_PATH"
-$ACTIVATE
-$PIP install --upgrade -r "$REQUIREMENTS_PATH"
+CREATE_VENV_CMDS_TEMPLATE = """
+python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
+$ACTIVATE_CMD
+$PIP_CMD install "$DULWICH_PKG"
 """
 
-RESET_SCRIPT_FNAME = "otree_reset.{}".format(SCRIPT_EXTENSION)
+CLONE_CMDS_TEMPLATE = """
+$ACTIVATE_CMD
+$DULWICH_CMD clone "$OTREE_REPO" "$WRK_PATH"
+"""
+
+INSTALL_REQUIEMENTS_CMDS_TEMPLATE = """
+$ACTIVATE_CMD
+$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
+"""
 
 RESET_CMDS_TEMPLATE = """
-$ACTIVATE
-cd "$OTREE_PATH"
-python "$RUNSCRIPT" resetdb --noinput
+$ACTIVATE_CMD
+cd "$WRK_PATH"
+python "$OTREE_SCRIPT_PATH" resetdb --noinput
 """
 
-RUNNER_SCRIPT_FNAME = "otree_run.{}".format(SCRIPT_EXTENSION)
-
-RUNNER_CMDS_TEMPLATE = """
-$ACTIVATE
-cd "$OTREE_PATH"
-python "$RUNSCRIPT" runserver
+RUN_CMDS_TEMPLATE = """
+$ACTIVATE_CMD
+cd "$WRK_PATH"
+python "$OTREE_SCRIPT_PATH" runserver
 """
-
 
 # =============================================================================
 # LOGGER
@@ -140,7 +161,7 @@ logger.setLevel(logging.INFO)
 # DIRECTORIES & FILES
 # =============================================================================
 
-for dpath in [LAUNCHER_DIR_PATH]:
+for dpath in [LAUNCHER_DIR_PATH, LAUNCHER_TEMP_DIR_PATH]:
     if not os.path.isdir(dpath):
         os.makedirs(dpath)
 
@@ -149,6 +170,7 @@ if not os.path.isfile(LOG_FPATH):
     with open(LOG_FPATH, "w"):
         msg = "New log file '{}' (it will be removed in 31 days)"
         logger.info(msg.format(LOG_FPATH))
+
 
 # =============================================================================
 # MAIN
