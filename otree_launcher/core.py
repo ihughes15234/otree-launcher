@@ -65,7 +65,8 @@ class InstallError(Exception):
 
 def kill_proc(proc):
     if cons.IS_WINDOWS:
-        call(["TASKKILL", "/F", "/PID", str(proc.pid), "/T"])
+        proc = call(["TASKKILL", "/F", "/PID", str(proc.pid), "/T"])
+        proc.communicate()
     else:
         import signal
         os.killpg(proc.pid, signal.SIGTERM)
@@ -77,7 +78,7 @@ def clean_proc(proc):
         kill_proc(proc)
 
 
-def call(command, span=False, *args, **kwargs):
+def call(command, sleep=1, *args, **kwargs):
     """Call an external command"""
     cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
     if cons.IS_WINDOWS:
@@ -86,11 +87,8 @@ def call(command, span=False, *args, **kwargs):
         proc = subprocess.Popen(
             cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
         )
-    if not span:
-        proc.communicate()
-    else:
-        atexit.register(clean_proc, proc)
-        time.sleep(1)
+    atexit.register(clean_proc, proc)
+    time.sleep(sleep)
     return proc
 
 
@@ -138,7 +136,7 @@ def create_virtualenv():
             fp.write(src)
         logger.info("Creating venv please wait"
                     "(this can be take some minutes)...")
-        return call([cons.INTERPRETER, fpath], span=True)
+        return call([cons.INTERPRETER, fpath])
 
 
 def clone(wrkpath):
@@ -152,7 +150,7 @@ def clone(wrkpath):
             src = render(cons.CLONE_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Clonning...")
-        return call([cons.INTERPRETER, fpath], span=True)
+        return call([cons.INTERPRETER, fpath])
 
 
 def install_requirements(wrkpath):
@@ -166,7 +164,7 @@ def install_requirements(wrkpath):
             fp.write(src)
         logger.info("Installing please wait"
                     "(this can be take some minutes)...")
-        return call([cons.INTERPRETER, fpath], span=True)
+        return call([cons.INTERPRETER, fpath])
 
 
 def reset_db(wrkpath):
@@ -180,7 +178,7 @@ def reset_db(wrkpath):
             src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Reseting (this can be take some minutes)...")
-        return call([cons.INTERPRETER, fpath], span=True)
+        return call([cons.INTERPRETER, fpath])
 
 
 def runserver(wrkpath):
@@ -194,7 +192,7 @@ def runserver(wrkpath):
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Starting...")
-        return  call([cons.INTERPRETER, fpath], span=True)
+        return  call([cons.INTERPRETER, fpath])
 
 
 def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
