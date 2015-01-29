@@ -80,6 +80,8 @@ LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
 LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
 
+DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.json")
+
 ENCODING = "UTF-8"
 
 INTERPRETER = "" if IS_WINDOWS else "bash"

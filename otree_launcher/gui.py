@@ -30,7 +30,7 @@ import tkMessageBox
 import tkFileDialog
 import ttk
 
-from . import cons, core, db, res
+from . import cons, core, res
 from .libs import splash
 
 
@@ -86,6 +86,7 @@ class OTreeLauncherFrame(ttk.Frame):
         ttk.Frame.__init__(self, root)
         self.root = root
         self.proc = None
+        self.conf = core.get_conf()
 
         # icons
         self.icon_new = Tkinter.PhotoImage(file=res.get("new.gif"))
@@ -94,7 +95,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.icon_about = Tkinter.PhotoImage(file=res.get("about.gif"))
 
         self.icon_run = Tkinter.PhotoImage(file=res.get("run.gif"))
-        self.icon_delete = Tkinter.PhotoImage(file=res.get("delete.gif"))
+        self.icon_opendir = Tkinter.PhotoImage(file=res.get("opendir.gif"))
         self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.gif"))
         self.icon_stop = Tkinter.PhotoImage(file=res.get("stop.gif"))
 
@@ -131,27 +132,25 @@ class OTreeLauncherFrame(ttk.Frame):
         # =====================================================================
         # DIRECTORY COMBO
         # =====================================================================
+        directory_opts = {"side": Tkinter.LEFT, "padx": 5, "pady": 5}
+
         directory_frame = ttk.LabelFrame(self, text="Project Directory")
         directory_frame.pack(fill=Tkinter.X)
 
-        self.selected_deploy = Tkinter.StringVar()
-        self.deploys_combobox = ttk.Combobox(
-            directory_frame, textvariable=self.selected_deploy,
+        self.deploy_path = Tkinter.StringVar()
+        self.deploy_entry = ttk.Entry(
+            directory_frame, textvariable=self.deploy_path,
             state=["readonly"]
         )
-        self.deploys_combobox.bind(
-            "<<ComboboxSelected>>", self.do_select_deploy
-        )
-        self.deploys_combobox.pack(
-            fill=Tkinter.X, padx=5, pady=5,
-            expand=True, side=Tkinter.LEFT
+        self.deploy_entry.pack(
+            fill=Tkinter.X, expand=True, **directory_opts
         )
 
-        self.delete_button = ttk.Button(
-            directory_frame, text="", command=self.do_delete,
-            compound=Tkinter.LEFT, image=self.icon_delete
+        self.opendirectory_button = ttk.Button(
+            directory_frame, text="", command=self.do_opendir,
+            compound=Tkinter.LEFT, image=self.icon_opendir
         )
-        self.delete_button.pack(side=Tkinter.LEFT, padx=5, pady=5)
+        self.opendirectory_button.pack(**directory_opts)
 
         # =====================================================================
         # BUTTONS
@@ -187,98 +186,57 @@ class OTreeLauncherFrame(ttk.Frame):
         self.log_display = LogDisplay(self, text="Console")
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
 
-        self.refresh_deploy_list()
+        self.refresh_deploy_path()
 
-    def refresh_deploy_list(self):
-        combo_values = []
-        for deploy in db.Deploy.select().order_by(db.Deploy.created_date):
-            combo_values.append(deploy.path)
-            if deploy.selected:
-                self.selected_deploy.set(deploy.path)
-        self.deploys_combobox["values"] = combo_values
-
-        state = Tkinter.NORMAL if combo_values else Tkinter.DISABLED
+    def refresh_deploy_path(self):
+        self.deploy_path.set(self.conf.path or "")
+        state = Tkinter.NORMAL if self.conf.path else Tkinter.DISABLED
         self.run_button.config(state=state)
         self.clear_button.config(state=state)
-        self.deploys_combobox.config(state=state)
-        self.delete_button.config(state=state)
+
+    def check_proc_end(self, cleaner, msg):
+        if self.proc and self.proc.poll() is None:
+            self.root.after(1000, self.check_proc_end, cleaner, msg)
+        else:
+            cleaner()
+            logger.info(msg)
+            self.proc = None
 
     # =========================================================================
     # SLOTS
     # =========================================================================
 
-    def do_select_deploy(self, e=None):
-        path = self.deploys_combobox.get()
-        deploy = db.Deploy.select().where(db.Deploy.path == path).get()
-        deploy.selected = True
-        deploy.save()
-
-    def do_delete(self):
-        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
-        msg = (
-            "WARNING\nAre you sure to delete the deploy '{}'?\n"
-            "(The files will not be removed)"
-        )
-        res = tkMessageBox.askokcancel(
-            "Delete Deploy", msg.format(deploy.path)
-        )
-        if res:
-            try:
-                self.run_button.config(state=Tkinter.DISABLED)
-                self.clear_button.config(state=Tkinter.DISABLED)
-                self.deploys_combobox.config(state=Tkinter.DISABLED)
-                self.delete_button.config(state=Tkinter.DISABLED)
-                deploy.delete_instance(True)
-                logger.info("Deploy '{}' deleted".format(deploy.path))
-            except Exception as err:
-                tkMessageBox.showerror("Something gone wrong", unicode(err))
-            else:
-                if db.Deploy.select().count():
-                    selected = db.Deploy.select().order_by(
-                        db.Deploy.created_date
-                    ).get()
-                    selected.selected = True
-                    selected.save()
-            finally:
-                self.run_button.config(state=Tkinter.NORMAL)
-                self.clear_button.config(state=Tkinter.NORMAL)
-                self.delete_button.config(state=Tkinter.NORMAL)
-                self.deploys_combobox.config(state="readonly")
-                self.refresh_deploy_list()
-
     def do_clear(self):
-        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
         msg = "Are you sure to clear the database of the deploy '{}'?"
-        res = tkMessageBox.askokcancel("Reset Deploy", msg.format(deploy.path))
+        res = tkMessageBox.askokcancel(
+            "Reset Deploy", msg.format(self.conf.path)
+        )
         if res:
+            def clean():
+                self.run_button.config(state=Tkinter.NORMAL)
+                self.clear_button.config(state=Tkinter.NORMAL)
+                self.opendirectory_button.config(state=Tkinter.NORMAL)
+
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
-                self.deploys_combobox.config(state=Tkinter.DISABLED)
-                self.delete_button.config(state=Tkinter.DISABLED)
-                core.reset(deploy.path)
-                logger.info("Reset done!")
+                self.opendirectory_button.config(state=Tkinter.DISABLED)
+                self.proc = core.reset_db(self.conf.path)
+                self.check_proc_end(clean, "Database Reset done")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
-            finally:
-                self.run_button.config(state=Tkinter.NORMAL)
-                self.clear_button.config(state=Tkinter.NORMAL)
-                self.delete_button.config(state=Tkinter.NORMAL)
-                self.deploys_combobox.config(state="readonly")
+                clean()
 
     def do_run(self):
-        deploy = db.Deploy.select().where(db.Deploy.selected == True).get()
         try:
             self.run_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
-            self.deploys_combobox.config(state=Tkinter.DISABLED)
-            self.delete_button.config(state=Tkinter.DISABLED)
-            self.proc = core.execute(deploy.path)
+            self.opendirectory_button.config(state=Tkinter.DISABLED)
+            self.proc = core.runserver(self.conf.path)
         except:
             self.run_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
-            self.delete_button.config(state=Tkinter.NORMAL)
-            self.deploys_combobox.config(state="readonly")
+            self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
@@ -288,12 +246,12 @@ class OTreeLauncherFrame(ttk.Frame):
     def do_stop(self):
         if self.proc:
             logger.info("Killing process...")
-            core.kill_proc(self.proc)
+            if self.proc.poll() is None:
+                core.kill_proc(self.proc)
             self.proc = None
         self.run_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
-        self.delete_button.config(state=Tkinter.NORMAL)
-        self.deploys_combobox.config(state="readonly")
+        self.opendirectory_button.config(state=Tkinter.NORMAL)
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
@@ -313,6 +271,19 @@ class OTreeLauncherFrame(ttk.Frame):
 
     def do_exit(self):
         self.root.quit()
+
+    def do_opendir(self):
+        options = {
+            'parent': self,
+            'initialdir': self.conf.path or cons.HOME_DIR,
+            'mustexist': True,
+            'title': 'Select oTree directory'
+        }
+        dpath = tkFileDialog.askdirectory(**options)
+        if dpath:
+            self.conf.path = dpath
+            self.conf.save()
+            self.refresh_deploy_path()
 
     def do_deploy(self):
         # define options for opening or saving a file

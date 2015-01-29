@@ -25,10 +25,8 @@ def main():
     """Execute otree installer
 
     """
-    from otree_launcher import core, cons
-    wrkpath = r"c:\kkk" if cons.IS_WINDOWS else "/home/juan/kkk"
-    proc = core.reset_db(wrkpath)
-    proc.wait()
+    from otree_launcher import gui
+    gui.run()
 
 
 # =============================================================================

@@ -32,7 +32,7 @@ import time
 import datetime
 import threading
 
-from . import cons, ctx
+from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
 
 
@@ -74,7 +74,7 @@ def kill_proc(proc):
 
 def clean_proc(proc):
     """Clean process if is still runing on exit"""
-    if proc.returncode is None:
+    if proc.poll() is None:
         kill_proc(proc)
 
 
@@ -202,6 +202,13 @@ def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
     logger.info("Launching webbrowser...")
     time.sleep(cons.OTREE_SPAN_SLEEP)
     webbrowser.open_new_tab(url)
+
+
+def get_conf():
+    """Get the configuration of oTree Launcher"""
+    if db.Configuration.select().count():
+            return db.Configuration.select().get()
+    return db.Configuration.create()
 
 
 # =============================================================================
