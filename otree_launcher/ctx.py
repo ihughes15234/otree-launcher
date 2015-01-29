@@ -27,6 +27,7 @@ import contextlib
 import codecs
 import uuid
 import urllib2
+import sys
 
 from . import cons
 
@@ -58,15 +59,6 @@ def open(fname, mode, *args, **kwargs):
         kwargs["encoding"] = cons.ENCODING
     with codecs.open(fname, mode, *args, **kwargs) as fp:
         yield fp
-
-
-@contextlib.contextmanager
-def urlget(url, *args, **kwargs):
-    """Open an url with get method
-
-    """
-    with contextlib.closing(urllib2.urlopen(url, *args, **kwargs)) as response:
-        yield response
 
 
 # =============================================================================

@@ -78,6 +78,8 @@ LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "venv")
 
 LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
+LAUNCHER_PID_FILE_PATH = os.path.join(LAUNCHER_DIR_PATH, "run")
+
 LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
 
 DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.json")

@@ -30,7 +30,7 @@ import tkMessageBox
 import tkFileDialog
 import ttk
 
-from . import cons, core, res
+from . import cons, core, res, ctx
 from .libs import splash
 
 
@@ -106,28 +106,28 @@ class OTreeLauncherFrame(ttk.Frame):
         self.menu = Tkinter.Menu(self)
         root.config(menu=self.menu)
 
-        deploy_menu = Tkinter.Menu(self.menu)
-        deploy_menu.add_command(
+        self.deploy_menu = Tkinter.Menu(self.menu)
+        self.deploy_menu.add_command(
             label="New Deploy", command=self.do_deploy,
             compound=Tkinter.LEFT, image=self.icon_new
         )
-        deploy_menu.add_separator()
-        deploy_menu.add_command(
+        self.deploy_menu.add_separator()
+        self.deploy_menu.add_command(
             label="Exit", command=self.do_exit,
             compound=Tkinter.LEFT, image=self.icon_exit
         )
-        self.menu.add_cascade(label="Deploys", menu=deploy_menu)
+        self.menu.add_cascade(label="Deploys", menu=self.deploy_menu)
 
-        about_menu = Tkinter.Menu(self.menu)
-        about_menu.add_command(
+        self.about_menu = Tkinter.Menu(self.menu)
+        self.about_menu.add_command(
             label="oTree Homepage", command=self.do_open_homepage,
             compound=Tkinter.LEFT, image=self.icon_homepage
         )
-        about_menu.add_command(
-            label="About me...", command=self.do_about,
+        self.about_menu.add_command(
+            label="About oTree Launcher", command=self.do_about,
             compound=Tkinter.LEFT, image=self.icon_about
         )
-        self.menu.add_cascade(label="About", menu=about_menu)
+        self.menu.add_cascade(label="About", menu=self.about_menu)
 
         # =====================================================================
         # DIRECTORY COMBO
@@ -187,20 +187,40 @@ class OTreeLauncherFrame(ttk.Frame):
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
 
         self.refresh_deploy_path()
+        if not self.conf.virtualenv:
+            self.first_run()
+
+    def first_run(self):
+
+        def clean():
+            self.conf.virtualenv = True
+            self.conf.save()
+            self.refresh_deploy_path()
+
+        self.proc = core.create_virtualenv()
+        self.check_proc_end(clean, "First Configuration done")
 
     def refresh_deploy_path(self):
+
+        if self.conf.path and not os.path.isdir(self.conf.path):
+            self.conf.path = None
+            self.conf.save()
+
         self.deploy_path.set(self.conf.path or "")
         state = Tkinter.NORMAL if self.conf.path else Tkinter.DISABLED
         self.run_button.config(state=state)
         self.clear_button.config(state=state)
 
+        state = Tkinter.NORMAL if self.conf.virtualenv else Tkinter.DISABLED
+        self.deploy_menu.entryconfig(1, state=state)
+
     def check_proc_end(self, cleaner, msg):
         if self.proc and self.proc.poll() is None:
             self.root.after(1000, self.check_proc_end, cleaner, msg)
         else:
+            self.proc = None
             cleaner()
             logger.info(msg)
-            self.proc = None
 
     # =========================================================================
     # SLOTS
@@ -217,11 +237,13 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
                 self.opendirectory_button.config(state=Tkinter.NORMAL)
+                self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
 
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
+                self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
                 self.proc = core.reset_db(self.conf.path)
                 self.check_proc_end(clean, "Database Reset done")
             except Exception as err:
@@ -233,11 +255,13 @@ class OTreeLauncherFrame(ttk.Frame):
             self.run_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
+            self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
             self.proc = core.runserver(self.conf.path)
         except:
             self.run_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
+            self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
@@ -253,6 +277,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.run_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
         self.opendirectory_button.config(state=Tkinter.NORMAL)
+        self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
@@ -313,11 +338,13 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.run_button.config(state=Tkinter.DISABLED)
                     self.clear_button.config(state=Tkinter.DISABLED)
                     self.opendirectory_button.config(state=Tkinter.DISABLED)
+                    self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
 
                 def clean():
                     self.run_button.config(state=Tkinter.NORMAL)
                     self.clear_button.config(state=Tkinter.NORMAL)
                     self.opendirectory_button.config(state=Tkinter.NORMAL)
+                    self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
                     self.refresh_deploy_path()
 
                 def setdir():
@@ -382,7 +409,7 @@ def run():
         line = fp.readline()
         if line:
             logger.info(line.rstrip())
-        root.after(1, read_log_file)
+        root.after(10, read_log_file)
 
     read_log_file()
     root.mainloop()
