@@ -115,7 +115,7 @@ SCRIPT_HEADER = ["@echo off"] if IS_WINDOWS else ["set -e;"]
 
 SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 
-DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
+DULWICH_PKG = "https://github.com/oTree-org/dulwich-windows-otree/releases/download/1/dulwich_windows-0.9.8-cp27-none-any.whl" if IS_WINDOWS else "dulwich"
 
 
 # =============================================================================
