@@ -78,7 +78,7 @@ def clean_proc(proc):
         kill_proc(proc)
 
 
-def call(command, sleep=1, *args, **kwargs):
+def call(command, *args, **kwargs):
     """Call an external command"""
     cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
     if cons.IS_WINDOWS:
@@ -88,7 +88,6 @@ def call(command, sleep=1, *args, **kwargs):
             cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
         )
     atexit.register(clean_proc, proc)
-    time.sleep(sleep)
     return proc
 
 
@@ -209,6 +208,28 @@ def get_conf():
     if db.Configuration.select().count():
             return db.Configuration.select().get()
     return db.Configuration.create()
+
+
+def logfile_fp():
+    """Open and return the log file used for external process"""
+
+    logger.info("Opening log file '{}'...".format(cons.LOG_FPATH))
+
+    with open(cons.LOG_FPATH, "w"):
+        pass
+
+    fp = open(cons.LOG_FPATH)
+    fp.seek(0, 2)
+    return fp
+
+
+def clean_tempdir():
+    """Destroy all files inside the temporary directory"""
+    logger.info("Cleaning tempdir '{}'".format(cons.LAUNCHER_TEMP_DIR_PATH))
+    for fname in os.listdir(cons.LAUNCHER_TEMP_DIR_PATH):
+        fpath = os.path.join(cons.LAUNCHER_TEMP_DIR_PATH, fname)
+        if os.path.isfile(fpath):
+            os.remove(fpath)
 
 
 # =============================================================================

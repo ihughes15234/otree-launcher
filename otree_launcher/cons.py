@@ -78,11 +78,9 @@ LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "venv")
 
 LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
-LAUNCHER_PID_FILE_PATH = os.path.join(LAUNCHER_DIR_PATH, "run")
-
 LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
 
-DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.json")
+DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 
 ENCODING = "UTF-8"
 
@@ -108,7 +106,7 @@ PIP_CMD = (
 )
 
 END_CMD = (
-    ">> {} 2>&1 || goto :error \n" if IS_WINDOWS else ">> {} 2>&1 ;\n"
+    " >> {} 2>&1 || goto :error \n" if IS_WINDOWS else " >> {} 2>&1 ;\n"
 ).format(LOG_FPATH)
 
 SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
@@ -127,7 +125,7 @@ DULWICH_PKG = "dulwich-windows" if IS_WINDOWS else "dulwich"
 CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
-$PIP_CMD install "$DULWICH_PKG"
+$PIP_CMD install $DULWICH_PKG
 """
 
 CLONE_CMDS_TEMPLATE = """
@@ -168,12 +166,6 @@ logger.setLevel(logging.INFO)
 for dpath in [LAUNCHER_DIR_PATH, LAUNCHER_TEMP_DIR_PATH]:
     if not os.path.isdir(dpath):
         os.makedirs(dpath)
-
-
-if not os.path.isfile(LOG_FPATH):
-    with open(LOG_FPATH, "w"):
-        msg = "New log file '{}' (it will be removed in 31 days)"
-        logger.info(msg.format(LOG_FPATH))
 
 
 # =============================================================================

@@ -43,11 +43,7 @@ def tempfile(prefix, extension):
     """
     fname = "{}_{}.{}".format(prefix, uuid.uuid4().int, extension)
     fpath = os.path.join(cons.LAUNCHER_TEMP_DIR_PATH, fname)
-    try:
-        yield fpath
-    finally:
-        if os.path.isfile(fpath):
-            os.remove(fpath)
+    yield fpath
 
 
 @contextlib.contextmanager

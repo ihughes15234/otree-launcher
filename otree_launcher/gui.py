@@ -187,18 +187,6 @@ class OTreeLauncherFrame(ttk.Frame):
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
 
         self.refresh_deploy_path()
-        if not self.conf.virtualenv:
-            self.first_run()
-
-    def first_run(self):
-
-        def clean():
-            self.conf.virtualenv = True
-            self.conf.save()
-            self.refresh_deploy_path()
-
-        self.proc = core.create_virtualenv()
-        self.check_proc_end(clean, "First Configuration done")
 
     def refresh_deploy_path(self):
 
@@ -383,6 +371,17 @@ def run():
     root = Tkinter.Tk()
 
     with splash.Splash(root, res.get("splash.gif"), 1.9):
+
+        core.clean_tempdir()
+        fp = core.logfile_fp()
+
+        conf = core.get_conf()
+        if not conf.virtualenv:
+            proc = core.create_virtualenv()
+            proc.communicate()
+            conf.virtualenv = True
+            conf.save()
+
         root.geometry("500x530+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
@@ -397,11 +396,6 @@ def run():
         # setup logger
         logger.handlers = []
         logger.addHandler(LoggingToGUI(frame.log_display.console))
-
-        # opening logger file
-        logger.info("Opening log file '{}'...".format(cons.LOG_FPATH))
-        fp = open(cons.LOG_FPATH)
-        fp.seek(0, 2)
 
         logger.info("oTree Launcher says 'Hello'")
 
