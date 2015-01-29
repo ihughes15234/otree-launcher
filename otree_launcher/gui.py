@@ -212,6 +212,7 @@ class OTreeLauncherFrame(ttk.Frame):
             "Reset Deploy", msg.format(self.conf.path)
         )
         if res:
+
             def clean():
                 self.run_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
@@ -298,9 +299,7 @@ class OTreeLauncherFrame(ttk.Frame):
             dpath = tkFileDialog.askdirectory(**options)
             if not dpath:
                 return None
-            elif not os.path.isdir(dpath):
-                os.makedirs(dpath)
-            if len(os.listdir(dpath)):
+            if os.path.isdir(dpath) and len(os.listdir(dpath)):
                 options["initialdir"] = dpath
                 msg = "Please select an empty directory"
                 tkMessageBox.showwarning("Directory is not empty", msg)
@@ -309,22 +308,42 @@ class OTreeLauncherFrame(ttk.Frame):
                 break
         if wrkpath:
             try:
-                self.run_button.config(state=Tkinter.DISABLED)
-                self.clear_button.config(state=Tkinter.DISABLED)
-                self.deploys_combobox.config(state=Tkinter.DISABLED)
-                self.delete_button.config(state=Tkinter.DISABLED)
-                core.download(wrkpath)
-                core.install(wrkpath)
-                core.reset(wrkpath)
-                logger.info("Deploy finished")
+
+                def block():
+                    self.run_button.config(state=Tkinter.DISABLED)
+                    self.clear_button.config(state=Tkinter.DISABLED)
+                    self.opendirectory_button.config(state=Tkinter.DISABLED)
+
+                def clean():
+                    self.run_button.config(state=Tkinter.NORMAL)
+                    self.clear_button.config(state=Tkinter.NORMAL)
+                    self.opendirectory_button.config(state=Tkinter.NORMAL)
+                    self.refresh_deploy_path()
+
+                def setdir():
+                    block()
+                    self.conf.path = wrkpath
+                    self.conf.save()
+                    clean()
+
+                def reset():
+                    block()
+                    self.proc = core.reset_db(wrkpath)
+                    self.check_proc_end(setdir, "Deploy Done")
+
+                def install():
+                    block()
+                    self.proc = core.install_requirements(wrkpath)
+                    self.check_proc_end(reset, "Install done")
+
+                block()
+                self.proc = core.clone(wrkpath)
+                self.check_proc_end(install, "Clone done")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
-            finally:
-                self.run_button.config(state=Tkinter.NORMAL)
-                self.clear_button.config(state=Tkinter.NORMAL)
-                self.delete_button.config(state=Tkinter.NORMAL)
-                self.deploys_combobox.config(state="readonly")
-                self.refresh_deploy_list()
+                clean()
+
+
 
 
 # =============================================================================
@@ -363,7 +382,7 @@ def run():
         line = fp.readline()
         if line:
             logger.info(line.rstrip())
-        root.after(10, read_log_file)
+        root.after(1, read_log_file)
 
     read_log_file()
     root.mainloop()
