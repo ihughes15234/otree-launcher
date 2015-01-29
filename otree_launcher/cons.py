@@ -26,6 +26,7 @@ import os
 import logging
 import datetime
 
+from . import res
 
 # =============================================================================
 # PROJECT CONSTANTS
@@ -106,7 +107,9 @@ PIP_CMD = (
 )
 
 END_CMD = (
-    " >> {} 2>&1 || goto :error \n" if IS_WINDOWS else " >> {} 2>&1 ;\n"
+    " >> \"{}\" 2>&1 || goto :error \n"
+    if IS_WINDOWS else
+    " >> \"{}\" 2>&1 ;\n"
 ).format(LOG_FPATH)
 
 SCRIPT_EXTENSION = "bat" if IS_WINDOWS else "sh"
@@ -115,7 +118,11 @@ SCRIPT_HEADER = ["@echo off"] if IS_WINDOWS else ["set -e;"]
 
 SCRIPT_FOOTER = ["", ":error", "  exit /b %errorlevel%"] if IS_WINDOWS else []
 
-DULWICH_PKG = "https://github.com/oTree-org/dulwich-windows-otree/releases/download/1/dulwich_windows-0.9.8-cp27-none-any.whl" if IS_WINDOWS else "dulwich"
+DULWICH_PKG = (
+    res.get("dulwich_windows-0.9.8-cp27-none-any.whl")
+    if IS_WINDOWS else
+    res.get("dulwich-0.9.8.tar.gz")
+)
 
 
 # =============================================================================
@@ -125,7 +132,7 @@ DULWICH_PKG = "https://github.com/oTree-org/dulwich-windows-otree/releases/downl
 CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
-$PIP_CMD install $DULWICH_PKG
+$PIP_CMD install "$DULWICH_PKG"
 """
 
 CLONE_CMDS_TEMPLATE = """

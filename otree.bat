@@ -1,5 +1,5 @@
 @echo off
-pythonw run.py || goto :error
+pythonw -c "from otree_launcher import gui; gui.run()"; || goto :error
 
 :error
 exit /b %errorlevel%

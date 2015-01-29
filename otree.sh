@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e;
-python run.py;
+python -c "from otree_launcher import gui; gui.run()";
