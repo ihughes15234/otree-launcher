@@ -128,7 +128,7 @@ def create_virtualenv():
 
     """
     logger.info(
-        "Creating virtualenv on '{}'...".format(cons.LAUNCHER_VENV_PATH)
+        "Creating virtualenv in '{}'...".format(cons.LAUNCHER_VENV_PATH)
     )
 
     reqpath = None
@@ -145,8 +145,8 @@ def create_virtualenv():
             src = render(cons.CREATE_VENV_CMDS_TEMPLATE,
                          cons.LAUNCHER_VENV_PATH, REQUIREMENTS_PATH=reqpath)
             fp.write(src)
-        logger.info("Creating venv please wait"
-                    "(this can be take some minutes)...")
+        logger.info("Creating venv, please wait"
+                    " (this may take a few minutes)...")
         return call([cons.INTERPRETER, fpath])
 
 
@@ -154,27 +154,27 @@ def clone(wrkpath):
     """Clone otree code into working dir
 
     """
-    logger.info("Clone on '{}'...".format(wrkpath))
+    logger.info("Cloning into '{}'...".format(wrkpath))
     with ctx.tempfile("cloner", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating cloner script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.CLONE_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Clonning...")
+        logger.info("Cloning...")
         return call([cons.INTERPRETER, fpath])
 
 
 def install_requirements(wrkpath):
     logger.info(
-        "Installing requirements of '{}'...".format(cons.LAUNCHER_VENV_PATH)
+        "Installing requirements in '{}'...".format(cons.LAUNCHER_VENV_PATH)
     )
     with ctx.tempfile("req_installer", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating requirements install script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.INSTALL_REQUIEMENTS_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Installing please wait"
-                    "(this can be take some minutes)...")
+        logger.info("Installing, please wait"
+                    "(this may take a few minutes)...")
         return call([cons.INTERPRETER, fpath])
 
 
@@ -182,13 +182,13 @@ def reset_db(wrkpath):
     """Reset the database of the oTree installation
 
     """
-    logger.info("Reset oTree on '{}'...".format(wrkpath))
+    logger.info("Reset oTree in '{}'...".format(wrkpath))
     with ctx.tempfile("reseter", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating reseter script...")
+        logger.info("Creating reset script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Reseting (this can be take some minutes)...")
+        logger.info("Resetting (please wait)...")
         return call([cons.INTERPRETER, fpath])
 
 
@@ -196,7 +196,7 @@ def runserver(wrkpath):
     """Run otree of the working path installation
 
     """
-    logger.info("Running otree on'{}'...".format(wrkpath))
+    logger.info("Running oTree in '{}'...".format(wrkpath))
     with ctx.tempfile("runner", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating runner script...")
         with ctx.open(fpath, "w") as fp:
@@ -210,7 +210,7 @@ def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
     """Open the web browser on the given url
 
     """
-    logger.info("Launching webbrowser...")
+    logger.info("Launching web browser...")
     time.sleep(cons.OTREE_SPAN_SLEEP)
     webbrowser.open_new_tab(url)
 
@@ -237,7 +237,7 @@ def logfile_fp():
 
 def clean_tempdir():
     """Destroy all files inside the temporary directory"""
-    logger.info("Cleaning tempdir '{}'".format(cons.LAUNCHER_TEMP_DIR_PATH))
+    logger.info("Cleaning temp dir '{}'".format(cons.LAUNCHER_TEMP_DIR_PATH))
     for fname in os.listdir(cons.LAUNCHER_TEMP_DIR_PATH):
         fpath = os.path.join(cons.LAUNCHER_TEMP_DIR_PATH, fname)
         if os.path.isfile(fpath):

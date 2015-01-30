@@ -192,21 +192,28 @@ class OTreeLauncherFrame(ttk.Frame):
         if self.conf.virtualenv:
             return
 
+        setup_complete_msg = (
+            "Initial setup complete.\n"
+            "Click on the 'Deploys' menu to create a new deploy."
+        )
+
         def clean():
             self.conf.virtualenv = True
             self.conf.save()
             self.refresh_deploy_path()
-            tkMessageBox.showinfo("First run setup", "The system are ready")
+            tkMessageBox.showinfo(
+                "First run setup",
+                setup_complete_msg,
+            )
 
         msg = (
-            "This is your first time running oTree Launcher\n"
-            "Now we are going to install the system\n"
-            "This can be take some minutes"
+            "This is your first time running the oTree launcher.\n"
+            "Initial setup may take a few minutes.\n"
         )
         tkMessageBox.showinfo("First run setup", msg)
         self.proc = core.create_virtualenv()
 
-        self.check_proc_end(clean, "System is installed")
+        self.check_proc_end(clean, setup_complete_msg)
 
 
     def refresh_deploy_path(self):
@@ -237,7 +244,7 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
 
     def do_clear(self):
-        msg = "Are you sure to clear the database of the deploy '{}'?"
+        msg = "Are you sure to you want to clear the database for the deploy '{}'?"
         res = tkMessageBox.askokcancel(
             "Reset Deploy", msg.format(self.conf.path)
         )
@@ -294,7 +301,7 @@ class OTreeLauncherFrame(ttk.Frame):
         title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
         body = (
             "{doc}\n"
-            "A modern open platform for social science experiment\n"
+            "A modern open platform for social science experiments\n"
             "Version: {version}"
         ).format(
             prj=cons.PRJ, url=cons.URL, doc=cons.DOC,
@@ -327,7 +334,7 @@ class OTreeLauncherFrame(ttk.Frame):
             'parent': self,
             'initialdir': cons.HOME_DIR,
             'mustexist': False,
-            'title': 'Select directory for install oTree'
+            'title': 'Select an empty folder for your oTree project files.'
         }
         wrkpath = None
         while True:
@@ -366,7 +373,11 @@ class OTreeLauncherFrame(ttk.Frame):
                 def reset():
                     block()
                     self.proc = core.reset_db(wrkpath)
-                    self.check_proc_end(setdir, "Deploy Done")
+                    self.check_proc_end(
+                        setdir,
+                        ("Deploy done. Click the 'Run' button to start the server."
+                         " Or, you can first modify the apps in your project directory.")
+                    )
 
                 def install():
                     block()
@@ -377,7 +388,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.clone(wrkpath)
                 self.check_proc_end(install, "Clone done")
             except Exception as err:
-                tkMessageBox.showerror("Something gone wrong", unicode(err))
+                tkMessageBox.showerror("Something went wrong", unicode(err))
                 clean()
 
 
@@ -412,7 +423,7 @@ def run():
         logger.handlers = []
         logger.addHandler(LoggingToGUI(frame.log_display.console))
 
-        logger.info("oTree Launcher says 'Hello'")
+        logger.info("The oTree Launcher says 'Hello'")
 
     def read_log_file():
         line = fp.readline()

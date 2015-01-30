@@ -1,17 +1,21 @@
 
 ## [oTree](http://demo.otree.org/) installer and launcher
 
-## To use
+## To launch
 
-`python run.py --gui`
+### Windows
+Double click on `otree.exe` or `otree.bat`
+
+### Mac/Linux
+Double click on `otree.sh`
 
 ## Homepage
 http://www.otree.org/
 
 ## About
 
-This repo contains all the code for create the oTree installer. The installer
-have no dependencies and is self-contained.
+This repo contains all the code for the oTree installer. The installer
+has no dependencies and is self-contained.
 
 ## Contact
 chris@otree.org (you can also add me on Skype by searching this email address;

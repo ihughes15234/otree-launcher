@@ -32,9 +32,9 @@ from . import res
 # PROJECT CONSTANTS
 # =============================================================================
 
-PRJ = "oTree-launcher"
+PRJ = "oTree Launcher"
 
-DOC = "Launcher of oTree (http://otree.org)"
+DOC = "Launcher for oTree (http://otree.org)"
 
 URL = "http://otree.org"
 
