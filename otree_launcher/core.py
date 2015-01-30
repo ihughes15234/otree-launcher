@@ -91,12 +91,12 @@ def call(command, *args, **kwargs):
     return proc
 
 
-def render(template, wrkpath):
+def render(template, wrkpath, **kwargs):
     """Render template acoring the working path
 
     """
     # vars
-    src = string.Template(template.strip()).substitute(**{
+    context = {
         "WRK_PATH": wrkpath,
         "VIRTUALENV_PATH": os.path.abspath(virtualenv.__file__),
         "REQUIREMENTS_PATH": os.path.join(wrkpath, cons.REQUIREMENTS_FNAME),
@@ -107,7 +107,10 @@ def render(template, wrkpath):
         "ACTIVATE_CMD": cons.ACTIVATE_CMD,
         "OTREE_REPO": cons.OTREE_REPO,
         "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME)
-    })
+    }
+    context.update(kwargs)
+
+    src = string.Template(template.strip()).substitute(**context)
     script = "".join(
         ["\n".join(cons.SCRIPT_HEADER), "\n"] +
         ["{}{}".format(line, cons.END_CMD) for line in src.splitlines()] +
@@ -127,11 +130,20 @@ def create_virtualenv():
     logger.info(
         "Creating virtualenv on '{}'...".format(cons.LAUNCHER_VENV_PATH)
     )
+
+    reqpath = None
+    with ctx.tempfile("requirements", "txt") as fpath:
+        logger.info("Downloading requirements file...")
+        with ctx.urlget(cons.VENV_REQUIREMENTS_URL) as response:
+            with ctx.open(fpath, "w") as fp:
+                fp.write(response.read())
+        reqpath = fpath
+
     with ctx.tempfile("venv_installer", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating virtualenv install script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.CREATE_VENV_CMDS_TEMPLATE,
-                         cons.LAUNCHER_VENV_PATH)
+                         cons.LAUNCHER_VENV_PATH, REQUIREMENTS_PATH=reqpath)
             fp.write(src)
         logger.info("Creating venv please wait"
                     "(this can be take some minutes)...")

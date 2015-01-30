@@ -63,6 +63,8 @@ DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
 OTREE_SCRIPT_FNAME = "otree"
 
+VENV_REQUIREMENTS_URL = "https://raw.githubusercontent.com/oTree-org/oTree/master/requirements_base.txt"
+
 
 # =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
@@ -133,6 +135,7 @@ CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
 $PIP_CMD install "$DULWICH_PKG"
+$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
 CLONE_CMDS_TEMPLATE = """

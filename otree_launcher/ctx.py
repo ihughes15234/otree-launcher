@@ -57,6 +57,15 @@ def open(fname, mode, *args, **kwargs):
         yield fp
 
 
+@contextlib.contextmanager
+def urlget(url, *args, **kwargs):
+    """Open an url with get method
+
+    """
+    with contextlib.closing(urllib2.urlopen(url, *args, **kwargs)) as response:
+        yield response
+
+
 # =============================================================================
 # MAIN
 # =============================================================================

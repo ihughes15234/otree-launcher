@@ -188,6 +188,26 @@ class OTreeLauncherFrame(ttk.Frame):
 
         self.refresh_deploy_path()
 
+    def setup_env(self):
+        if self.conf.virtualenv:
+            return
+
+        def clean():
+            self.conf.virtualenv = True
+            self.conf.save()
+            self.refresh_deploy_path()
+
+        msg = (
+            "This is your first time running oTree Launcher\n"
+            "Now we are going to install the system\n"
+            "This can be take some minutes"
+        )
+        tkMessageBox.showinfo("First run setup", msg)
+        self.proc = core.create_virtualenv()
+
+        self.check_proc_end(clean, "System is installed")
+
+
     def refresh_deploy_path(self):
 
         if self.conf.path and not os.path.isdir(self.conf.path):
@@ -370,17 +390,10 @@ def run():
     # create gui
     root = Tkinter.Tk()
 
-    with splash.Splash(root, res.get("splash.gif"), 1.9):
+    with splash.Splash(root, res.get("splash.gif"), 1):
 
         core.clean_tempdir()
         fp = core.logfile_fp()
-
-        conf = core.get_conf()
-        if not conf.virtualenv:
-            proc = core.create_virtualenv()
-            proc.communicate()
-            conf.virtualenv = True
-            conf.save()
 
         root.geometry("500x530+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
@@ -406,6 +419,9 @@ def run():
         root.after(10, read_log_file)
 
     read_log_file()
+
+    frame.setup_env()
+
     root.mainloop()
 
 
