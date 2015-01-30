@@ -1,6 +1,9 @@
 
-## [oTree](http://demo.otree.org/) installer script
+## [oTree](http://demo.otree.org/) installer and launcher
 
+## To use
+
+`python run.py --gui`
 
 ## Homepage
 http://www.otree.org/
