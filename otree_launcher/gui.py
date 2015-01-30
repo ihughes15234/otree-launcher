@@ -196,6 +196,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.conf.virtualenv = True
             self.conf.save()
             self.refresh_deploy_path()
+            tkMessageBox.showinfo("First run setup", "The system are ready")
 
         msg = (
             "This is your first time running oTree Launcher\n"
@@ -221,6 +222,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
         state = Tkinter.NORMAL if self.conf.virtualenv else Tkinter.DISABLED
         self.deploy_menu.entryconfig(1, state=state)
+        self.opendirectory_button.config(state=state)
 
     def check_proc_end(self, cleaner, msg):
         if self.proc and self.proc.poll() is None:
