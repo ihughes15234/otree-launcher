@@ -203,7 +203,7 @@ def runserver(wrkpath):
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Starting...")
-        return  call([cons.INTERPRETER, fpath])
+        return call([cons.INTERPRETER, fpath])
 
 
 def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):

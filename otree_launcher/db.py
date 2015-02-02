@@ -69,9 +69,11 @@ class Configuration(BaseModel):
 
 DB.connect()
 
+
 def create_tables():
     for cls in BaseModel.__subclasses__():
         cls.create_table(fail_silently=True)
+
 
 def clear_database():
     logger.info("Removing data...")

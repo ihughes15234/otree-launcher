@@ -63,7 +63,10 @@ DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
 OTREE_SCRIPT_FNAME = "otree"
 
-VENV_REQUIREMENTS_URL = "https://raw.githubusercontent.com/oTree-org/oTree/master/requirements_base.txt"
+VENV_REQUIREMENTS_URL = (
+    "https://raw.githubusercontent.com/oTree-org/oTree/master/"
+    "requirements_base.txt"
+)
 
 
 # =============================================================================

@@ -192,18 +192,14 @@ class OTreeLauncherFrame(ttk.Frame):
         if self.conf.virtualenv:
             return
 
-        setup_complete_msg = (
-            "Initial setup complete.\n"
-            "Click on the 'Deploys' menu to create a new deploy."
-        )
-
         def clean():
             self.conf.virtualenv = True
             self.conf.save()
             self.refresh_deploy_path()
             tkMessageBox.showinfo(
                 "First run setup",
-                setup_complete_msg,
+                ("Initial setup complete.\n"
+                 "Click on the 'Deploys' menu to create a new deploy.")
             )
 
         msg = (
@@ -214,7 +210,6 @@ class OTreeLauncherFrame(ttk.Frame):
         self.proc = core.create_virtualenv()
 
         self.check_proc_end(clean, setup_complete_msg)
-
 
     def refresh_deploy_path(self):
 
@@ -244,10 +239,11 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
 
     def do_clear(self):
-        msg = "Are you sure to you want to clear the database for the deploy '{}'?"
-        res = tkMessageBox.askokcancel(
-            "Reset Deploy", msg.format(self.conf.path)
-        )
+        msg = (
+            "Are you sure to you want to clear the"
+            "database for the deploy '{}'?"
+        ).format(self.conf.path)
+        res = tkMessageBox.askokcancel("Reset Deploy", msg)
         if res:
 
             def clean():
@@ -375,8 +371,9 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.proc = core.reset_db(wrkpath)
                     self.check_proc_end(
                         setdir,
-                        ("Deploy done. Click the 'Run' button to start the server."
-                         " Or, you can first modify the apps in your project directory.")
+                        ("Deploy done. Click the 'Run' button to start the "
+                         "server. Or, you can first modify the apps in your"
+                         "project directory.")
                     )
 
                 def install():
@@ -390,8 +387,6 @@ class OTreeLauncherFrame(ttk.Frame):
             except Exception as err:
                 tkMessageBox.showerror("Something went wrong", unicode(err))
                 clean()
-
-
 
 
 # =============================================================================
