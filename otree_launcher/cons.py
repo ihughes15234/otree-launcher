@@ -57,7 +57,7 @@ OTREE_REPO = "https://github.com/oTree-org/oTree.git"
 
 REQUIREMENTS_FNAME = "requirements_base.txt"
 
-OTREE_SPAN_SLEEP = 3.5
+OTREE_SPAN_SLEEP = 5
 
 DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
