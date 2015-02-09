@@ -372,7 +372,7 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.check_proc_end(
                         setdir,
                         ("Deploy done. Click the 'Run' button to start the "
-                         "server. Or, you can first modify the apps in your"
+                         "server. Or, you can first modify the apps in your "
                          "project directory.")
                     )
 
