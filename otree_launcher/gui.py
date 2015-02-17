@@ -249,7 +249,24 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
 
     def do_open_terminal(self):
-        core.open_terminal(self.conf.path)
+        try:
+            self.run_button.config(state=Tkinter.DISABLED)
+            self.terminal_button.config(state=Tkinter.DISABLED)
+            self.clear_button.config(state=Tkinter.DISABLED)
+            self.opendirectory_button.config(state=Tkinter.DISABLED)
+            self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+            self.proc = core.open_terminal(self.conf.path)
+        except Exception as err:
+            self.run_button.config(state=Tkinter.NORMAL)
+            self.terminal_button.config(state=Tkinter.NORMAL)
+            self.clear_button.config(state=Tkinter.NORMAL)
+            self.opendirectory_button.config(state=Tkinter.NORMAL)
+            self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+            self.stop_button.config(state=Tkinter.DISABLED)
+            tkMessageBox.showerror("Something gone wrong", unicode(err))
+        else:
+            self.check_proc_end(self.do_stop, "Terminal Killed")
+            self.stop_button.config(state=Tkinter.NORMAL)
 
     def do_clear(self):
         msg = (
@@ -261,12 +278,14 @@ class OTreeLauncherFrame(ttk.Frame):
 
             def clean():
                 self.run_button.config(state=Tkinter.NORMAL)
+                self.terminal_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
                 self.opendirectory_button.config(state=Tkinter.NORMAL)
                 self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
 
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
+                self.terminal_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
                 self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
@@ -279,12 +298,14 @@ class OTreeLauncherFrame(ttk.Frame):
     def do_run(self):
         try:
             self.run_button.config(state=Tkinter.DISABLED)
+            self.terminal_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
             self.proc = core.runserver(self.conf.path)
         except Exception as err:
             self.run_button.config(state=Tkinter.NORMAL)
+            self.terminal_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
@@ -292,6 +313,7 @@ class OTreeLauncherFrame(ttk.Frame):
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
             core.open_webbrowser()
+            self.check_proc_end(self.do_stop, "Server Killed")
             self.stop_button.config(state=Tkinter.NORMAL)
 
     def do_stop(self):
@@ -301,6 +323,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 core.kill_proc(self.proc)
             self.proc = None
         self.run_button.config(state=Tkinter.NORMAL)
+        self.terminal_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
         self.opendirectory_button.config(state=Tkinter.NORMAL)
         self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
