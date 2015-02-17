@@ -91,8 +91,8 @@ DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 ENCODING = "UTF-8"
 
 TERMINAL_CMD = (
-    "cmd" if IS_WINDOWS else
-    "xterm -fa monaco -fs 10 -bg black -fg green -T \"oTree Terminal\" -e"
+    "start \"oTree Terminal\" /wait cmd /k" if IS_WINDOWS else
+    "xterm -fa monaco -fs 10 -T \"oTree Terminal\" -e bash --init-file"
 )
 
 INTERPRETER = "" if IS_WINDOWS else "bash"
@@ -161,7 +161,7 @@ $DULWICH_CMD clone "$OTREE_REPO" "$WRK_PATH"
 
 OPEN_TERMINAL_CMDS_TEMPLATE = """
 cd "$WRK_PATH"
-$TERMINAL_CMD $INTERPRETER --init-file $ACTIVATE_PATH
+$TERMINAL_CMD $ACTIVATE_PATH
 """
 
 INSTALL_REQUIEMENTS_CMDS_TEMPLATE = """
