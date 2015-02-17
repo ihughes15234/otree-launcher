@@ -34,6 +34,7 @@ from . import cons, core, res, ctx
 from .libs import splash
 
 
+
 # =============================================================================
 # LOGGER
 # =============================================================================
@@ -198,6 +199,10 @@ class OTreeLauncherFrame(ttk.Frame):
         self.refresh_deploy_path()
 
     def setup_env(self):
+
+        setup_complete_msg = ("Initial setup complete.\n"
+                 "Click on the 'Deploys' menu to create a new deploy.")
+
         if self.conf.virtualenv:
             return
 
@@ -207,8 +212,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.refresh_deploy_path()
             tkMessageBox.showinfo(
                 "First run setup",
-                ("Initial setup complete.\n"
-                 "Click on the 'Deploys' menu to create a new deploy.")
+                setup_complete_msg
             )
 
         msg = (
