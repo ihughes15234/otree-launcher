@@ -98,6 +98,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.icon_opendir = Tkinter.PhotoImage(file=res.get("opendir.gif"))
         self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.gif"))
         self.icon_stop = Tkinter.PhotoImage(file=res.get("stop.gif"))
+        self.icon_terminal = Tkinter.PhotoImage(file=res.get("terminal.gif"))
 
         # =====================================================================
         # MENU
@@ -160,6 +161,12 @@ class OTreeLauncherFrame(ttk.Frame):
         buttons_frame.pack(fill=Tkinter.X)
         button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5}
 
+        self.terminal_button = ttk.Button(
+            buttons_frame, text="Terminal", command=self.do_open_terminal,
+            compound=Tkinter.LEFT, image=self.icon_terminal
+        )
+        self.terminal_button.pack(**button_opt)
+
         self.run_button = ttk.Button(
             buttons_frame, text="Run", command=self.do_run,
             compound=Tkinter.LEFT, image=self.icon_run
@@ -178,6 +185,8 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_clear
         )
         self.clear_button.pack(**button_opt)
+
+
 
         # =====================================================================
         # CONSOLE
@@ -220,6 +229,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploy_path.set(self.conf.path or "")
         state = Tkinter.NORMAL if self.conf.path else Tkinter.DISABLED
         self.run_button.config(state=state)
+        self.terminal_button.config(state=state)
         self.clear_button.config(state=state)
 
         state = Tkinter.NORMAL if self.conf.virtualenv else Tkinter.DISABLED
@@ -237,6 +247,9 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
     # SLOTS
     # =========================================================================
+
+    def do_open_terminal(self):
+        core.open_terminal(self.conf.path)
 
     def do_clear(self):
         msg = (
@@ -270,7 +283,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
             self.proc = core.runserver(self.conf.path)
-        except:
+        except Exception as err:
             self.run_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
@@ -349,12 +362,14 @@ class OTreeLauncherFrame(ttk.Frame):
 
                 def block():
                     self.run_button.config(state=Tkinter.DISABLED)
+                    self.terminal_button.config(state=Tkinter.DISABLED)
                     self.clear_button.config(state=Tkinter.DISABLED)
                     self.opendirectory_button.config(state=Tkinter.DISABLED)
                     self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
 
                 def clean():
                     self.run_button.config(state=Tkinter.NORMAL)
+                    self.terminal_button.config(state=Tkinter.NORMAL)
                     self.clear_button.config(state=Tkinter.NORMAL)
                     self.opendirectory_button.config(state=Tkinter.NORMAL)
                     self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)

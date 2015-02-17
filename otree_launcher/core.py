@@ -31,6 +31,7 @@ import atexit
 import time
 import datetime
 import threading
+import shlex
 
 from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
@@ -97,17 +98,15 @@ def render(template, wrkpath, **kwargs):
     """
     # vars
     context = {
+        k:v for k, v in vars(cons).items()
+        if not k.startswith("_") and k.isupper()
+    }
+    context.update({
         "WRK_PATH": wrkpath,
         "VIRTUALENV_PATH": os.path.abspath(virtualenv.__file__),
         "REQUIREMENTS_PATH": os.path.join(wrkpath, cons.REQUIREMENTS_FNAME),
-        "PIP_CMD": cons.PIP_CMD,
-        "DULWICH_PKG": cons.DULWICH_PKG,
-        "LAUNCHER_VENV_PATH": cons.LAUNCHER_VENV_PATH,
-        "DULWICH_CMD": cons.DULWICH_CMD,
-        "ACTIVATE_CMD": cons.ACTIVATE_CMD,
-        "OTREE_REPO": cons.OTREE_REPO,
-        "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME)
-    }
+        "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME),
+    })
     context.update(kwargs)
 
     src = string.Template(template.strip()).substitute(**context)
@@ -203,6 +202,20 @@ def runserver(wrkpath):
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Starting...")
+        return call([cons.INTERPRETER, fpath])
+
+
+def open_terminal(wrkpath):
+    """Open a new terminal activating the virtualenv
+
+    """
+    logger.info("Opening terminal in '{}'...".format(wrkpath))
+    with ctx.tempfile("open_terminal", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating open terminal script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.OPEN_TERMINAL_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Launching Terminal...")
         return call([cons.INTERPRETER, fpath])
 
 

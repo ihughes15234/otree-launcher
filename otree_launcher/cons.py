@@ -90,16 +90,29 @@ DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 
 ENCODING = "UTF-8"
 
+TERMINAL_CMD = (
+    "cmd" if IS_WINDOWS else
+    "xterm -fa monaco -fs 10 -bg black -fg green -T \"oTree Terminal\" -e"
+)
+
 INTERPRETER = "" if IS_WINDOWS else "bash"
 
 VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
                                     "Scripts" if IS_WINDOWS else "bin")
 
-ACTIVATE_CMD = (
-    "call \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat"))
+ACTIVATE_PATH  = (
+    os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat")
     if IS_WINDOWS else
-    "source \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "activate"))
+    os.path.join(VENV_SCRIPT_DIR_PATH, "activate")
 )
+
+
+ACTIVATE_CMD = (
+    "call \"{}\"".format(ACTIVATE_PATH)
+    if IS_WINDOWS else
+    "source \"{}\"".format(ACTIVATE_PATH)
+)
+
 
 DULWICH_CMD = "python \"{}\"".format(
     os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich")
@@ -144,6 +157,11 @@ $PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
 CLONE_CMDS_TEMPLATE = """
 $ACTIVATE_CMD
 $DULWICH_CMD clone "$OTREE_REPO" "$WRK_PATH"
+"""
+
+OPEN_TERMINAL_CMDS_TEMPLATE = """
+cd "$WRK_PATH"
+$TERMINAL_CMD $INTERPRETER --init-file $ACTIVATE_PATH
 """
 
 INSTALL_REQUIEMENTS_CMDS_TEMPLATE = """
