@@ -467,7 +467,7 @@ def run():
     with splash.Splash(root, res.get("splash.gif"), 1):
 
         core.clean_tempdir()
-        fp = core.logfile_fp()
+        logfile_fp = core.logfile_fp()
 
         root.geometry("500x530+50+50")
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
@@ -487,7 +487,7 @@ def run():
         logger.info("The oTree Launcher says 'Hello'")
 
     def read_log_file():
-        line = fp.readline()
+        line = logfile_fp.readline()
         if line:
             logger.info(line.rstrip())
         root.after(10, read_log_file)
