@@ -81,7 +81,7 @@ def clean_proc(proc):
 
 def call(command, *args, **kwargs):
     """Call an external command"""
-    cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
+    cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()] + cons.CTRL_C
     if cons.IS_WINDOWS:
         proc = subprocess.Popen(cleaned_cmd, *args, **kwargs)
     else:
@@ -200,6 +200,21 @@ def runserver(wrkpath):
         logger.info("Creating runner script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Starting...")
+        return call([cons.INTERPRETER, fpath])
+
+
+def upgrade_venv(wrkpath):
+    """Change the installs inside venv with the given in requirement_base_txt
+    from the given deploy path
+
+    """
+    logger.info("Upgrading venv '{}'...".format(wrkpath))
+    with ctx.tempfile("runner", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating runner script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.CHANGE_DEPLOY_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Starting...")
         return call([cons.INTERPRETER, fpath])

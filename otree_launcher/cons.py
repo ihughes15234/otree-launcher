@@ -75,12 +75,14 @@ VENV_REQUIREMENTS_URL = (
 
 IS_WINDOWS = sys.platform.startswith("win")
 
+IS_OSX = sys.platform.startswith("darwin")
+
 LAUNCHER_DIR_PATH = os.path.join(
     os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
     "otree-launcher" if IS_WINDOWS else ".otree-launcher"
 )
 
-LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "venv")
+LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
 LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
@@ -91,8 +93,12 @@ DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 ENCODING = "UTF-8"
 
 TERMINAL_CMD = (
-    "start \"oTree Terminal\" /wait cmd /k" if IS_WINDOWS else
-    "xterm -fa monaco -fs 10 -T \"oTree Terminal\" -e bash --init-file"
+    "start \"oTree Terminal\" /wait cmd /k"
+    if IS_WINDOWS else (
+        "TODO: COMPLETE MACOSX TERMINAL" # FIXME!
+        if IS_OSX else
+        "xterm -fa monaco -fs 10 -T \"oTree Terminal\" -e bash --init-file"
+    )
 )
 
 INTERPRETER = "" if IS_WINDOWS else "bash"
@@ -124,6 +130,9 @@ PIP_CMD = (
     "python \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "pip"))
 )
 
+# this emulate ctrl+c keystroke on windows
+CTRL_C = ["<", "nul"] if IS_WINDOWS else []
+
 END_CMD = (
     " >> \"{}\" 2>&1 || goto :error \n"
     if IS_WINDOWS else
@@ -150,7 +159,13 @@ DULWICH_PKG = (
 CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
+$PIP_CMD install --upgrade pip
 $PIP_CMD install "$DULWICH_PKG"
+$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
+"""
+
+CHANGE_DEPLOY_CMDS_TEMPLATE = """
+$ACTIVATE_CMD
 $PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
 """
 

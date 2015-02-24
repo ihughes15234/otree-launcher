@@ -242,13 +242,16 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploy_menu.entryconfig(1, state=state)
         self.opendirectory_button.config(state=state)
 
-    def check_proc_end(self, cleaner, msg):
+    def check_proc_end(self, cleaner, msg, popup=False):
         if self.proc and self.proc.poll() is None:
-            self.root.after(1000, self.check_proc_end, cleaner, msg)
+            self.root.after(1000, self.check_proc_end, cleaner, msg, popup)
         else:
             self.proc = None
             cleaner()
             logger.info(msg)
+            if popup:
+                tkMessageBox.showinfo("Finished!", msg)
+
 
     # =========================================================================
     # SLOTS
@@ -296,7 +299,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
                 self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
                 self.proc = core.reset_db(self.conf.path)
-                self.check_proc_end(clean, "Database Reset done")
+                self.check_proc_end(clean, "Database Reset done", popup=True)
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
                 clean()
@@ -361,10 +364,24 @@ class OTreeLauncherFrame(ttk.Frame):
             'title': 'Select oTree directory'
         }
         dpath = tkFileDialog.askdirectory(**options)
-        if dpath:
-            self.conf.path = dpath
-            self.conf.save()
-            self.refresh_deploy_path()
+        if dpath and dpath != self.conf.path:
+
+            def clean():
+                self.conf.path = dpath
+                self.conf.save()
+                self.refresh_deploy_path()
+
+            try:
+                self.run_button.config(state=Tkinter.DISABLED)
+                self.terminal_button.config(state=Tkinter.DISABLED)
+                self.clear_button.config(state=Tkinter.DISABLED)
+                self.opendirectory_button.config(state=Tkinter.DISABLED)
+                self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+                self.proc = core.upgrade_venv(dpath)
+                self.check_proc_end(clean, "Virtualenv upgraded")
+            except Exception as err:
+                tkMessageBox.showerror("Something gone wrong", unicode(err))
+                clean()
 
     def do_deploy(self):
         # define options for opening or saving a file
@@ -417,13 +434,18 @@ class OTreeLauncherFrame(ttk.Frame):
                         setdir,
                         ("Deploy done. Click the 'Run' button to start the "
                          "server. Or, you can first modify the apps in your "
-                         "project directory.")
+                         "project directory."), popup=True
                     )
+
+                def upgrade_venv():
+                    block()
+                    self.proc = core.upgrade_venv(wrkpath)
+                    self.check_proc_end(reset, "Virtualenv upgraded")
 
                 def install():
                     block()
                     self.proc = core.install_requirements(wrkpath)
-                    self.check_proc_end(reset, "Install done")
+                    self.check_proc_end(upgrade_venv, "Install done")
 
                 block()
                 self.proc = core.clone(wrkpath)
