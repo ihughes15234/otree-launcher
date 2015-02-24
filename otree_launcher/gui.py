@@ -200,11 +200,13 @@ class OTreeLauncherFrame(ttk.Frame):
 
     def setup_env(self):
 
-        setup_complete_msg = ("Initial setup complete.\n"
-                 "Click on the 'Deploys' menu to create a new deploy.")
-
         if self.conf.virtualenv:
             return
+
+        setup_complete_msg = (
+            "Initial setup complete.\n"
+            "Click on the 'Deploys' menu to create a new deploy."
+        )
 
         def clean():
             self.conf.virtualenv = True
