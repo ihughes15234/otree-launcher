@@ -377,7 +377,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
                 self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
-                self.proc = core.upgrade_venv(dpath)
+                self.proc = core.install_requirements(dpath)
                 self.check_proc_end(clean, "Virtualenv upgraded")
             except Exception as err:
                 tkMessageBox.showerror("Something gone wrong", unicode(err))
@@ -437,15 +437,10 @@ class OTreeLauncherFrame(ttk.Frame):
                          "project directory."), popup=True
                     )
 
-                def upgrade_venv():
-                    block()
-                    self.proc = core.upgrade_venv(wrkpath)
-                    self.check_proc_end(reset, "Virtualenv upgraded")
-
                 def install():
                     block()
                     self.proc = core.install_requirements(wrkpath)
-                    self.check_proc_end(upgrade_venv, "Install done")
+                    self.check_proc_end(reset, "Install done")
 
                 block()
                 self.proc = core.clone(wrkpath)

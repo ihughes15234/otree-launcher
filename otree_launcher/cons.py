@@ -92,15 +92,6 @@ DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 
 ENCODING = "UTF-8"
 
-TERMINAL_CMD = (
-    "start \"oTree Terminal\" /wait cmd /k"
-    if IS_WINDOWS else (
-        "TODO: COMPLETE MACOSX TERMINAL" # FIXME!
-        if IS_OSX else
-        "xterm -fa monaco -fs 10 -T \"oTree Terminal\" -e bash --init-file"
-    )
-)
-
 INTERPRETER = "" if IS_WINDOWS else "bash"
 
 VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
@@ -123,15 +114,6 @@ ACTIVATE_CMD = (
 DULWICH_CMD = "python \"{}\"".format(
     os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich")
 )
-
-PIP_CMD = (
-    "\"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "pip.exe"))
-    if IS_WINDOWS else
-    "python \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "pip"))
-)
-
-# this emulate ctrl+c keystroke on windows
-CTRL_C = ["<", "nul"] if IS_WINDOWS else []
 
 END_CMD = (
     " >> \"{}\" 2>&1 || goto :error \n"
@@ -159,14 +141,9 @@ DULWICH_PKG = (
 CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
-$PIP_CMD install --upgrade pip
-$PIP_CMD install "$DULWICH_PKG"
-$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
-"""
-
-CHANGE_DEPLOY_CMDS_TEMPLATE = """
-$ACTIVATE_CMD
-$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
+python -m pip install --upgrade pip
+python -m pip install "$DULWICH_PKG"
+python -m pip install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
 CLONE_CMDS_TEMPLATE = """
@@ -174,14 +151,9 @@ $ACTIVATE_CMD
 $DULWICH_CMD clone "$OTREE_REPO" "$WRK_PATH"
 """
 
-OPEN_TERMINAL_CMDS_TEMPLATE = """
-cd "$WRK_PATH"
-$TERMINAL_CMD $ACTIVATE_PATH
-"""
-
-INSTALL_REQUIEMENTS_CMDS_TEMPLATE = """
+INSTALL_REQUIREMENTS_CMDS_TEMPLATE = """
 $ACTIVATE_CMD
-$PIP_CMD install --upgrade -r "$REQUIREMENTS_PATH"
+python -m pip install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
 RESET_CMDS_TEMPLATE = """
@@ -195,6 +167,21 @@ $ACTIVATE_CMD
 cd "$WRK_PATH"
 python "$OTREE_SCRIPT_PATH" runserver
 """
+
+if IS_WINDOWS:
+    OPEN_TERMINAL_CMDS_TEMPLATE = """
+        start "$PRJ" /d "$WRK_PATH" /wait cmd /k call "$ACTIVATE_PATH"
+    """
+elif IS_OSX:
+    OPEN_TERMINAL_CMDS_TEMPLATE = """
+        TODO: COMPLETE MACOSX TERMINAL
+    """ # FIXME!
+else:
+    OPEN_TERMINAL_CMDS_TEMPLATE = """
+        cd "$WRK_PATH"
+        xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
+    """
+
 
 # =============================================================================
 # LOGGER

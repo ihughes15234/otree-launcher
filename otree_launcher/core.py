@@ -81,9 +81,10 @@ def clean_proc(proc):
 
 def call(command, *args, **kwargs):
     """Call an external command"""
-    cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()] + cons.CTRL_C
+    cleaned_cmd = [cmd.strip() for cmd in command if cmd.strip()]
     if cons.IS_WINDOWS:
-        proc = subprocess.Popen(cleaned_cmd, *args, **kwargs)
+        win_cmd = "{} < Nul".format(" ".join(cleaned_cmd))
+        proc = subprocess.Popen(win_cmd, shell=True, *args, **kwargs)
     else:
         proc = subprocess.Popen(
             cleaned_cmd, preexec_fn=os.setsid, *args, **kwargs
@@ -164,13 +165,16 @@ def clone(wrkpath):
 
 
 def install_requirements(wrkpath):
+    """Intall the requirements of the given deploy
+
+    """
     logger.info(
         "Installing requirements in '{}'...".format(cons.LAUNCHER_VENV_PATH)
     )
     with ctx.tempfile("req_installer", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating requirements install script...")
         with ctx.open(fpath, "w") as fp:
-            src = render(cons.INSTALL_REQUIEMENTS_CMDS_TEMPLATE, wrkpath)
+            src = render(cons.INSTALL_REQUIREMENTS_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Installing, please wait"
                     "(this may take a few minutes)...")
@@ -200,21 +204,6 @@ def runserver(wrkpath):
         logger.info("Creating runner script...")
         with ctx.open(fpath, "w") as fp:
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
-            fp.write(src)
-        logger.info("Starting...")
-        return call([cons.INTERPRETER, fpath])
-
-
-def upgrade_venv(wrkpath):
-    """Change the installs inside venv with the given in requirement_base_txt
-    from the given deploy path
-
-    """
-    logger.info("Upgrading venv '{}'...".format(wrkpath))
-    with ctx.tempfile("runner", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating runner script...")
-        with ctx.open(fpath, "w") as fp:
-            src = render(cons.CHANGE_DEPLOY_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
         logger.info("Starting...")
         return call([cons.INTERPRETER, fpath])
