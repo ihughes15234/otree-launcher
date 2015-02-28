@@ -24,6 +24,7 @@ __doc__ = """Constants for all oTree launcher
 import os
 import logging
 import webbrowser
+import sys
 
 import Tkinter
 import tkMessageBox
@@ -187,35 +188,34 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         self.clear_button.pack(**button_opt)
 
-
-
         # =====================================================================
         # CONSOLE
         # =====================================================================
 
         self.log_display = LogDisplay(self, text="Console")
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
-
+    
         self.refresh_deploy_path()
 
-    def setup_env(self):
+    def check_connectivity(self):
+        try:
+            core.check_connectivity()
+            logger.info("check_connectivity OK")
+            return True
+        except IOError as err:
+            logger.error(err.message)
+            tkMessageBox.showerror("Critical Error", err.message)
+        return False
+
+    def check_virtualenv(self):
 
         if self.conf.virtualenv:
             return
-
-        setup_complete_msg = (
-            "Initial setup complete.\n"
-            "Click on the 'Deploys' menu to create a new deploy."
-        )
 
         def clean():
             self.conf.virtualenv = True
             self.conf.save()
             self.refresh_deploy_path()
-            tkMessageBox.showinfo(
-                "First run setup",
-                setup_complete_msg
-            )
 
         msg = (
             "This is your first time running the oTree launcher.\n"
@@ -224,7 +224,12 @@ class OTreeLauncherFrame(ttk.Frame):
         tkMessageBox.showinfo("First run setup", msg)
         self.proc = core.create_virtualenv()
 
-        self.check_proc_end(clean, setup_complete_msg)
+        setup_complete_msg = (
+            "Initial setup complete.\n"
+            "Click on the 'Deploys' menu to create a new deploy."
+        )
+
+        self.check_proc_end(clean, setup_complete_msg, popup=True)
 
     def refresh_deploy_path(self):
 
@@ -365,7 +370,11 @@ class OTreeLauncherFrame(ttk.Frame):
             'title': 'Select oTree directory'
         }
         dpath = tkFileDialog.askdirectory(**options)
+        
         if dpath and dpath != self.conf.path:
+            
+            if not self.check_connectivity():
+                return 
 
             def clean():
                 self.conf.path = dpath
@@ -405,6 +414,10 @@ class OTreeLauncherFrame(ttk.Frame):
                 wrkpath = dpath
                 break
         if wrkpath:
+            
+            if not self.check_connectivity():
+                return 
+            
             try:
 
                 def block():
@@ -481,6 +494,9 @@ def run():
         logger.handlers = []
         logger.addHandler(LoggingToGUI(frame.log_display.console))
 
+        if not frame.conf.virtualenv and not frame.check_connectivity():
+            sys.exit(1)
+
         logger.info("The oTree Launcher says 'Hello'")
 
     def read_log_file():
@@ -490,9 +506,8 @@ def run():
         root.after(10, read_log_file)
 
     read_log_file()
-
-    frame.setup_env()
-
+    
+    frame.check_virtualenv()
     root.mainloop()
 
 

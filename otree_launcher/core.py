@@ -32,6 +32,8 @@ import time
 import datetime
 import threading
 import shlex
+import urllib2
+import urlparse
 
 from . import cons, ctx, db
 from .libs.virtualenv import virtualenv
@@ -63,6 +65,23 @@ class InstallError(Exception):
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
+
+def check_connectivity(timeout=1):
+    """Check if all servers needed for use oTree-launcher are online
+
+    """
+    errors = []    
+    for server in cons.SERVERS:
+        try:
+            response=urllib2.urlopen(server, timeout=timeout)
+        except urllib2.URLError:
+            host = urlparse.urlsplit(server).netloc
+            errors.append("'{}' is unreachable".format(host))
+    if errors:
+        errors_joined = "\n  ".join(errors)
+        msg = "Check your internet connection\n  {}".format(errors_joined)
+        raise IOError(msg)
+
 
 def kill_proc(proc):
     if cons.IS_WINDOWS:

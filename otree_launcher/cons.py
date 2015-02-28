@@ -69,6 +69,10 @@ VENV_REQUIREMENTS_URL = (
 )
 
 
+# this servers are needed to run otree-launcher
+SERVERS = ["https://github.com/", "https://pypi.python.org/"]
+
+
 # =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
 # =============================================================================
@@ -174,8 +178,8 @@ if IS_WINDOWS:
     """
 elif IS_OSX:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
-        TODO: COMPLETE MACOSX TERMINAL
-    """ # FIXME!
+        osascript -e "'tell' application 'Terminal' to do script '$ACTIVATE_PATH'"
+    """ 
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
