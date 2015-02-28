@@ -239,7 +239,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.clear_button.config(state=state)
 
         state = Tkinter.NORMAL if self.conf.virtualenv else Tkinter.DISABLED
-        self.deploy_menu.entryconfig(1, state=state)
+        self.deploy_menu.entryconfig(0, state=state)
         self.opendirectory_button.config(state=state)
 
     def check_proc_end(self, cleaner, msg, popup=False):
@@ -263,14 +263,15 @@ class OTreeLauncherFrame(ttk.Frame):
             self.terminal_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
-            self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+            self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
+
             self.proc = core.open_terminal(self.conf.path)
         except Exception as err:
             self.run_button.config(state=Tkinter.NORMAL)
             self.terminal_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
-            self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+            self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
@@ -290,14 +291,14 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.terminal_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
                 self.opendirectory_button.config(state=Tkinter.NORMAL)
-                self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+                self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
 
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
                 self.terminal_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
-                self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+                self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
                 self.proc = core.reset_db(self.conf.path)
                 self.check_proc_end(clean, "Database Reset done", popup=True)
             except Exception as err:
@@ -310,14 +311,14 @@ class OTreeLauncherFrame(ttk.Frame):
             self.terminal_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
-            self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+            self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
             self.proc = core.runserver(self.conf.path)
         except Exception as err:
             self.run_button.config(state=Tkinter.NORMAL)
             self.terminal_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
-            self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+            self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
@@ -335,7 +336,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.terminal_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
         self.opendirectory_button.config(state=Tkinter.NORMAL)
-        self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+        self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
@@ -376,7 +377,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.terminal_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
-                self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+                self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
                 self.proc = core.install_requirements(dpath)
                 self.check_proc_end(clean, "Virtualenv upgraded")
             except Exception as err:
@@ -411,14 +412,14 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.terminal_button.config(state=Tkinter.DISABLED)
                     self.clear_button.config(state=Tkinter.DISABLED)
                     self.opendirectory_button.config(state=Tkinter.DISABLED)
-                    self.deploy_menu.entryconfig(1, state=Tkinter.DISABLED)
+                    self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
 
                 def clean():
                     self.run_button.config(state=Tkinter.NORMAL)
                     self.terminal_button.config(state=Tkinter.NORMAL)
                     self.clear_button.config(state=Tkinter.NORMAL)
                     self.opendirectory_button.config(state=Tkinter.NORMAL)
-                    self.deploy_menu.entryconfig(1, state=Tkinter.NORMAL)
+                    self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
                     self.refresh_deploy_path()
 
                 def setdir():
@@ -458,6 +459,7 @@ class OTreeLauncherFrame(ttk.Frame):
 def run():
     # create gui
     root = Tkinter.Tk()
+    root.option_add("*tearOff", False)
 
     with splash.Splash(root, res.get("splash.gif"), 1):
 
