@@ -142,7 +142,7 @@ CREATE_VENV_CMDS_TEMPLATE = """
 python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
 python -m pip install --upgrade pip
-python -m pip install "$DULWICH_PKG"
+python -m pip install "$DULWICH_PKG" --global-option="--pure"
 python -m pip install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
