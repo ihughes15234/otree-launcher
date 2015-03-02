@@ -57,8 +57,6 @@ OTREE_REPO = "https://github.com/oTree-org/oTree.git"
 
 REQUIREMENTS_FNAME = "requirements_base.txt"
 
-OTREE_SPAN_SLEEP = 5
-
 DEFAULT_OTREE_DEMO_URL = "http://localhost:8000/"
 
 OTREE_SCRIPT_FNAME = "otree"
@@ -178,7 +176,7 @@ if IS_WINDOWS:
     """
 elif IS_OSX:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
-        osascript -e "'tell' application 'Terminal' to do script '$ACTIVATE_PATH'"
+        osascript -e 'tell application "Terminal" to do script "source $ACTIVATE_PATH; cd '$WRK_PATH'; clear"'
     """
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
