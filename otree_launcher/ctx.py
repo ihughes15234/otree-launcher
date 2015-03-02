@@ -27,7 +27,6 @@ import contextlib
 import codecs
 import uuid
 import urllib2
-import sys
 
 from . import cons
 

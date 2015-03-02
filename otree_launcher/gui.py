@@ -30,9 +30,8 @@ import tkMessageBox
 import tkFileDialog
 import ttk
 
-from . import cons, core, res, ctx
+from . import cons, core, res
 from .libs import splash, hackbrowser
-
 
 
 # =============================================================================
@@ -193,7 +192,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
         self.log_display = LogDisplay(self, text="Console")
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
-    
+
         self.refresh_deploy_path()
 
     def check_connectivity(self):
@@ -255,7 +254,6 @@ class OTreeLauncherFrame(ttk.Frame):
             logger.info(msg)
             if popup:
                 tkMessageBox.showinfo("Finished!", msg)
-
 
     # =========================================================================
     # SLOTS
@@ -372,11 +370,11 @@ class OTreeLauncherFrame(ttk.Frame):
             'title': 'Select oTree directory'
         }
         dpath = tkFileDialog.askdirectory(**options)
-        
+
         if dpath and dpath != self.conf.path:
-            
+
             if not self.check_connectivity():
-                return 
+                return
 
             def clean():
                 self.conf.path = dpath
@@ -416,10 +414,10 @@ class OTreeLauncherFrame(ttk.Frame):
                 wrkpath = dpath
                 break
         if wrkpath:
-            
+
             if not self.check_connectivity():
-                return 
-            
+                return
+
             try:
 
                 def block():
@@ -508,7 +506,7 @@ def run():
         root.after(10, read_log_file)
 
     read_log_file()
-    
+
     frame.check_virtualenv()
     root.mainloop()
 

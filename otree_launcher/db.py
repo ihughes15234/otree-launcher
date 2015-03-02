@@ -22,8 +22,6 @@ from __future__ import unicode_literals
 # IMPORTS
 # =============================================================================
 
-import datetime
-
 from . import cons
 from .libs import peewee
 

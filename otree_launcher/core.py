@@ -25,16 +25,11 @@ __doc__ = """Installer logic
 import os
 import subprocess
 import string
-import zipfile
 import atexit
-import datetime
-import threading
-import shlex
 import urllib2
 import urlparse
 
 from . import cons, ctx, db
-from .libs import hackbrowser
 from .libs.virtualenv import virtualenv
 
 
@@ -69,10 +64,10 @@ def check_connectivity(timeout=1):
     """Check if all servers needed for use oTree-launcher are online
 
     """
-    errors = []    
+    errors = []
     for server in cons.SERVERS:
         try:
-            response=urllib2.urlopen(server, timeout=timeout)
+            urllib2.urlopen(server, timeout=timeout)
         except urllib2.URLError:
             host = urlparse.urlsplit(server).netloc
             errors.append("'{}' is unreachable".format(host))
@@ -117,7 +112,7 @@ def render(template, wrkpath, **kwargs):
     """
     # vars
     context = {
-        k:v for k, v in vars(cons).items()
+        k: v for k, v in vars(cons).items()
         if not k.startswith("_") and k.isupper()
     }
     context.update({

@@ -24,9 +24,9 @@ __doc__ = """Constants for all oTree launcher
 import sys
 import os
 import logging
-import datetime
 
 from . import res
+
 
 # =============================================================================
 # PROJECT CONSTANTS
@@ -101,7 +101,7 @@ INTERPRETER = "" if IS_WINDOWS else "bash"
 VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
                                     "Scripts" if IS_WINDOWS else "bin")
 
-ACTIVATE_PATH  = (
+ACTIVATE_PATH = (
     os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat")
     if IS_WINDOWS else
     os.path.join(VENV_SCRIPT_DIR_PATH, "activate")
@@ -179,7 +179,7 @@ if IS_WINDOWS:
 elif IS_OSX:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         osascript -e "'tell' application 'Terminal' to do script '$ACTIVATE_PATH'"
-    """ 
+    """
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
