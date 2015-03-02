@@ -23,7 +23,6 @@ __doc__ = """Constants for all oTree launcher
 
 import os
 import logging
-import webbrowser
 import sys
 
 import Tkinter
@@ -32,7 +31,7 @@ import tkFileDialog
 import ttk
 
 from . import cons, core, res, ctx
-from .libs import splash
+from .libs import splash, hackbrowser
 
 
 
@@ -327,7 +326,10 @@ class OTreeLauncherFrame(ttk.Frame):
             self.stop_button.config(state=Tkinter.DISABLED)
             tkMessageBox.showerror("Something gone wrong", unicode(err))
         else:
-            core.open_webbrowser()
+            logger.info("Launching web browser...")
+            self.root.after(
+                5000, hackbrowser.open, cons.DEFAULT_OTREE_DEMO_URL
+            )
             self.check_proc_end(self.do_stop, "Server Killed")
             self.stop_button.config(state=Tkinter.NORMAL)
 
@@ -357,7 +359,7 @@ class OTreeLauncherFrame(ttk.Frame):
         tkMessageBox.showinfo(title, body)
 
     def do_open_homepage(self):
-        webbrowser.open_new_tab(cons.URL)
+        hackbrowser.open(cons.URL)
 
     def do_exit(self):
         self.root.quit()

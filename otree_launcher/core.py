@@ -25,10 +25,8 @@ __doc__ = """Installer logic
 import os
 import subprocess
 import string
-import webbrowser
 import zipfile
 import atexit
-import time
 import datetime
 import threading
 import shlex
@@ -36,6 +34,7 @@ import urllib2
 import urlparse
 
 from . import cons, ctx, db
+from .libs import hackbrowser
 from .libs.virtualenv import virtualenv
 
 
@@ -240,15 +239,6 @@ def open_terminal(wrkpath):
             fp.write(src)
         logger.info("Launching Terminal...")
         return call([cons.INTERPRETER, fpath])
-
-
-def open_webbrowser(url=cons.DEFAULT_OTREE_DEMO_URL):
-    """Open the web browser on the given url
-
-    """
-    logger.info("Launching web browser...")
-    time.sleep(cons.OTREE_SPAN_SLEEP)
-    webbrowser.open_new_tab(url)
 
 
 def get_conf():
