@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 # DOCS
 # =============================================================================
 
-__doc__ = """Webbroser don't work well in macosx so this file hack 
+__doc__ = """Webbroser don't work well in macosx so this file hack
 this behavior
 
 """
@@ -33,11 +33,11 @@ import webbrowser
 # =============================================================================
 
 def open(url):
-	if sys.platform.startswith("darwin"):
-		cmd = "open {}".format(url)
-		retcode = os.system(cmd)
-		return (retcode == 0)
-	return webbrowser.open_new_tab(url)
+    if sys.platform.startswith("darwin"):
+        cmd = "open {}".format(url)
+        retcode = os.system(cmd)
+        return (retcode == 0)
+    return webbrowser.open_new_tab(url)
 
 
 # =============================================================================
