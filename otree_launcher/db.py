@@ -32,11 +32,6 @@ from .libs import peewee
 
 logger = cons.logger
 
-
-# =============================================================================
-# CONSTANTS
-# =============================================================================
-
 DB = peewee.SqliteDatabase(cons.DB_FPATH, threadlocals=True)
 
 

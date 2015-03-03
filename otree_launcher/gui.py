@@ -35,10 +35,12 @@ from .libs import splash, hackbrowser
 
 
 # =============================================================================
-# LOGGER
+# CONSTANTS
 # =============================================================================
 
 logger = cons.logger
+
+WEB_BROWSER_WAIT = 5 * 1000
 
 
 # =============================================================================
@@ -326,7 +328,7 @@ class OTreeLauncherFrame(ttk.Frame):
         else:
             logger.info("Launching web browser...")
             self.root.after(
-                5000, hackbrowser.open, cons.DEFAULT_OTREE_DEMO_URL
+                WEB_BROWSER_WAIT, hackbrowser.open, cons.DEFAULT_OTREE_DEMO_URL
             )
             self.check_proc_end(self.do_stop, "Server Killed")
             self.stop_button.config(state=Tkinter.NORMAL)
