@@ -172,7 +172,7 @@ python "$OTREE_SCRIPT_PATH" runserver
 
 if IS_WINDOWS:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
-        start "$PRJ" /d "$WRK_PATH" /wait cmd /k call "$ACTIVATE_PATH"
+        start "$PRJ" /d "$WRK_PATH" cmd /k call "$ACTIVATE_PATH"
     """
 elif IS_OSX:
     _osx_terminal = res.get("osx_terminal.sh")
