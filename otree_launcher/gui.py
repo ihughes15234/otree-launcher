@@ -24,6 +24,7 @@ __doc__ = """Constants for all oTree launcher
 import os
 import logging
 import sys
+import webbrowser
 
 import Tkinter
 import tkMessageBox
@@ -313,7 +314,8 @@ class OTreeLauncherFrame(ttk.Frame):
         else:
             logger.info("Launching web browser...")
             self.root.after(
-                WEB_BROWSER_WAIT, hackbrowser.open, cons.DEFAULT_OTREE_DEMO_URL
+                WEB_BROWSER_WAIT, webbrowser.open_new_tab, 
+                cons.DEFAULT_OTREE_DEMO_URL
             )
             self.check_proc_end(self.do_stop, "Server Killed")
             self.stop_button.config(state=Tkinter.NORMAL)
