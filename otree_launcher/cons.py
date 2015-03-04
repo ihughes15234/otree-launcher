@@ -175,9 +175,17 @@ if IS_WINDOWS:
         start "$PRJ" /d "$WRK_PATH" /wait cmd /k call "$ACTIVATE_PATH"
     """
 elif IS_OSX:
+    _osx_terminal = res.get("osx_terminal.sh")
+    _cmds = [
+        "source $ACTIVATE_PATH", 
+        "cd '$WRK_PATH'", 
+        "echo -n -e '\\033]0;$PRJ\\007'",
+        "clear",
+    ]
     OPEN_TERMINAL_CMDS_TEMPLATE = """
-        osascript -e 'tell application "Terminal" to do script "source $ACTIVATE_PATH; cd '$WRK_PATH'; clear"'
-    """
+        bash "{terminal}" "{cmds}"
+    """.format(terminal=_osx_terminal, cmds="; ".join(_cmds))
+    del _osx_terminal, _cmds
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
