@@ -176,7 +176,7 @@ if IS_WINDOWS:
         start "$PRJ" /d "$WRK_PATH" cmd /k call "$ACTIVATE_PATH"
     """
     OPEN_FILEMANAGER_CMDS_TEMPLATE = """
-        start /d "$WRK_PATH" explorer
+        start explorer "$WRK_PATH"
     """
 elif IS_OSX:
     _osx_terminal = res.get("osx_terminal.sh")
