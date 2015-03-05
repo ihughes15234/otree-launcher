@@ -177,8 +177,8 @@ if IS_WINDOWS:
 elif IS_OSX:
     _osx_terminal = res.get("osx_terminal.sh")
     _cmds = [
-        "source $ACTIVATE_PATH", 
-        "cd '$WRK_PATH'", 
+        "source $ACTIVATE_PATH",
+        "cd '$WRK_PATH'",
         "echo -n -e '\\033]0;$PRJ\\007'",
         "clear",
     ]
@@ -189,7 +189,7 @@ elif IS_OSX:
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
-        xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
+        nohup xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
     """
 
 
