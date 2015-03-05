@@ -175,6 +175,9 @@ if IS_WINDOWS:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         start "$PRJ" /d "$WRK_PATH" cmd /k call "$ACTIVATE_PATH"
     """
+    OPEN_FILEMANAGER_CMDS_TEMPLATE = """
+        start /d "$WRK_PATH" explorer
+    """
 elif IS_OSX:
     _osx_terminal = res.get("osx_terminal.sh")
     _cmds = [
@@ -187,10 +190,17 @@ elif IS_OSX:
         bash "{terminal}" "{cmds}"
     """.format(terminal=_osx_terminal, cmds="; ".join(_cmds)).lstrip()
     del _osx_terminal, _cmds
+
+    OPEN_FILEMANAGER_CMDS_TEMPLATE = """
+        open "$WRK_PATH"
+    """
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
         xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
+    """
+    OPEN_FILEMANAGER_CMDS_TEMPLATE = """
+        sh -x $$(which xdg-open) "$WRK_PATH"
     """
 
 

@@ -241,6 +241,21 @@ def open_terminal(wrkpath):
         logger.info("Launching Terminal...")
         return call([cons.INTERPRETER, fpath])
 
+def open_filemanager(wrkpath):
+    """Open a new terminal activating the virtualenv
+
+    """
+    logger.info("Opening filemanager in '{}'...".format(wrkpath))
+    with ctx.tempfile("open_filemanager", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating open filemanager script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(
+                cons.OPEN_FILEMANAGER_CMDS_TEMPLATE, wrkpath, decorate=False
+            )
+            fp.write(src)
+        logger.info("Launching filemanager...")
+        return call([cons.INTERPRETER, fpath])
+
 
 def get_conf():
     """Get the configuration of oTree Launcher"""
