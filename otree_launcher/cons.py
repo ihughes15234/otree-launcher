@@ -117,6 +117,7 @@ DULWICH_CMD = "python \"{}\"".format(
     os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich")
 )
 
+
 END_CMD = (
     " >> \"{}\" 2>&1 || goto :error \n"
     if IS_WINDOWS else
@@ -184,12 +185,12 @@ elif IS_OSX:
     ]
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         bash "{terminal}" "{cmds}"
-    """.format(terminal=_osx_terminal, cmds="; ".join(_cmds))
+    """.format(terminal=_osx_terminal, cmds="; ".join(_cmds)).lstrip()
     del _osx_terminal, _cmds
 else:
     OPEN_TERMINAL_CMDS_TEMPLATE = """
         cd "$WRK_PATH"
-        nohup xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
+        xterm -fa monaco -fs 10 -T "$PRJ" -e bash --rcfile "$ACTIVATE_PATH"
     """
 
 

@@ -106,7 +106,7 @@ def call(command, *args, **kwargs):
     return proc
 
 
-def render(template, wrkpath, **kwargs):
+def render(template, wrkpath, decorate=True, **kwargs):
     """Render template acoring the working path
 
     """
@@ -124,12 +124,16 @@ def render(template, wrkpath, **kwargs):
     context.update(kwargs)
 
     src = string.Template(template.strip()).substitute(**context)
-    script = "".join(
-        ["\n".join(cons.SCRIPT_HEADER), "\n"] +
-        ["{}{}".format(line, cons.END_CMD) for line in src.splitlines()] +
-        ["\n".join(cons.SCRIPT_FOOTER), "\n"]
-    ).strip() + "\n"
-    return script
+
+    if decorate:
+        script = "".join(
+            ["\n".join(cons.SCRIPT_HEADER), "\n"] +
+            ["{}{}".format(l.strip(), cons.END_CMD) for l in src.splitlines()] +
+            ["\n".join(cons.SCRIPT_FOOTER), "\n"]
+        )
+    else:
+        script = "\n".join([l.strip() for l in src.splitlines()])
+    return script.strip() + "\n"
 
 
 # =============================================================================
@@ -230,7 +234,9 @@ def open_terminal(wrkpath):
     with ctx.tempfile("open_terminal", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating open terminal script...")
         with ctx.open(fpath, "w") as fp:
-            src = render(cons.OPEN_TERMINAL_CMDS_TEMPLATE, wrkpath)
+            src = render(
+                cons.OPEN_TERMINAL_CMDS_TEMPLATE, wrkpath, decorate=False
+            )
             fp.write(src)
         logger.info("Launching Terminal...")
         return call([cons.INTERPRETER, fpath])
