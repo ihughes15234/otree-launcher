@@ -32,7 +32,7 @@ import tkFileDialog
 import ttk
 
 from . import cons, core, res
-from .libs import splash, hackbrowser
+from .libs import splash
 
 
 # =============================================================================
