@@ -66,7 +66,6 @@ VENV_REQUIREMENTS_URL = (
     "requirements_base.txt"
 )
 
-
 # this servers are needed to run otree-launcher
 SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 
