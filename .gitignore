@@ -8,3 +8,4 @@ staticfiles
 _coverage_results/
 _wrk/
 _dist/
+clean_pycs.sh
