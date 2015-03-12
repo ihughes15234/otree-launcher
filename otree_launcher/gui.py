@@ -32,7 +32,7 @@ import tkFileDialog
 import ttk
 
 from . import cons, core, res
-from .libs import splash
+from .libs import splash, tktooltip
 
 
 # =============================================================================
@@ -160,6 +160,7 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts
         )
         self.opendirectory_button.pack(**directory_opts)
+        tktooltip.create_tooltip(self.opendirectory_button, "Change project")
 
         self.filemanager_button = ttk.Button(
             directory_frame, text="", command=self.do_open_filemanager,
@@ -167,6 +168,10 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts
         )
         self.filemanager_button.pack(**directory_opts)
+        tktooltip.create_tooltip(
+            self.filemanager_button,
+            "Open project directory with the file manager"
+        )
 
         self.terminal_button = ttk.Button(
             directory_frame, text="", command=self.do_open_terminal,
@@ -174,6 +179,9 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts
         )
         self.terminal_button.pack(**directory_opts)
+        tktooltip.create_tooltip(
+            self.terminal_button, "Open terminal with project enviroment"
+        )
 
         # =====================================================================
         # BUTTONS
@@ -188,6 +196,9 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_run
         )
         self.run_button.pack(**button_opt)
+        tktooltip.create_tooltip(
+            self.run_button, "Run the project server and open the webbrowser"
+        )
 
         self.stop_button = ttk.Button(
             buttons_frame, text="Stop", command=self.do_stop,
@@ -195,12 +206,18 @@ class OTreeLauncherFrame(ttk.Frame):
         )
         self.stop_button.config(state=Tkinter.DISABLED)
         self.stop_button.pack(**button_opt)
+        tktooltip.create_tooltip(
+            self.stop_button, "Stop the server"
+        )
 
         self.clear_button = ttk.Button(
             buttons_frame, text="Clear Database", command=self.do_clear,
             compound=Tkinter.LEFT, image=self.icon_clear
         )
         self.clear_button.pack(**button_opt)
+        tktooltip.create_tooltip(
+            self.clear_button, "Restore the database of current project"
+        )
 
         # =====================================================================
         # CONSOLE

@@ -47,7 +47,7 @@ AUTHOR = "The oTree team"
 SHORT_DESCRIPTION = DOC.splitlines()[0]
 
 # : The project version as tuple of strings
-VERSION = ("0", "3")
+VERSION = ("0", "3", "2")
 
 STR_VERSION = __version__ = ".".join(VERSION)
 
