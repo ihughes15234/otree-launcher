@@ -47,7 +47,7 @@ AUTHOR = "The oTree team"
 SHORT_DESCRIPTION = DOC.splitlines()[0]
 
 # : The project version as tuple of strings
-VERSION = ("0", "3", "2")
+VERSION = ("0", "3", "3")
 
 STR_VERSION = __version__ = ".".join(VERSION)
 
@@ -88,7 +88,7 @@ if IS_WINDOWS:
     from .libs import winext
     os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
-    
+
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
