@@ -80,8 +80,15 @@ IS_OSX = sys.platform.startswith("darwin")
 
 LAUNCHER_DIR_PATH = os.path.join(
     os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
-    "otree-launcher" if IS_WINDOWS else ".otree-launcher"
+    "otree launcher" if IS_WINDOWS else ".otree-launcher"
 )
+
+if IS_WINDOWS:
+    # patch the path
+    from .libs import winext
+    os.makedirs(LAUNCHER_DIR_PATH)
+    LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
+    
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
