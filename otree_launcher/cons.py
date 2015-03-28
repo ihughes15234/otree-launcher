@@ -80,7 +80,7 @@ IS_OSX = sys.platform.startswith("darwin")
 
 LAUNCHER_DIR_PATH = os.path.join(
     os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
-    "otree launcher" if IS_WINDOWS else ".otree-launcher"
+    "otree-launcher" if IS_WINDOWS else ".otree-launcher"
 )
 
 if IS_WINDOWS:
