@@ -86,7 +86,8 @@ LAUNCHER_DIR_PATH = os.path.join(
 if IS_WINDOWS:
     # patch the path
     from .libs import winext
-    os.makedirs(LAUNCHER_DIR_PATH)
+    if not os.path.isdir(LAUNCHER_DIR_PATH):
+        os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
 
 
