@@ -19,5 +19,5 @@ __doc__ = """All windows common extensions"""
 # IMPORTS
 # =============================================================================
 
-from .expanduser import _expanduser as expanduser
+from .expanduser import expanduser
 from .shortpath import shortpath
