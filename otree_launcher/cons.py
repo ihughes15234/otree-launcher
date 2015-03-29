@@ -18,7 +18,7 @@ __doc__ = """Constants for all oTree launcher
 
 
 # =============================================================================
-# IMPORTS
+# COMMON IMPORTS
 # =============================================================================
 
 import sys
@@ -26,6 +26,22 @@ import os
 import logging
 
 from . import res
+from .libs.virtualenv import virtualenv
+
+# =============================================================================
+# PLATFORM IMPORTS
+# =============================================================================
+
+
+IS_WINDOWS = sys.platform.startswith("win")
+
+IS_OSX = sys.platform.startswith("darwin")
+
+winext = None
+
+if IS_WINDOWS:
+    from .libs import winext
+
 
 
 # =============================================================================
@@ -51,8 +67,6 @@ VERSION = ("0", "3", "3")
 
 STR_VERSION = __version__ = ".".join(VERSION)
 
-HOME_DIR = os.path.expanduser("~")
-
 OTREE_REPO = "https://github.com/oTree-org/oTree.git"
 
 REQUIREMENTS_FNAME = "requirements_base.txt"
@@ -74,18 +88,17 @@ SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 # PLATAFORM DEPENDENT CONSTANTS
 # =============================================================================
 
-IS_WINDOWS = sys.platform.startswith("win")
-
-IS_OSX = sys.platform.startswith("darwin")
+HOME_DIR = winext.expanduser("~") if IS_WINDOWS else os.path.expanduser("~")
 
 LAUNCHER_DIR_PATH = os.path.join(
     os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
     "otree-launcher" if IS_WINDOWS else ".otree-launcher"
 )
 
+VIRTUALENV_CREATROR_PATH = os.path.abspath(virtualenv.__file__)
+
 if IS_WINDOWS:
     # patch the path
-    from .libs import winext
     if not os.path.isdir(LAUNCHER_DIR_PATH):
         os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
@@ -105,6 +118,7 @@ INTERPRETER = "" if IS_WINDOWS else "bash"
 
 VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
                                     "Scripts" if IS_WINDOWS else "bin")
+
 
 ACTIVATE_PATH = (
     os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat")
@@ -149,7 +163,7 @@ DULWICH_PKG = (
 # =============================================================================
 
 CREATE_VENV_CMDS_TEMPLATE = """
-python "$VIRTUALENV_PATH" "$LAUNCHER_VENV_PATH"
+python "$VIRTUALENV_CREATROR_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
 python -m pip install --upgrade pip
 python -m pip install "$DULWICH_PKG" --global-option="--pure"

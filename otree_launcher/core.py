@@ -30,7 +30,6 @@ import urllib2
 import urlparse
 
 from . import cons, ctx, db
-from .libs.virtualenv import virtualenv
 
 
 # =============================================================================
@@ -117,7 +116,6 @@ def render(template, wrkpath, decorate=True, **kwargs):
     }
     context.update({
         "WRK_PATH": wrkpath.replace("/", os.path.sep),
-        "VIRTUALENV_PATH": os.path.abspath(virtualenv.__file__),
         "REQUIREMENTS_PATH": os.path.join(wrkpath, cons.REQUIREMENTS_FNAME),
         "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME),
     })
