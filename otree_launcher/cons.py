@@ -88,10 +88,12 @@ SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 # PLATAFORM DEPENDENT CONSTANTS
 # =============================================================================
 
+OUR_PATH = os.path.abspath(os.path.dirname(__file__))
+
 HOME_DIR = winext.expanduser("~") if IS_WINDOWS else os.path.expanduser("~")
 
 LAUNCHER_DIR_PATH = os.path.join(
-    os.environ.get("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
+    os.getenv("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
     "otree-launcher" if IS_WINDOWS else ".otree-launcher"
 )
 
@@ -102,7 +104,6 @@ if IS_WINDOWS:
     if not os.path.isdir(LAUNCHER_DIR_PATH):
         os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
-
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 

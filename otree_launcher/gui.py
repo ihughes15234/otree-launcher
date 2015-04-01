@@ -240,27 +240,36 @@ class OTreeLauncherFrame(ttk.Frame):
 
     def check_virtualenv(self):
 
-        if self.conf.virtualenv:
-            return
+        if " " in cons.OUR_PATH:
+            msg = (
+                "We found an space in the path where oTree-Launcher is "
+                "located ({}).\n"
+                "oTree-Launcher can't run from here due limitations of Python "
+                "itself. Please move oTree-Launcher to a non space path"
+            ).format(cons.OUR_PATH)
+            tkMessageBox.showerror("Path Problem", msg)
+            sys.exit(1)
 
-        def clean():
-            self.conf.virtualenv = True
-            self.conf.save()
-            self.refresh_deploy_path()
+        elif not self.conf.virtualenv:
 
-        msg = (
-            "This is your first time running the oTree launcher.\n"
-            "Initial setup may take a few minutes.\n"
-        )
-        tkMessageBox.showinfo("First run setup", msg)
-        self.proc = core.create_virtualenv()
+            def clean():
+                self.conf.virtualenv = True
+                self.conf.save()
+                self.refresh_deploy_path()
 
-        setup_complete_msg = (
-            "Initial setup complete.\n"
-            "Click on the 'Deploys' menu to create a new deploy."
-        )
+            msg = (
+                "This is your first time running the oTree launcher.\n"
+                "Initial setup may take a few minutes.\n"
+            )
+            tkMessageBox.showinfo("First run setup", msg)
+            self.proc = core.create_virtualenv()
 
-        self.check_proc_end(clean, setup_complete_msg, popup=True)
+            setup_complete_msg = (
+                "Initial setup complete.\n"
+                "Click on the 'Deploys' menu to create a new deploy."
+            )
+
+            self.check_proc_end(clean, setup_complete_msg, popup=True)
 
     def refresh_deploy_path(self):
 
