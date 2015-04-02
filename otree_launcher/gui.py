@@ -238,8 +238,9 @@ class OTreeLauncherFrame(ttk.Frame):
             tkMessageBox.showerror("Critical Error", err.message)
         return False
 
-    def check_virtualenv(self):
-
+    def check_launcher_enviroment(self):
+        """Check the launcher enviroment and stop the program if its imposible
+        to configure or run"""
         if " " in cons.OUR_PATH:
             msg = (
                 "We found an space in the path where oTree-Launcher is "
@@ -269,10 +270,13 @@ class OTreeLauncherFrame(ttk.Frame):
                 "Click on the 'Deploys' menu to create a new deploy."
             )
 
-            self.check_proc_end(clean, setup_complete_msg, popup=True)
+            self.check_proc_end(clean, setup_complete_msg,
+                                popup=True, exit_on_fail=True)
 
     def refresh_deploy_path(self):
+        """Enable or disabled the controls if some path is selected or not
 
+        """
         if self.conf.path and not os.path.isdir(self.conf.path):
             self.conf.path = None
             self.conf.save()
@@ -288,15 +292,36 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploy_menu.entryconfig(0, state=state)
         self.opendirectory_button.config(state=state)
 
-    def check_proc_end(self, cleaner, msg, popup=False):
+    def check_proc_end(self, cleaner, msg, popup=False, exit_on_fail=False):
+        """Check if the process already end, or call this methos again 1 second
+        later. When the proc is finished execute the *cleaner* functiona and
+        print the msg to the logger and if popup is True show the same message
+        as popup. If the process fails and exit_on_fail is true, stop the
+        program with the error code from the subprocess
+
+        """
         if self.proc and self.proc.poll() is None:
-            self.root.after(1000, self.check_proc_end, cleaner, msg, popup)
+            self.root.after(1000, self.check_proc_end, cleaner,
+                            msg, popup, exit_on_fail)
         else:
-            self.proc = None
-            cleaner()
-            logger.info(msg)
-            if popup:
-                tkMessageBox.showinfo("Finished!", msg)
+            if self.proc.returncode == 0:
+                self.proc = None
+                cleaner()
+                logger.info(msg)
+                if popup:
+                    tkMessageBox.showinfo("Finished!", msg)
+            elif not exit_on_fail:
+                self.proc = None
+                cleaner()
+                msg = "Something gone wrong!!! Please check the console"
+                logger.critical(msg)
+                if popup:
+                    tkMessageBox.showerror("Error", msg)
+            else:
+                msg = "Critical Error!!!\nThe oTree-Launcher will be closed"
+                logger.error(msg)
+                tkMessageBox.showerror("Critical Error", msg)
+                sys.exit(self.proc.returncode)
 
     # =========================================================================
     # SLOTS
@@ -540,7 +565,7 @@ def run():
 
     read_log_file()
 
-    frame.check_virtualenv()
+    frame.check_launcher_enviroment()
     root.mainloop()
 
 
