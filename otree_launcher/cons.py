@@ -24,6 +24,7 @@ __doc__ = """Constants for all oTree launcher
 import sys
 import os
 import logging
+import json
 
 from . import res
 from .libs.virtualenv import virtualenv
@@ -63,7 +64,8 @@ AUTHOR = "The oTree team"
 SHORT_DESCRIPTION = DOC.splitlines()[0]
 
 # : The project version as tuple of strings
-VERSION = ("0", "3", "3")
+with open(res.get("version.json")) as fp:
+    VERSION = tuple(json.load(fp)["version"])
 
 STR_VERSION = __version__ = ".".join(VERSION)
 
