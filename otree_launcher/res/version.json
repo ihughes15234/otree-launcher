@@ -1,4 +1,7 @@
 {
     "version":  ["0", "4"],
-    "mandatory": true
+    "mandatory": {
+        "condition": "<",
+        "value": ["0", "4"]
+    }
 }

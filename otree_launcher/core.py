@@ -293,9 +293,26 @@ def check_upgrade():
     """
     with ctx.urlget(cons.LASTEST_VERSION_URL) as response:
         data = json.load(response)
+
         lversion = tuple(data["version"])
-        return (".".join(lversion),
-               cons.VERSION < lversion, data["force_upgrade"])
+        str_lversion = ".".join(lversion)
+
+        exists_upgrade = cons.VERSION < lversion
+
+        mcondition = data["mandatory"]["condition"]
+        mvalue = data["mandatory"]["value"]
+
+        mandatory = {
+            "==": cons.VERSION == mvalue,
+            "<": cons.VERSION < mvalue,
+            "<=": cons.VERSION <= mvalue,
+            ">": cons.VERSION > mvalue,
+            ">=": cons.VERSION >= mvalue,
+            "!=": cons.VERSION != mvalue,
+            "in": cons.VERSION in mvalue
+        }[mcondition]
+
+        return str_lversion, exits_upgrade, mandatory
 
 
 # =============================================================================
