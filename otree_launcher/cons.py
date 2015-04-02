@@ -82,6 +82,11 @@ VENV_REQUIREMENTS_URL = (
     "requirements_base.txt"
 )
 
+LASTEST_VERSION_URL = (
+    "https://raw.githubusercontent.com/oTree-org/otree-launcher/master/"
+    "otree_launcher/res/version.json"
+)
+
 # this servers are needed to run otree-launcher
 SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 

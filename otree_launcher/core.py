@@ -28,6 +28,7 @@ import string
 import atexit
 import urllib2
 import urlparse
+import json
 
 from . import cons, ctx, db
 
@@ -282,6 +283,19 @@ def clean_tempdir():
         fpath = os.path.join(cons.LAUNCHER_TEMP_DIR_PATH, fname)
         if os.path.isfile(fpath):
             os.remove(fpath)
+
+
+def check_upgrade():
+    """Chek if a new version of oTree-Launcher is available and if mandatory
+    to upgrade the program
+
+    Returns: last_version, is_new, mandatory
+    """
+    with ctx.urlget(cons.LASTEST_VERSION_URL) as response:
+        data = json.load(response)
+        lversion = tuple(data["version"])
+        return (".".join(lversion),
+               cons.VERSION < lversion, data["force_upgrade"])
 
 
 # =============================================================================

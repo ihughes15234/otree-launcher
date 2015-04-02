@@ -1,4 +1,4 @@
 {
-    "version":  ["0", "3", "4"],
-    "force_upgrade": true
+    "version":  ["0", "4"],
+    "mandatory": true
 }
