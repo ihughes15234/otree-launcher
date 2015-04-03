@@ -87,6 +87,10 @@ LASTEST_VERSION_URL = (
     "otree_launcher/res/version.json"
 )
 
+OTREE_LAUNCHER_ZIP_URL = (
+    "https://github.com/oTree-org/otree-launcher/archive/master.zip"
+)
+
 # this servers are needed to run otree-launcher
 SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 

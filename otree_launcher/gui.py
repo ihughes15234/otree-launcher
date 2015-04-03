@@ -239,8 +239,36 @@ class OTreeLauncherFrame(ttk.Frame):
         return False
 
     def check_launcher_enviroment(self):
-        """Check the launcher enviroment and stop the program if its imposible
+        """Check the launcher enviroment and stop the program if its impossible
         to configure or run"""
+
+        if self.check_connectivity():
+            last_ver, is_new, mandatory = core.check_upgrade()
+            if mandatory:
+                msg = (
+                    "Your version of oTree-Launcher ({}) is obsolete\n"
+                    "Do you want to download new {} version?"
+                ).format(cons.STR_VERSION, last_ver)
+                response = tkMessageBox.askokcancel(
+                    message=msg, icon='question',
+                    title='Version Obsolete'
+                )
+                if response:
+                    webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
+                sys.exit(1)
+
+            elif is_new:
+                msg = (
+                    "A new version of oTree-Launcher is available ({})\n"
+                    "Do you want to download it?"
+                ).format(last_ver)
+                response = tkMessageBox.askyesno(
+                    message=msg, icon='question',
+                    title='New Version Available'
+                )
+                if response:
+                    webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
+
         if " " in cons.OUR_PATH:
             msg = (
                 "We found an space in the path where oTree-Launcher is "
