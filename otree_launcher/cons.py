@@ -94,6 +94,8 @@ OTREE_LAUNCHER_ZIP_URL = (
 # this servers are needed to run otree-launcher
 SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 
+GIT_AVAILABLE = os.system("git --version") == 0
+
 
 # =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
@@ -131,7 +133,6 @@ INTERPRETER = "" if IS_WINDOWS else "bash"
 VENV_SCRIPT_DIR_PATH = os.path.join(LAUNCHER_VENV_PATH,
                                     "Scripts" if IS_WINDOWS else "bin")
 
-
 ACTIVATE_PATH = (
     os.path.join(VENV_SCRIPT_DIR_PATH, "activate.bat")
     if IS_WINDOWS else
@@ -146,8 +147,10 @@ ACTIVATE_CMD = (
 )
 
 
-DULWICH_CMD = "python \"{}\"".format(
-    os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich")
+GIT_CMD = (
+    "git"
+    if GIT_AVAILABLE else
+    "python \"{}\"".format(os.path.join(VENV_SCRIPT_DIR_PATH, "dulwich"))
 )
 
 
@@ -184,7 +187,7 @@ python -m pip install --upgrade -r "$REQUIREMENTS_PATH"
 
 CLONE_CMDS_TEMPLATE = """
 $ACTIVATE_CMD
-$DULWICH_CMD clone "$OTREE_REPO" "$WRK_PATH"
+$GIT_CMD clone "$OTREE_REPO" "$WRK_PATH"
 """
 
 INSTALL_REQUIREMENTS_CMDS_TEMPLATE = """

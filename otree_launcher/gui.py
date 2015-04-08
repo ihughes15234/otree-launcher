@@ -59,6 +59,10 @@ class LoggingToGUI(logging.Handler):
         super(LoggingToGUI, self).__init__()
         self.console = console
 
+    def format(self, msg):
+        fmt = super(LoggingToGUI, self).format(msg)
+        return fmt.decode("ascii", "ignore")
+
     def emit(self, message):
         formattedMessage = self.format(message)
         self.console.configure(state=Tkinter.NORMAL)
