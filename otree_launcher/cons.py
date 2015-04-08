@@ -215,7 +215,7 @@ if IS_WINDOWS:
         start explorer "$WRK_PATH"
     """
 elif IS_OSX:
-    _osx_terminal = res.get("osx_terminal.sh")
+    _osx_terminal = res.get("scripts", "osx_terminal.sh")
     _cmds = [
         "source $ACTIVATE_PATH",
         "cd '$WRK_PATH'",
