@@ -32,12 +32,13 @@ PATH = os.path.abspath(os.path.dirname(__file__))
 # FUNCTIONS
 # =============================================================================
 
-def get(fname):
+def get(*parts):
     """Retrieve a full path to resourse or raises an IOError"""
-    path = os.path.join(PATH, fname)
+    fpath = os.path.join(*parts)
+    path = os.path.join(PATH, fpath)
     if os.path.exists(path):
         return path
-    raise IOError("Resource '{}' not exists".format(fname))
+    raise IOError("Resource '{}' not exists".format(fpath))
 
 
 # =============================================================================
