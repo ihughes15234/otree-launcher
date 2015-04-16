@@ -96,18 +96,24 @@ class OTreeLauncherFrame(ttk.Frame):
         self.conf = core.get_conf()
 
         # icons
-        self.icon_new = Tkinter.PhotoImage(file=res.get("new.gif"))
-        self.icon_exit = Tkinter.PhotoImage(file=res.get("exit.gif"))
-        self.icon_homepage = Tkinter.PhotoImage(file=res.get("homepage.gif"))
-        self.icon_about = Tkinter.PhotoImage(file=res.get("about.gif"))
+        self.icon_new = Tkinter.PhotoImage(file=res.get("imgs", "new.gif"))
+        self.icon_exit = Tkinter.PhotoImage(file=res.get("imgs", "exit.gif"))
+        self.icon_homepage = Tkinter.PhotoImage(
+            file=res.get("imgs", "homepage.gif")
+        )
+        self.icon_about = Tkinter.PhotoImage(file=res.get("imgs", "about.gif"))
 
-        self.icon_run = Tkinter.PhotoImage(file=res.get("run.gif"))
-        self.icon_opendir = Tkinter.PhotoImage(file=res.get("opendir.gif"))
-        self.icon_clear = Tkinter.PhotoImage(file=res.get("clear.gif"))
-        self.icon_stop = Tkinter.PhotoImage(file=res.get("stop.gif"))
-        self.icon_terminal = Tkinter.PhotoImage(file=res.get("terminal.gif"))
+        self.icon_run = Tkinter.PhotoImage(file=res.get("imgs", "run.gif"))
+        self.icon_opendir = Tkinter.PhotoImage(
+            file=res.get("imgs", "opendir.gif")
+        )
+        self.icon_clear = Tkinter.PhotoImage(file=res.get("imgs", "clear.gif"))
+        self.icon_stop = Tkinter.PhotoImage(file=res.get("imgs", "stop.gif"))
+        self.icon_terminal = Tkinter.PhotoImage(
+            file=res.get("imgs", "terminal.gif")
+        )
         self.icon_filemanager = Tkinter.PhotoImage(
-            file=res.get("filemanager.gif")
+            file=res.get("imgs", "filemanager.gif")
         )
 
         # =====================================================================
@@ -564,7 +570,7 @@ def run():
     root = Tkinter.Tk()
     root.option_add("*tearOff", False)
 
-    with splash.Splash(root, res.get("splash.gif"), 1):
+    with splash.Splash(root, res.get("imgs", "splash.gif"), 1):
 
         core.clean_tempdir()
         logfile_fp = core.logfile_fp()
@@ -573,7 +579,7 @@ def run():
         root.title("{} - v.{}".format(cons.PRJ, cons.STR_VERSION))
 
         # set icon
-        icon = Tkinter.PhotoImage(file=res.get("otree.gif"))
+        icon = Tkinter.PhotoImage(file=res.get("imgs", "otree.gif"))
         root.tk.call('wm', 'iconphoto', root._w, icon)
 
         # add main frame
