@@ -252,6 +252,16 @@ class OTreeLauncherFrame(ttk.Frame):
         """Check the launcher enviroment and stop the program if its impossible
         to configure or run"""
 
+        py_allowed, pyver_info, pyexe = core.check_py_version()
+        logger.info("Python: {} ({})".format(pyver_info, pyexe))
+        if not py_allowed:
+            msg = (
+                "The Python version {} ({}) "
+                "is not suitable to run oTree-Launcher"
+            ).format(pyver_info, pyexe)
+            tkMessageBox.showerror("Python Version Problem", msg)
+            sys.exit(1)
+
         if self.check_connectivity():
             last_ver, is_new, mandatory = core.check_upgrade()
             if mandatory:

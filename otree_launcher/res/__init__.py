@@ -34,6 +34,8 @@ PATH = os.path.abspath(os.path.dirname(__file__))
 if IS_WINDOWS:
     from ..libs import winext
     PATH = winext.shortpath(PATH)
+else:
+    PATH = PATH.decode("utf8")
 
 
 # =============================================================================

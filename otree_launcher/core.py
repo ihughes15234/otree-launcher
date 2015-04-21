@@ -29,6 +29,7 @@ import atexit
 import urllib2
 import urlparse
 import json
+import sys
 
 from . import cons, ctx, db
 
@@ -314,6 +315,17 @@ def check_upgrade():
         }[mcondition]
 
         return str_lversion, exists_upgrade, mandatory
+
+
+def check_py_version():
+    """Check if python version is ok for oTree-Launcher
+
+    Returns: is_version_allowed(boolean), version_indo, executable_path
+
+    """
+    allowed = (cons.MAX_PYVERSION == sys.version_info[:2])
+    info = (allowed, sys.version, sys.executable)
+    return info
 
 
 # =============================================================================

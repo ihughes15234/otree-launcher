@@ -33,6 +33,7 @@ from .libs.virtualenv import virtualenv
 # PLATFORM IMPORTS
 # =============================================================================
 
+MAX_PYVERSION = (2, 7)
 
 IS_WINDOWS = sys.platform.startswith("win")
 
@@ -42,7 +43,6 @@ winext = None
 
 if IS_WINDOWS:
     from .libs import winext
-
 
 
 # =============================================================================
@@ -118,6 +118,9 @@ if IS_WINDOWS:
         os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
     OUR_PATH = winext.shortpath(OUR_PATH)
+else:
+    LAUNCHER_DIR_PATH = LAUNCHER_DIR_PATH.decode("utf8")
+    OUR_PATH = OUR_PATH.decode("utf8")
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
