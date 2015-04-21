@@ -117,6 +117,7 @@ if IS_WINDOWS:
     if not os.path.isdir(LAUNCHER_DIR_PATH):
         os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
+    OUR_PATH = winext.shortpath(OUR_PATH)
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Based on: http://goo.gl/r9cTCn
+# Based on: http://stackoverflow.com/a/23889086/2489206
 
 import os
 
