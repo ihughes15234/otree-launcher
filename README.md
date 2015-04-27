@@ -4,10 +4,10 @@
 ## To launch
 
 ### Windows
-Double click on `otree.exe` or `otree.bat`
+Run `otree.bat`
 
 ### Mac/Linux
-Double click on `otree.sh`
+Run `otree.sh`
 
 ## Homepage
 http://www.otree.org/
