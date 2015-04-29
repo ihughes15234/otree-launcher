@@ -27,7 +27,6 @@ import logging
 import json
 
 from . import res
-from .libs.virtualenv import virtualenv
 
 # =============================================================================
 # PLATFORM IMPORTS
@@ -96,6 +95,7 @@ SERVERS = ["https://github.com/", "https://pypi.python.org/"]
 
 GIT_AVAILABLE = os.system("git --version") == 0
 
+ENCODING = "UTF-8"
 
 # =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
@@ -110,8 +110,6 @@ LAUNCHER_DIR_PATH = os.path.join(
     "otree-launcher" if IS_WINDOWS else ".otree-launcher"
 )
 
-VIRTUALENV_CREATROR_PATH = os.path.abspath(virtualenv.__file__)
-
 if IS_WINDOWS:
     # patch the path
     if not os.path.isdir(LAUNCHER_DIR_PATH):
@@ -119,8 +117,8 @@ if IS_WINDOWS:
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
     OUR_PATH = winext.shortpath(OUR_PATH)
 else:
-    LAUNCHER_DIR_PATH = LAUNCHER_DIR_PATH.decode("utf8")
-    OUR_PATH = OUR_PATH.decode("utf8")
+    LAUNCHER_DIR_PATH = LAUNCHER_DIR_PATH.decode(ENCODING)
+    OUR_PATH = OUR_PATH.decode(ENCODING)
 
 LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
@@ -129,8 +127,6 @@ LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
 
 DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
-
-ENCODING = "UTF-8"
 
 INTERPRETER = "" if IS_WINDOWS else "bash"
 
@@ -176,13 +172,15 @@ DULWICH_PKG = (
     res.get("packages", "dulwich-0.10.1a.tar.gz")
 )
 
+VIRTUALENV_CREATOR_PATH = res.get("packages", "virtualenv", "virtualenv.py")
 
+    
 # =============================================================================
 # TEMPLATES FOS SCRIPTS
 # =============================================================================
 
 CREATE_VENV_CMDS_TEMPLATE = """
-python "$VIRTUALENV_CREATROR_PATH" "$LAUNCHER_VENV_PATH"
+python "$VIRTUALENV_CREATOR_PATH" "$LAUNCHER_VENV_PATH"
 $ACTIVATE_CMD
 python -m pip install --upgrade pip
 python -m pip install "$DULWICH_PKG" --global-option="--pure"

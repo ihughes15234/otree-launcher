@@ -289,12 +289,13 @@ class OTreeLauncherFrame(ttk.Frame):
                 if response:
                     webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
 
-        if " " in cons.OUR_PATH:
+        if not core.check_our_path():
             msg = (
-                "We found an space in the path where oTree-Launcher is "
-                "located ({}).\n"
+                "We found an space, unicode or invalid character in the path "
+                "where oTree-Launcher is located.\n"
+                "{}\n"
                 "oTree-Launcher can't run from here due limitations of Python "
-                "itself. Please move oTree-Launcher to a non space path"
+                "itself. Please move oTree-Launcher to a valid path"
             ).format(cons.OUR_PATH)
             tkMessageBox.showerror("Path Problem", msg)
             sys.exit(1)

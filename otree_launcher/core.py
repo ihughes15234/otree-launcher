@@ -122,7 +122,7 @@ def render(template, wrkpath, decorate=True, **kwargs):
         "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME),
     })
     context.update(kwargs)
-
+    
     src = string.Template(template.strip()).substitute(**context)
 
     if decorate:
@@ -328,6 +328,17 @@ def check_py_version():
     return info
 
 
+def check_our_path():
+    """Check if the oTree-Launcher is in valid path"""
+    if " " in cons.OUR_PATH:
+        return False
+    try:
+        cons.OUR_PATH.encode("ascii")
+    except UnicodeError:
+        return False
+    return True
+        
+        
 # =============================================================================
 # MAIN
 # =============================================================================
