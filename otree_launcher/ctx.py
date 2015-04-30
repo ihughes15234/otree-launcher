@@ -37,7 +37,7 @@ from . import cons
 
 @contextlib.contextmanager
 def tempfile(prefix, extension):
-    """Create a temporary fule in the wrkpath
+    """Create a temporary file in the wrkpath
 
     """
     fname = "{}_{}.{}".format(prefix, uuid.uuid4().int, extension)

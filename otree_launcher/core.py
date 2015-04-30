@@ -32,6 +32,7 @@ import json
 import sys
 
 from . import cons, ctx, db
+from .libs import dpaste
 
 
 # =============================================================================
@@ -122,7 +123,7 @@ def render(template, wrkpath, decorate=True, **kwargs):
         "OTREE_SCRIPT_PATH": os.path.join(wrkpath, cons.OTREE_SCRIPT_FNAME),
     })
     context.update(kwargs)
-    
+
     src = string.Template(template.strip()).substitute(**context)
 
     if decorate:
@@ -264,16 +265,18 @@ def get_conf():
     return db.Configuration.create()
 
 
-def logfile_fp():
+def logfile_fp(rewind=False):
     """Open and return the log file used for external process"""
 
     logger.info("Opening log file '{}'...".format(cons.LOG_FPATH))
 
-    with open(cons.LOG_FPATH, "w"):
-        pass
+    if not os.path.exists(cons.LOG_FPATH):
+        with open(cons.LOG_FPATH, "w"):
+            pass
 
     fp = open(cons.LOG_FPATH)
-    fp.seek(0, 2)
+    if not rewind:
+        fp.seek(0, 2)
     return fp
 
 
@@ -337,8 +340,22 @@ def check_our_path():
     except UnicodeError:
         return False
     return True
-        
-        
+
+
+def publish_log():
+    """Publish all the content of the oTree-Launcher log in dpaste"""
+    fp = None
+    try:
+        fp = logfile_fp(rewind=True)
+        return dpaste.paste(fp.read(), expiry_days=60)
+    except:
+        pass
+    finally:
+        if not fp.closed:
+            fp.close()
+    return ""
+
+
 # =============================================================================
 # MAIN
 # =============================================================================

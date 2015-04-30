@@ -25,8 +25,10 @@ import sys
 import os
 import logging
 import json
+import datetime
 
 from . import res
+
 
 # =============================================================================
 # PLATFORM IMPORTS
@@ -97,6 +99,9 @@ GIT_AVAILABLE = os.system("git --version") == 0
 
 ENCODING = "UTF-8"
 
+TODAY = datetime.date.today()
+
+
 # =============================================================================
 # PLATAFORM DEPENDENT CONSTANTS
 # =============================================================================
@@ -124,7 +129,9 @@ LAUNCHER_VENV_PATH = os.path.join(LAUNCHER_DIR_PATH, "oTree")
 
 LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
-LOG_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.log")
+LOG_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "logs")
+
+LOG_FPATH = os.path.join(LOG_DIR_PATH, "{}.log".format(TODAY.isoformat()))
 
 DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 
@@ -174,7 +181,7 @@ DULWICH_PKG = (
 
 VIRTUALENV_CREATOR_PATH = res.get("packages", "virtualenv", "virtualenv.py")
 
-    
+
 # =============================================================================
 # TEMPLATES FOS SCRIPTS
 # =============================================================================
@@ -255,7 +262,7 @@ logger.setLevel(logging.INFO)
 # DIRECTORIES & FILES
 # =============================================================================
 
-for dpath in [LAUNCHER_DIR_PATH, LAUNCHER_TEMP_DIR_PATH]:
+for dpath in [LAUNCHER_DIR_PATH, LAUNCHER_TEMP_DIR_PATH, LOG_DIR_PATH]:
     if not os.path.isdir(dpath):
         os.makedirs(dpath)
 
