@@ -51,11 +51,27 @@ WEB_BROWSER_WAIT = 5 * 1000
 
 class MessageBox(object):
 
+    def __init__(self, root):
+        self.root = root
+
     def __getattr__(self, name):
         return getattr(tkMessageBox, name)
 
-    def showerror(self, *args, **kwargs):
-        return self.msgbox.showerror(*args, **kwargs)
+    def showerror(self, title, message, *args, **kwargs):
+        tkMessageBox.showerror(title, message, *args, **kwargs)
+        msg = (
+            "Do you want to copy the full description of error to "
+            "the clipboard?")
+        response = self.askyesno(
+            message=msg, icon='question', title="Share your error")
+        if response:
+            log = core.read_log()
+            self.root.clipboard_clear()
+            self.root.clipboard_append(log)
+            msg = (
+                "Plese report your error whit the information stored in "
+                "your clipboard")
+            self.showinfo("Success", msg)
 
 
 # =============================================================================
@@ -109,7 +125,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.proc = None
         self.conf = core.get_conf()
         self.last_connectivity_check = (None, None)  # status, time
-        self.msgbox = MessageBox()
+        self.msgbox = MessageBox(root)
 
         # icons
         self.icon_new = Tkinter.PhotoImage(file=res.get("imgs", "new.gif"))
@@ -310,7 +326,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 if response:
                     webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
 
-        if not core.check_our_path():
+        if True: #not core.check_our_path():
             msg = (
                 "We found an space, unicode or invalid character in the path "
                 "where oTree-Launcher is located.\n"
@@ -638,7 +654,6 @@ def run():
 
     frame.check_launcher_enviroment()
     root.mainloop()
-
 
 # =============================================================================
 # MAIN

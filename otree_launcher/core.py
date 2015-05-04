@@ -34,7 +34,6 @@ import sys
 import datetime
 
 from . import cons, ctx, db
-from .libs import dpaste
 
 
 # =============================================================================
@@ -362,20 +361,16 @@ def check_our_path():
     return True
 
 
-def publish_log():
-    """Publish all the content of the oTree-Launcher log in dpaste
-
-    This code fails silently
-
-    """
+def read_log():
+    """Read all the content of the oTree-Launcher log in dpaste"""
     fp = None
     try:
         fp = logfile_fp(rewind=True)
-        return dpaste.paste(fp.read(), expiry_days=60)
+        return fp.read()
     except:
         pass
     finally:
-        if not fp.closed:
+        if fp and not fp.closed:
             fp.close()
     return ""
 
