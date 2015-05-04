@@ -110,20 +110,20 @@ TODAY = datetime.date.today()
 
 OUR_PATH = os.path.abspath(os.path.dirname(__file__))
 
-HOME_DIR = winext.expanduser("~") if IS_WINDOWS else os.path.expanduser("~")
-
-LAUNCHER_DIR_PATH = os.path.join(
-    os.getenv("APPDATA", HOME_DIR) if IS_WINDOWS else HOME_DIR,
-    "otree-launcher" if IS_WINDOWS else ".otree-launcher"
-)
+CONF_DIRNAME = "otree-launcher"
 
 if IS_WINDOWS:
     # patch the path
+    HOME_DIR = winext.expanduser("~")
+    LAUNCHER_DIR_PATH = os.path.join(
+        os.getenv("APPDATA", HOME_DIR), CONF_DIRNAME)
     if not os.path.isdir(LAUNCHER_DIR_PATH):
         os.makedirs(LAUNCHER_DIR_PATH)
     LAUNCHER_DIR_PATH = winext.shortpath(LAUNCHER_DIR_PATH)
     OUR_PATH = winext.shortpath(OUR_PATH)
 else:
+    HOME_DIR = os.path.expanduser("~")
+    LAUNCHER_DIR_PATH = os.path.join(HOME_DIR, ".config", CONF_DIRNAME)
     LAUNCHER_DIR_PATH = LAUNCHER_DIR_PATH.decode(ENCODING)
     OUR_PATH = OUR_PATH.decode(ENCODING)
 
