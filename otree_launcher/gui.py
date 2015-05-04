@@ -25,6 +25,7 @@ import os
 import logging
 import sys
 import webbrowser
+import time
 
 import Tkinter
 import tkMessageBox
@@ -42,6 +43,19 @@ from .libs import splash, tktooltip
 logger = cons.logger
 
 WEB_BROWSER_WAIT = 5 * 1000
+
+
+# =============================================================================
+# MESSAGE WRAPPER
+# =============================================================================
+
+class MessageBox(object):
+
+    def __getattr__(self, name):
+        return getattr(tkMessageBox, name)
+
+    def showerror(self, *args, **kwargs):
+        return self.msgbox.showerror(*args, **kwargs)
 
 
 # =============================================================================
@@ -94,6 +108,8 @@ class OTreeLauncherFrame(ttk.Frame):
         self.root = root
         self.proc = None
         self.conf = core.get_conf()
+        self.last_connectivity_check = (None, None)  # status, time
+        self.msgbox = MessageBox()
 
         # icons
         self.icon_new = Tkinter.PhotoImage(file=res.get("imgs", "new.gif"))
@@ -239,14 +255,19 @@ class OTreeLauncherFrame(ttk.Frame):
         self.refresh_deploy_path()
 
     def check_connectivity(self):
-        try:
-            core.check_connectivity()
-            logger.info("check_connectivity OK")
-            return True
-        except IOError as err:
-            logger.error(err.message)
-            tkMessageBox.showerror("Critical Error", err.message)
-        return False
+        now = time.time()
+        lstatus, ltime = self.last_connectivity_check
+        if lstatus is None or now - ltime > 60:
+            try:
+                core.check_connectivity()
+                logger.info("check_connectivity OK")
+                self.last_connectivity_check = True, now
+            except Exception as err:
+
+                logger.error(err.message)
+                self.msgbox.showerror("Critical Error", err.message)
+                self.last_connectivity_check = False, now
+        return self.last_connectivity_check[0]
 
     def check_launcher_enviroment(self):
         """Check the launcher enviroment and stop the program if its impossible
@@ -259,7 +280,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 "The Python version {} ({}) "
                 "is not suitable to run oTree-Launcher"
             ).format(pyver_info, pyexe)
-            tkMessageBox.showerror("Python Version Problem", msg)
+            self.msgbox.showerror("Python Version Problem", msg)
             sys.exit(1)
 
         if self.check_connectivity():
@@ -269,7 +290,7 @@ class OTreeLauncherFrame(ttk.Frame):
                     "Your version of oTree-Launcher ({}) is obsolete\n"
                     "Do you want to download new {} version?"
                 ).format(cons.STR_VERSION, last_ver)
-                response = tkMessageBox.askokcancel(
+                response = self.msgbox.askokcancel(
                     message=msg, icon='question',
                     title='Version Obsolete'
                 )
@@ -282,7 +303,7 @@ class OTreeLauncherFrame(ttk.Frame):
                     "A new version of oTree-Launcher is available ({})\n"
                     "Do you want to download it?"
                 ).format(last_ver)
-                response = tkMessageBox.askyesno(
+                response = self.msgbox.askyesno(
                     message=msg, icon='question',
                     title='New Version Available'
                 )
@@ -297,7 +318,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 "oTree-Launcher can't run from here due limitations of Python "
                 "itself. Please move oTree-Launcher to a valid path"
             ).format(cons.OUR_PATH)
-            tkMessageBox.showerror("Path Problem", msg)
+            self.msgbox.showerror("Path Problem", msg)
             sys.exit(1)
 
         elif not self.conf.virtualenv:
@@ -311,7 +332,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 "This is your first time running the oTree launcher.\n"
                 "Initial setup may take a few minutes.\n"
             )
-            tkMessageBox.showinfo("First run setup", msg)
+            self.msgbox.showinfo("First run setup", msg)
             self.proc = core.create_virtualenv()
 
             setup_complete_msg = (
@@ -358,18 +379,18 @@ class OTreeLauncherFrame(ttk.Frame):
                 cleaner()
                 logger.info(msg)
                 if popup:
-                    tkMessageBox.showinfo("Finished!", msg)
+                    self.msgbox.showinfo("Finished!", msg)
             elif not exit_on_fail:
                 self.proc = None
                 cleaner()
                 msg = "Something gone wrong!!! Please check the console"
                 logger.critical(msg)
                 if popup:
-                    tkMessageBox.showerror("Error", msg)
+                    self.msgbox.showerror("Error", msg)
             else:
                 msg = "Critical Error!!!\nThe oTree-Launcher will be closed"
-                logger.error(msg)
-                tkMessageBox.showerror("Critical Error", msg)
+                logger.critical(msg)
+                self.msgbox.showerror("Critical Error", msg)
                 sys.exit(self.proc.returncode)
 
     # =========================================================================
@@ -380,20 +401,20 @@ class OTreeLauncherFrame(ttk.Frame):
         try:
             core.open_terminal(self.conf.path)
         except Exception as err:
-            tkMessageBox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror("Something gone wrong", unicode(err))
 
     def do_open_filemanager(self):
         try:
             core.open_filemanager(self.conf.path)
         except Exception as err:
-            tkMessageBox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror("Something gone wrong", unicode(err))
 
     def do_clear(self):
         msg = (
             "Are you sure to you want to clear the"
             "database for the deploy '{}'?"
         ).format(self.conf.path)
-        res = tkMessageBox.askokcancel("Reset Deploy", msg)
+        res = self.msgbox.askokcancel("Reset Deploy", msg)
         if res:
 
             def clean():
@@ -410,7 +431,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.reset_db(self.conf.path)
                 self.check_proc_end(clean, "Database Reset done", popup=True)
             except Exception as err:
-                tkMessageBox.showerror("Something gone wrong", unicode(err))
+                self.msgbox.showerror("Something gone wrong", unicode(err))
                 clean()
 
     def do_run(self):
@@ -426,7 +447,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
-            tkMessageBox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror("Something gone wrong", unicode(err))
         else:
             logger.info("Launching web browser...")
             self.root.after(
@@ -458,7 +479,7 @@ class OTreeLauncherFrame(ttk.Frame):
             prj=cons.PRJ, url=cons.URL, doc=cons.DOC,
             version=cons.STR_VERSION
         )
-        tkMessageBox.showinfo(title, body)
+        self.msgbox.showinfo(title, body)
 
     def do_open_homepage(self):
         webbrowser.open(cons.URL)
@@ -495,7 +516,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.install_requirements(dpath)
                 self.check_proc_end(clean, "Virtualenv upgraded")
             except Exception as err:
-                tkMessageBox.showerror("Something gone wrong", unicode(err))
+                self.msgbox.showerror("Something gone wrong", unicode(err))
                 clean()
 
     def do_deploy(self):
@@ -514,7 +535,7 @@ class OTreeLauncherFrame(ttk.Frame):
             if os.path.isdir(dpath) and len(os.listdir(dpath)):
                 options["initialdir"] = dpath
                 msg = "Please select an empty directory"
-                tkMessageBox.showwarning("Directory is not empty", msg)
+                self.msgbox.showwarning("Directory is not empty", msg)
             else:
                 wrkpath = dpath
                 break
@@ -567,7 +588,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.clone(wrkpath)
                 self.check_proc_end(install, "Clone done")
             except Exception as err:
-                tkMessageBox.showerror("Something went wrong", unicode(err))
+                self.msgbox.showerror("Something went wrong", unicode(err))
                 clean()
 
 
