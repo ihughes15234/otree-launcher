@@ -99,6 +99,8 @@ GIT_AVAILABLE = os.system("git --version") == 0
 
 ENCODING = "UTF-8"
 
+DATE_FORMAT = "%Y-%m-%d"
+
 TODAY = datetime.date.today()
 
 
@@ -131,7 +133,9 @@ LAUNCHER_TEMP_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "temp")
 
 LOG_DIR_PATH = os.path.join(LAUNCHER_DIR_PATH, "logs")
 
-LOG_FPATH = os.path.join(LOG_DIR_PATH, "{}.log".format(TODAY.isoformat()))
+LOG_FPATH = os.path.join(
+    LOG_DIR_PATH, "{}.log".format(TODAY.strftime(DATE_FORMAT))
+)
 
 DB_FPATH = os.path.join(LAUNCHER_DIR_PATH, "launcher.db")
 

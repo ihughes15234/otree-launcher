@@ -29,7 +29,9 @@ import atexit
 import urllib2
 import urlparse
 import json
+import glob
 import sys
+import datetime
 
 from . import cons, ctx, db
 from .libs import dpaste
@@ -265,6 +267,24 @@ def get_conf():
     return db.Configuration.create()
 
 
+def clean_logs(older_than=7):
+    """Remove all log files older than 'older_than' days"""
+
+    logger.info(
+        "Cleaning older than {} days from dir '{}'".format(
+            older_than, cons.LOG_DIR_PATH)
+    )
+
+    flt = os.path.join(cons.LOG_DIR_PATH, "*.log")
+    for fpath in glob.glob(flt):
+        if os.path.isfile(fpath):
+            fname = os.path.basename(fpath)
+            str_date = os.path.splitext(fname)[0]
+            date = datetime.datetime.strptime(str_date, cons.DATE_FORMAT)
+            if (cons.TODAY - date.date()).days > older_than:
+                os.remove(fpath)
+
+
 def logfile_fp(rewind=False):
     """Open and return the log file used for external process"""
 
@@ -343,7 +363,11 @@ def check_our_path():
 
 
 def publish_log():
-    """Publish all the content of the oTree-Launcher log in dpaste"""
+    """Publish all the content of the oTree-Launcher log in dpaste
+
+    This code fails silently
+
+    """
     fp = None
     try:
         fp = logfile_fp(rewind=True)

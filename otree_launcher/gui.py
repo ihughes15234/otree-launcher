@@ -583,6 +583,7 @@ def run():
 
     with splash.Splash(root, res.get("imgs", "splash.gif"), 1):
 
+        core.clean_logs()
         core.clean_tempdir()
         logfile_fp = core.logfile_fp()
 
