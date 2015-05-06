@@ -24,14 +24,15 @@ __doc__ = """Installer logic
 
 import os
 import subprocess
-import string
 import atexit
+import string
 import urllib2
 import urlparse
 import json
 import glob
 import sys
 import datetime
+import zipfile
 
 from . import cons, ctx, db
 
@@ -130,7 +131,8 @@ def render(template, wrkpath, decorate=True, **kwargs):
     if decorate:
         script = "".join(
             ["\n".join(cons.SCRIPT_HEADER), "\n"] +
-            ["{}{}".format(l.strip(), cons.END_CMD) for l in src.splitlines()] +
+            ["{}{}".format(l.strip(), cons.END_CMD)
+             for l in src.splitlines()] +
             ["\n".join(cons.SCRIPT_FOOTER), "\n"]
         )
     else:
@@ -242,6 +244,7 @@ def open_terminal(wrkpath):
             fp.write(src)
         logger.info("Launching Terminal...")
         return call([cons.INTERPRETER, fpath])
+
 
 def open_filemanager(wrkpath):
     """Open a new terminal activating the virtualenv
@@ -361,18 +364,15 @@ def check_our_path():
     return True
 
 
-def read_log():
-    """Read all the content of the oTree-Launcher log in dpaste"""
-    fp = None
-    try:
-        fp = logfile_fp(rewind=True)
-        return fp.read()
-    except:
-        pass
-    finally:
-        if fp and not fp.closed:
-            fp.close()
-    return ""
+def zip_info(fpath):
+    """Create a zip file with all the logs and temp_files of launcher"""
+    with zipfile.ZipFile(fpath, 'w') as ziph:
+        for root, dirs, files in os.walk(cons.LOG_DIR_PATH):
+            for file in files:
+                ziph.write(os.path.join("logs", root, file))
+        for root, dirs, files in os.walk(cons.LAUNCHER_TEMP_DIR_PATH):
+            for file in files:
+                ziph.write(os.path.join("temp", root, file))
 
 
 # =============================================================================
