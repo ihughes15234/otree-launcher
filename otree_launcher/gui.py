@@ -659,8 +659,7 @@ def run():
 
     read_log_file()
 
-    #~ frame.check_launcher_enviroment()
-    frame.msgbox.showerror("je", "jo")
+    frame.check_launcher_enviroment()
     root.mainloop()
 
 # =============================================================================
