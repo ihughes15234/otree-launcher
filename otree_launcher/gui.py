@@ -75,9 +75,9 @@ class MessageBox(object):
             fpath = tkFileDialog.asksaveasfilename(**options)
             if fpath:
                 core.zip_info(fpath)
-                message = "Please attach '{}' on your error report".format(
-                    fpath
-                )
+                message = (
+                    "Please attach '{}' and send email to '{}' report"
+                ).format(fpath, cons.EMAIL)
                 tkMessageBox.showinfo("Report ended", message)
 
 
@@ -659,7 +659,8 @@ def run():
 
     read_log_file()
 
-    frame.check_launcher_enviroment()
+    #~ frame.check_launcher_enviroment()
+    frame.msgbox.showerror("je", "jo")
     root.mainloop()
 
 # =============================================================================

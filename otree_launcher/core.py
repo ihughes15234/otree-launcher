@@ -389,7 +389,8 @@ def zip_info(fpath):
                 fpath = os.path.join(root, fname)
                 arcname = os.path.join("temp", fname)
                 ziph.write(fpath, arcname)
-        ziph.write(cons.DB_FPATH, os.path.basename(cons.DB_FPATH))
+        if os.path.isfile(cons.DB_FPATH):
+            ziph.write(cons.DB_FPATH, os.path.basename(cons.DB_FPATH))
         ziph.writestr("cons.pkl", cons_as_pickle())
 
 
