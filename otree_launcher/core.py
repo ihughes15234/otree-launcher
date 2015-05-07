@@ -34,6 +34,11 @@ import sys
 import datetime
 import zipfile
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from . import cons, ctx, db
 
 
@@ -345,7 +350,7 @@ def check_upgrade():
 def check_py_version():
     """Check if python version is ok for oTree-Launcher
 
-    Returns: is_version_allowed(boolean), version_indo, executable_path
+    Returns: is_version_allowed(boolean), version_info, executable_path
 
     """
     allowed = (cons.MAX_PYVERSION == sys.version_info[:2])
@@ -366,13 +371,27 @@ def check_our_path():
 
 def zip_info(fpath):
     """Create a zip file with all the logs and temp_files of launcher"""
+
+    def cons_as_pickle():
+        cdict = {
+            k: v for k, v  in vars(cons).items()
+            if not k.startswith("_") and k.isupper()}
+        return pickle.dumps(cdict)
+
     with zipfile.ZipFile(fpath, 'w') as ziph:
         for root, dirs, files in os.walk(cons.LOG_DIR_PATH):
-            for file in files:
-                ziph.write(os.path.join("logs", root, file))
+            for fname in files:
+                fpath = os.path.join(root, fname)
+                arcname = os.path.join("logs", fname)
+                ziph.write(fpath, arcname)
         for root, dirs, files in os.walk(cons.LAUNCHER_TEMP_DIR_PATH):
-            for file in files:
-                ziph.write(os.path.join("temp", root, file))
+            for fname in files:
+                fpath = os.path.join(root, fname)
+                arcname = os.path.join("temp", fname)
+                ziph.write(fpath, arcname)
+        ziph.write(cons.DB_FPATH, os.path.basename(cons.DB_FPATH))
+        ziph.writestr("cons.pkl", cons_as_pickle())
+
 
 
 # =============================================================================

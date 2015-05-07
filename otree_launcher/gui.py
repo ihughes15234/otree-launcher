@@ -51,8 +51,8 @@ WEB_BROWSER_WAIT = 5 * 1000
 
 class MessageBox(object):
 
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, parent):
+        self.parent = parent
 
     def __getattr__(self, name):
         return getattr(tkMessageBox, name)
@@ -60,18 +60,25 @@ class MessageBox(object):
     def showerror(self, title, message, *args, **kwargs):
         tkMessageBox.showerror(title, message, *args, **kwargs)
         msg = (
-            "Do you want to copy the full description of error to "
-            "the clipboard?")
+            "Do you want to create a file with information about your "
+            "enviroment to report the problem?")
         response = self.askyesno(
             message=msg, icon='question', title="Share your error")
         if response:
-            log = core.read_log()
-            self.root.clipboard_clear()
-            self.root.clipboard_append(log)
-            msg = (
-                "Plese report your error whit the information stored in "
-                "your clipboard")
-            self.showinfo("Success", msg)
+            options = {
+                "parent": self.parent,
+                "defaultextension": ".zip",
+                "initialdir": self.parent.conf.path or cons.HOME_DIR,
+                "filetypes": [('zip files', '.zip'), ('all files', '.*')],
+                'title': 'Save Error Information'
+            }
+            fpath = tkFileDialog.asksaveasfilename(**options)
+            if fpath:
+                core.zip_info(fpath)
+                message = "Please attach '{}' on your error report".format(
+                    fpath
+                )
+                tkMessageBox.showinfo("Report ended", message)
 
 
 # =============================================================================
@@ -125,7 +132,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.proc = None
         self.conf = core.get_conf()
         self.last_connectivity_check = (None, None)  # status, time
-        self.msgbox = MessageBox(root)
+        self.msgbox = MessageBox(self)
 
         # icons
         self.icon_new = Tkinter.PhotoImage(file=res.get("imgs", "new.gif"))
@@ -231,7 +238,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
         buttons_frame = ttk.Frame(self)
         buttons_frame.pack(fill=Tkinter.X)
-        button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5,}
+        button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5}
 
         self.run_button = ttk.Button(
             buttons_frame, text="Run", command=self.do_run,
@@ -326,7 +333,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 if response:
                     webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
 
-        if True: #not core.check_our_path():
+        if not core.check_our_path():
             msg = (
                 "We found an space, unicode or invalid character in the path "
                 "where oTree-Launcher is located.\n"
