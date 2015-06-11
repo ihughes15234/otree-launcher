@@ -2,6 +2,6 @@
     "version":  ["0", "6", "1"],
     "mandatory": {
         "condition": "<",
-        "value": ["0", "5", "5"]
+        "value": ["0", "6", "1"]
     }
 }
