@@ -198,6 +198,12 @@ python -m pip install "$DULWICH_PKG" --global-option="--pure"
 python -m pip install --upgrade -r "$REQUIREMENTS_PATH"
 """
 
+OTREE_CORE_VERSION_CMDS_TEMPLATE = """
+$ACTIVATE_CMD
+python -m pip list
+"""
+
+
 CLONE_CMDS_TEMPLATE = """
 $ACTIVATE_CMD
 $GIT_CMD clone "$OTREE_REPO" "$WRK_PATH"

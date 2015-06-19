@@ -6,9 +6,6 @@ import json
 from . import six
 from .six.moves import urllib
 
-from pip.commands import show
-
-
 
 # =============================================================================
 # CONSTANTS
@@ -30,21 +27,9 @@ def info(package, version=None):
     else:
         url = INFO_VERSION_URL_TEMPLATE.format(
             package=package, version=version)
-    import ipdb; ipdb.set_trace()
     response = urllib.request.urlopen(url)
     try:
         info = json.load(response)
     finally:
         response.close()
     return info
-
-
-
-
-
-
-
-
-
-
-

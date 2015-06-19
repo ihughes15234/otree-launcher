@@ -40,6 +40,7 @@ except ImportError:
     import pickle
 
 from . import cons, ctx, db
+from .libs import pypi
 
 
 # =============================================================================
@@ -347,6 +348,37 @@ def check_upgrade():
         return str_lversion, exists_upgrade, mandatory
 
 
+def otree_core_version(wrkpath):
+    """Retrieve the otree-core version installed in the current project
+
+    """
+    logger.info("Retrieving otree-core version '{}'...".format(wrkpath))
+    with ctx.tempfile("otree_core_version", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating otree-core version retriever script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(
+                cons.OTREE_CORE_VERSION_CMDS_TEMPLATE, wrkpath, decorate=False)
+            fp.write(src)
+        proc = call([cons.INTERPRETER, fpath], stdout=subprocess.PIPE)
+        out, _ = proc.communicate()
+    for line in out.splitlines():
+        pkg, ver = line.split()
+        if pkg == "otree-core":
+            clean = ver[1:-1]
+            return tuple(clean.split("."))
+
+
+def available_otree_core_versions():
+    """Return a list of available versions of otree-core in pypi
+
+    """
+    logger.info("Retrieving available otree-core version on PyPi...")
+    data = pypi.info("otree-core")
+    versions = [tuple(ver.split(".")) for ver in data["releases"].keys()]
+    versions.sort(reverse=True)
+    return versions
+
+
 def check_py_version():
     """Check if python version is ok for oTree-Launcher
 
@@ -374,7 +406,7 @@ def zip_info(fpath):
 
     def cons_as_pickle():
         cdict = {
-            k: v for k, v  in vars(cons).items()
+            k: v for k, v in vars(cons).items()
             if not k.startswith("_") and k.isupper()}
         return pickle.dumps(cdict)
 
@@ -392,7 +424,6 @@ def zip_info(fpath):
         if os.path.isfile(cons.DB_FPATH):
             ziph.write(cons.DB_FPATH, os.path.basename(cons.DB_FPATH))
         ziph.writestr("cons.pkl", cons_as_pickle())
-
 
 
 # =============================================================================
