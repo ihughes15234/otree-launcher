@@ -109,10 +109,6 @@ class LoggingToGUI(logging.Handler):
         self.console.update()
 
 
-# =============================================================================
-# GUI
-# =============================================================================
-
 class LogDisplay(ttk.LabelFrame):
     """A simple 'console' to place at the bottom of a Tkinter window """
 
@@ -123,6 +119,44 @@ class LogDisplay(ttk.LabelFrame):
         self.console.configure(bg="#222222", fg="#dddddd")
         self.console.pack(fill=Tkinter.BOTH, expand=True)
 
+
+# =============================================================================
+# SELECT OTREE-CORE VERSION DIALOG
+# =============================================================================
+
+class OTreeCoreVersionDialog(object):
+
+    def __init__(self, parent, valor, title, labeltext = '' ):
+        self.valor = valor
+
+        self.top = Toplevel(parent)
+        self.top.transient(parent)
+        self.top.grab_set()
+        if len(title) > 0:
+                self.top.title(title)
+        if len(labeltext) == 0:
+            labeltext = 'Valor'
+        Label(self.top, text=labeltext).pack()
+        self.top.bind("<Return>", self.ok)
+        self.e = Entry(self.top, text=valor.get())
+        self.e.bind("<Return>", self.ok)
+        self.e.bind("<Escape>", self.cancel)
+        self.e.pack(padx=15)
+        self.e.focus_set()
+        b = Button(self.top, text="OK", command=self.ok)
+        b.pack(pady=5)
+
+    def ok(self, event=None):
+        print "Has escrito ...", self.e.get()
+        self.valor.set(self.e.get())
+        self.top.destroy()
+
+    def cancel(self, event=None):
+        self.top.destroy()
+
+# =============================================================================
+# MAIN FRAME
+# =============================================================================
 
 class OTreeLauncherFrame(ttk.Frame):
 
@@ -145,8 +179,8 @@ class OTreeLauncherFrame(ttk.Frame):
         self.icon_run = Tkinter.PhotoImage(file=res.get("imgs", "run.gif"))
         self.icon_clear = Tkinter.PhotoImage(file=res.get("imgs", "clear.gif"))
         self.icon_stop = Tkinter.PhotoImage(file=res.get("imgs", "stop.gif"))
-        self.icon_update = Tkinter.PhotoImage(
-            file=res.get("imgs", "update.gif"))
+        self.icon_core_installer = Tkinter.PhotoImage(
+            file=res.get("imgs", "core_installer.gif"))
 
         self.icon_opendir = Tkinter.PhotoImage(
             file=res.get("imgs", "opendir.gif"))
@@ -250,14 +284,14 @@ class OTreeLauncherFrame(ttk.Frame):
         tktooltip.create_tooltip(
             self.clear_button, "Restore the database of current project")
 
-        self.update_button = ttk.Button(
-            buttons_frame, text="oTree Update",
+        self.otree_core_selector_button = ttk.Button(
+            buttons_frame, text="Version Select",
             command=self.do_check_otree_update, compound=Tkinter.LEFT,
-            image=self.icon_update)
-        self.update_button.pack(**button_opt)
+            image=self.icon_core_installer)
+        self.otree_core_selector_button.pack(**button_opt)
         tktooltip.create_tooltip(
-            self.update_button,
-            "Check for oTree update in the current project")
+            self.otree_core_selector_button,
+            "Change the oTree version of the project")
 
         # =====================================================================
         # CONSOLE
@@ -367,7 +401,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploy_path.set(self.conf.path or "")
         state = Tkinter.NORMAL if self.conf.path else Tkinter.DISABLED
         self.run_button.config(state=state)
-        self.update_button.config(state=state)
+        self.otree_core_selector_button.config(state=state)
         self.terminal_button.config(state=state)
         self.filemanager_button.config(state=state)
         self.clear_button.config(state=state)
@@ -412,7 +446,30 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
 
     def do_check_otree_update(self):
-        raise NotImplementedError()
+        try:
+            self.run_button.config(state=Tkinter.DISABLED)
+            self.otree_core_selector_button.config(state=Tkinter.DISABLED)
+            self.clear_button.config(state=Tkinter.DISABLED)
+            self.opendirectory_button.config(state=Tkinter.DISABLED)
+            self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
+            if self.check_connectivity():
+                version = core.otree_core_version(self.conf.path)
+                available_versions = core.available_otree_core_versions()
+            for av in available_versions:
+                print av
+        except Exception as err:
+            self.msgbox.showerror("Something gone wrong", unicode(err))
+        finally:
+            self.run_button.config(state=Tkinter.NORMAL)
+            self.otree_core_selector_button.config(state=Tkinter.NORMAL)
+            self.clear_button.config(state=Tkinter.NORMAL)
+            self.opendirectory_button.config(state=Tkinter.NORMAL)
+            self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
+
+
+
+        #~ dialog = MyDialog(self.root, self.valor, "Probando Dialogo", "Dame valor")
+        #~ root.wait_window(dialog.top)
 
     def do_open_terminal(self):
         try:
@@ -436,14 +493,14 @@ class OTreeLauncherFrame(ttk.Frame):
 
             def clean():
                 self.run_button.config(state=Tkinter.NORMAL)
-                self.update_button.config(state=Tkinter.NORMAL)
+                self.otree_core_selector_button.config(state=Tkinter.NORMAL)
                 self.clear_button.config(state=Tkinter.NORMAL)
                 self.opendirectory_button.config(state=Tkinter.NORMAL)
                 self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
 
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
-                self.update_button.config(state=Tkinter.DISABLED)
+                self.otree_core_selector_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
                 self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
@@ -456,14 +513,14 @@ class OTreeLauncherFrame(ttk.Frame):
     def do_run(self):
         try:
             self.run_button.config(state=Tkinter.DISABLED)
-            self.update_button.config(state=Tkinter.DISABLED)
+            self.otree_core_selector_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
             self.proc = core.runserver(self.conf.path)
         except Exception as err:
             self.run_button.config(state=Tkinter.NORMAL)
-            self.update_button.config(state=Tkinter.NORMAL)
+            self.otree_core_selector_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
@@ -485,7 +542,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 core.kill_proc(self.proc)
             self.proc = None
         self.run_button.config(state=Tkinter.NORMAL)
-        self.update_button.config(state=Tkinter.NORMAL)
+        self.otree_core_selector_button.config(state=Tkinter.NORMAL)
         self.clear_button.config(state=Tkinter.NORMAL)
         self.opendirectory_button.config(state=Tkinter.NORMAL)
         self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
@@ -530,7 +587,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
             try:
                 self.run_button.config(state=Tkinter.DISABLED)
-                self.update_button.config(state=Tkinter.DISABLED)
+                self.otree_core_selector_button.config(state=Tkinter.DISABLED)
                 self.terminal_button.config(state=Tkinter.DISABLED)
                 self.filemanager_button.config(state=Tkinter.DISABLED)
                 self.clear_button.config(state=Tkinter.DISABLED)
@@ -571,7 +628,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
                 def block():
                     self.run_button.config(state=Tkinter.DISABLED)
-                    self.update_button.config(state=Tkinter.DISABLED)
+                    self.otree_core_selector_button.config(state=Tkinter.DISABLED)
                     self.terminal_button.config(state=Tkinter.DISABLED)
                     self.filemanager_button.config(state=Tkinter.DISABLED)
                     self.clear_button.config(state=Tkinter.DISABLED)
@@ -580,7 +637,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
                 def clean():
                     self.run_button.config(state=Tkinter.NORMAL)
-                    self.update_button.config(state=Tkinter.NORMAL)
+                    self.otree_core_selector_button.config(state=Tkinter.NORMAL)
                     self.terminal_button.config(state=Tkinter.NORMAL)
                     self.filemanager_button.config(state=Tkinter.NORMAL)
                     self.clear_button.config(state=Tkinter.NORMAL)
