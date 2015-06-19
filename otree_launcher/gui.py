@@ -164,13 +164,13 @@ class OTreeLauncherFrame(ttk.Frame):
 
         self.deploy_menu = Tkinter.Menu(self.menu)
         self.deploy_menu.add_command(
-            label="New Deploy", command=self.do_deploy,
+            label="New Project", command=self.do_deploy,
             compound=Tkinter.LEFT, image=self.icon_new)
         self.deploy_menu.add_separator()
         self.deploy_menu.add_command(
             label="Exit", command=self.do_exit,
             compound=Tkinter.LEFT, image=self.icon_exit)
-        self.menu.add_cascade(label="Deploys", menu=self.deploy_menu)
+        self.menu.add_cascade(label="Projects", menu=self.deploy_menu)
 
         self.about_menu = Tkinter.Menu(self.menu)
         self.about_menu.add_command(
@@ -350,7 +350,7 @@ class OTreeLauncherFrame(ttk.Frame):
 
             setup_complete_msg = (
                 "Initial setup complete.\n"
-                "Click on the 'Deploys' menu to create a new deploy."
+                "Click on the 'Projects' menu to create a new deploy."
             )
 
             self.check_proc_end(clean, setup_complete_msg,
@@ -429,9 +429,9 @@ class OTreeLauncherFrame(ttk.Frame):
     def do_clear(self):
         msg = (
             "Are you sure to you want to clear the"
-            "database for the deploy '{}'?"
+            "database for the project '{}'?"
         ).format(self.conf.path)
-        res = self.msgbox.askokcancel("Reset Deploy", msg)
+        res = self.msgbox.askokcancel("Reset Project", msg)
         if res:
 
             def clean():
@@ -599,10 +599,9 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.proc = core.reset_db(wrkpath)
                     self.check_proc_end(
                         setdir,
-                        ("Deploy done. Click the 'Run' button to start the "
+                        ("Project done. Click the 'Run' button to start the "
                          "server. Or, you can first modify the apps in your "
-                         "project directory."), popup=True
-                    )
+                         "project directory."), popup=True)
 
                 def install():
                     block()
