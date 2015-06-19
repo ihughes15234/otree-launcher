@@ -6,6 +6,10 @@ import json
 from . import six
 from .six.moves import urllib
 
+from pip.commands import show
+
+
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
