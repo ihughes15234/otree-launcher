@@ -349,7 +349,6 @@ def check_upgrade():
         return str_lversion, exists_upgrade, mandatory
 
 
-@cache.memoize(1, "minutes")
 def otree_core_version(wrkpath):
     """Retrieve the otree-core version installed in the current project
 
@@ -370,7 +369,7 @@ def otree_core_version(wrkpath):
             return tuple(clean.split("."))
 
 
-@cache.memoize(1, "hour")
+@cache.memoize(1, "hours")
 def available_otree_core_versions():
     """Return a list of available versions of otree-core in pypi
 

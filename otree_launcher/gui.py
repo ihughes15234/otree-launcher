@@ -36,6 +36,15 @@ from . import cons, core, res
 from .libs import splash, tktooltip
 
 
+
+# =============================================================================
+# PATCH
+# =============================================================================
+
+def _(string):
+    return string
+
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -125,34 +134,70 @@ class LogDisplay(ttk.LabelFrame):
 # =============================================================================
 
 class OTreeCoreVersionDialog(object):
+    """Dialog for chose the otree-core upgrade or downgrade inside e projec
 
-    def __init__(self, parent, valor, title, labeltext = '' ):
-        self.valor = valor
+    see: http://goo.gl/z9WqfB
 
-        self.top = Toplevel(parent)
+    """
+
+    def __init__(self, parent, version, available_versions):
+        self.top = Tkinter.Toplevel(parent)
         self.top.transient(parent)
         self.top.grab_set()
-        if len(title) > 0:
-                self.top.title(title)
-        if len(labeltext) == 0:
-            labeltext = 'Valor'
-        Label(self.top, text=labeltext).pack()
-        self.top.bind("<Return>", self.ok)
-        self.e = Entry(self.top, text=valor.get())
-        self.e.bind("<Return>", self.ok)
-        self.e.bind("<Escape>", self.cancel)
-        self.e.pack(padx=15)
-        self.e.focus_set()
-        b = Button(self.top, text="OK", command=self.ok)
-        b.pack(pady=5)
+        self.top.title(_("Select otree-core version"))
 
-    def ok(self, event=None):
-        print "Has escrito ...", self.e.get()
-        self.valor.set(self.e.get())
+        self.selected = None
+
+        self.version = version
+        self.version_str = ".".join(version)
+
+        self.available_versions_str = []
+        self.available_versions_mapper = {}
+        for aver in available_versions:
+            aver_str = ".".join(aver)
+            self.available_versions_str.append(aver_str)
+            self.available_versions_mapper[aver_str] = aver
+
+        # ICONS
+        #~ self.icon_ok = Tkinter.PhotoImage(file=res.get("imgs", "ok.gif"))
+        #~ self.icon_cancel = Tkinter.PhotoImage(
+            #~ file=res.get("imgs", "cancel.gif"))
+
+        # COMBO WIDGETS
+        pack_opts = {"padx": 30, "pady": 5}
+
+        self.versions_combo_label = Tkinter.Label(
+            self.top, text=_("The change of the oTree version only affect the "
+                             "current Project"))
+        self.versions_combo_label.pack(**pack_opts)
+
+        self._selected_version = Tkinter.StringVar()
+        self.versions_combo = ttk.Combobox(
+            self.top, textvariable=self._selected_version, state='readonly')
+        self.versions_combo['values'] = self.available_versions_str
+        self.versions_combo.set(self.version_str)
+        self.versions_combo.pack(**pack_opts)
+
+        # BUTTONS
+        buttons_frame = ttk.Frame(self.top)
+        buttons_frame.pack(**pack_opts)
+
+        btns_pack_opts = {"side": Tkinter.RIGHT, "padx": 5}
+
+        self.select_button = ttk.Button(
+            buttons_frame, text="Select", command=self.do_select,
+            compound=Tkinter.RIGHT)
+        self.select_button.pack(**btns_pack_opts)
+
+    def do_select(self):
+        key = self._selected_version.get()
+        if key != self.version_str:
+            self.selected = self.available_versions_mapper[key]
         self.top.destroy()
 
-    def cancel(self, event=None):
+    def cancel(self):
         self.top.destroy()
+
 
 # =============================================================================
 # MAIN FRAME
@@ -303,6 +348,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.refresh_deploy_path()
 
     def check_connectivity(self):
+        return True
         now = time.time()
         lstatus, ltime = self.last_connectivity_check
         if lstatus is None or now - ltime > 60:
@@ -452,11 +498,13 @@ class OTreeLauncherFrame(ttk.Frame):
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
-            if self.check_connectivity():
-                version = core.otree_core_version(self.conf.path)
-                available_versions = core.available_otree_core_versions()
-            for av in available_versions:
-                print av
+
+            version = core.otree_core_version(self.conf.path)
+            available_versions = core.available_otree_core_versions()
+            dialog = OTreeCoreVersionDialog(
+                self.root, version, available_versions)
+            self.root.wait_window(dialog.top)
+
         except Exception as err:
             self.msgbox.showerror("Something gone wrong", unicode(err))
         finally:
@@ -718,6 +766,7 @@ def run():
     read_log_file()
 
     frame.check_launcher_enviroment()
+    frame.do_check_otree_update()
     root.mainloop()
 
 # =============================================================================
