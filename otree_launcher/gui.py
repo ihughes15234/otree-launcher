@@ -189,6 +189,13 @@ class OTreeCoreVersionDialog(object):
             compound=Tkinter.RIGHT)
         self.select_button.pack(**btns_pack_opts)
 
+        self.cancel_button = ttk.Button(
+            buttons_frame, text="Canceñ", command=self.do_cancel,
+            compound=Tkinter.RIGHT)
+        self.cancel_button.pack(**btns_pack_opts)
+
+
+
     def do_select(self):
         key = self._selected_version.get()
         if key != self.version_str:
