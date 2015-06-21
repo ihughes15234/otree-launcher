@@ -31,18 +31,31 @@ except ImportError:
 
 
 # =============================================================================
+# CONSTANTS
+# =============================================================================
+
+CONVERSORS = {
+    "seconds": lambda s: s,
+    "minutes": lambda m: 60 * m,
+    "hours": lambda h: 60 * 60 * h,
+    "days": lambda d: 24 * 60 * 60 * d
+}
+
+
+# =============================================================================
 # MEMOIZE
 # =============================================================================
 
 Memo = namedtuple("Memo", ["ttd", "value"])
 
 
-def memoize(ttl):
+def memoize(ttl, unit="seconds"):
     """Dict cache for python functions.
 
     Fails if some of the parameter of the function is not pickleable.
 
     ttl is the time in second for the 'time to live' of the data
+    unit can be 'seconds', 'minutes', 'hours' or 'days'. Default is 'seconds'
 
     Example
     -------
@@ -63,6 +76,15 @@ def memoize(ttl):
 
 
     """
+
+    conversor = CONVERSORS.get(unit)
+    if conversor is None:
+        msg = "Invalid unit '{}' choice one of: {}".format(
+            unit, CONVERSORS.keys()
+        )
+        raise ValueError(msg)
+
+    ttl = conversor(ttl)
     cache = {}
 
     def _dec(fnc):

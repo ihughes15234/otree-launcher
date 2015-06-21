@@ -40,7 +40,7 @@ except ImportError:
     import pickle
 
 from . import cons, ctx, db
-from .libs import pypi
+from .libs import pypi, cache
 
 
 # =============================================================================
@@ -317,6 +317,7 @@ def clean_tempdir():
             os.remove(fpath)
 
 
+@cache.memoize(30, "minutes")
 def check_upgrade():
     """Chek if a new version of oTree-Launcher is available and if mandatory
     to upgrade the program
@@ -348,6 +349,7 @@ def check_upgrade():
         return str_lversion, exists_upgrade, mandatory
 
 
+@cache.memoize(1, "minutes")
 def otree_core_version(wrkpath):
     """Retrieve the otree-core version installed in the current project
 
@@ -368,6 +370,7 @@ def otree_core_version(wrkpath):
             return tuple(clean.split("."))
 
 
+@cache.memoize(1, "hour")
 def available_otree_core_versions():
     """Return a list of available versions of otree-core in pypi
 
