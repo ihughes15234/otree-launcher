@@ -159,9 +159,8 @@ class OTreeCoreVersionDialog(object):
             self.available_versions_mapper[aver_str] = aver
 
         # ICONS
-        #~ self.icon_ok = Tkinter.PhotoImage(file=res.get("imgs", "ok.gif"))
-        #~ self.icon_cancel = Tkinter.PhotoImage(
-            #~ file=res.get("imgs", "cancel.gif"))
+        self.icon_cancel = Tkinter.PhotoImage(
+            file=res.get("imgs", "cancel.gif"))
 
         # COMBO WIDGETS
         pack_opts = {"padx": 30, "pady": 5}
@@ -182,19 +181,17 @@ class OTreeCoreVersionDialog(object):
         buttons_frame = ttk.Frame(self.top)
         buttons_frame.pack(**pack_opts)
 
-        btns_pack_opts = {"side": Tkinter.RIGHT, "padx": 5}
+        btns_pack_opts = {"side": Tkinter.RIGHT, "anchor": "w", "padx": 5}
 
         self.select_button = ttk.Button(
             buttons_frame, text="Select", command=self.do_select,
-            compound=Tkinter.RIGHT)
+            compound=Tkinter.LEFT)
         self.select_button.pack(**btns_pack_opts)
 
         self.cancel_button = ttk.Button(
-            buttons_frame, text="Canceñ", command=self.do_cancel,
-            compound=Tkinter.RIGHT)
+            buttons_frame, text="Cancel", command=self.do_cancel,
+            compound=Tkinter.LEFT, image=self.icon_cancel)
         self.cancel_button.pack(**btns_pack_opts)
-
-
 
     def do_select(self):
         key = self._selected_version.get()
@@ -202,7 +199,7 @@ class OTreeCoreVersionDialog(object):
             self.selected = self.available_versions_mapper[key]
         self.top.destroy()
 
-    def cancel(self):
+    def do_cancel(self):
         self.top.destroy()
 
 
@@ -749,7 +746,7 @@ def run():
 
         # set icon
         icon = Tkinter.PhotoImage(file=res.get("imgs", "otree.gif"))
-        root.tk.call('wm', 'iconphoto', root._w, icon)
+        root.tk.call('wm', 'iconphoto', root._w, "-default", icon)
 
         # add main frame
         frame = OTreeLauncherFrame(root)
