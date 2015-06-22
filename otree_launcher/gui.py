@@ -25,7 +25,6 @@ import os
 import logging
 import sys
 import webbrowser
-import time
 
 import Tkinter
 import tkMessageBox
@@ -34,7 +33,6 @@ import ttk
 
 from . import cons, core, res
 from .libs import splash, tktooltip
-
 
 
 # =============================================================================
@@ -684,7 +682,8 @@ class OTreeLauncherFrame(ttk.Frame):
 
                 def block():
                     self.run_button.config(state=Tkinter.DISABLED)
-                    self.otree_core_selector_button.config(state=Tkinter.DISABLED)
+                    self.otree_core_selector_button.config(
+                        state=Tkinter.DISABLED)
                     self.terminal_button.config(state=Tkinter.DISABLED)
                     self.filemanager_button.config(state=Tkinter.DISABLED)
                     self.clear_button.config(state=Tkinter.DISABLED)
@@ -693,7 +692,8 @@ class OTreeLauncherFrame(ttk.Frame):
 
                 def clean():
                     self.run_button.config(state=Tkinter.NORMAL)
-                    self.otree_core_selector_button.config(state=Tkinter.NORMAL)
+                    self.otree_core_selector_button.config(
+                        state=Tkinter.NORMAL)
                     self.terminal_button.config(state=Tkinter.NORMAL)
                     self.filemanager_button.config(state=Tkinter.NORMAL)
                     self.clear_button.config(state=Tkinter.NORMAL)
