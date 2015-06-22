@@ -163,7 +163,7 @@ class OTreeCoreVersionDialog(object):
             file=res.get("imgs", "cancel.gif"))
 
         # COMBO WIDGETS
-        pack_opts = {"padx": 30, "pady": 5}
+        pack_opts = {"padx": 15, "pady": 5}
 
         self.versions_combo_label = Tkinter.Label(
             self.top, text=_("The change of the oTree version only affect the "
@@ -214,7 +214,6 @@ class OTreeLauncherFrame(ttk.Frame):
         self.root = root
         self.proc = None
         self.conf = core.get_conf()
-        self.last_connectivity_check = (None, None)  # status, time
         self.msgbox = MessageBox(self)
 
         # icons
@@ -353,18 +352,14 @@ class OTreeLauncherFrame(ttk.Frame):
 
     def check_connectivity(self):
         return True
-        now = time.time()
-        lstatus, ltime = self.last_connectivity_check
-        if lstatus is None or now - ltime > 60:
-            try:
-                core.check_connectivity()
-                logger.info("check_connectivity OK")
-                self.last_connectivity_check = True, now
-            except Exception as err:
-                logger.error(err.message)
-                self.msgbox.showerror("Critical Error", err.message)
-                self.last_connectivity_check = False, now
-        return self.last_connectivity_check[0]
+        try:
+            core.check_connectivity()
+            logger.info("check_connectivity OK")
+        except Exception as err:
+            logger.error(err.message)
+            self.msgbox.showerror("Critical Error", err.message)
+            return False
+        return True
 
     def check_launcher_enviroment(self):
         """Check the launcher enviroment and stop the program if its impossible
@@ -629,9 +624,6 @@ class OTreeLauncherFrame(ttk.Frame):
 
         if dpath and dpath != self.conf.path:
 
-            if not self.check_connectivity():
-                return
-
             def clean():
                 self.conf.path = dpath
                 self.conf.save()
@@ -672,9 +664,6 @@ class OTreeLauncherFrame(ttk.Frame):
                 wrkpath = dpath
                 break
         if wrkpath:
-
-            if not self.check_connectivity():
-                return
 
             try:
 

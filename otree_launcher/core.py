@@ -70,6 +70,7 @@ class InstallError(Exception):
 # HELPER FUNCTIONS
 # =============================================================================
 
+@cache.memoize(60, "seconds")
 def check_connectivity(timeout=1):
     """Check if all servers needed for use oTree-launcher are online
 
