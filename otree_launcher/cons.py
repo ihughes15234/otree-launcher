@@ -229,7 +229,7 @@ python "$OTREE_SCRIPT_PATH" runserver
 GIT_COMMIT_REQUIREMENTS_CMDS_TEMPLATE = (
     'cd "$WRK_PATH"\n'
     '$GIT_CMD commit --author="oTree-Launcher <oTree@launcher.com>" '
-    '"$REQUIREMENTS_PATH" -m "$old_version -> $new_version"'
+    '"$REQUIREMENTS_PATH" -m "otree-core - $old_version -> $new_version"'
 )
 
 
