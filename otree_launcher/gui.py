@@ -351,7 +351,6 @@ class OTreeLauncherFrame(ttk.Frame):
         self.refresh_deploy_path()
 
     def check_connectivity(self):
-        return True
         try:
             core.check_connectivity()
             logger.info("check_connectivity OK")
@@ -499,13 +498,21 @@ class OTreeLauncherFrame(ttk.Frame):
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
 
-
         def clean():
             self.run_button.config(state=Tkinter.NORMAL)
             self.otree_core_selector_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
+
+        def reinstall():
+            try:
+                block()
+                self.proc = core.install_requirements(self.conf.path)
+                self.check_proc_end(clean, "New version installed")
+            except:
+                self.msgbox.showerror("Something gone wrong", unicode(err))
+                clean()
 
         try:
             block()
@@ -519,7 +526,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.change_otree_core_version(
                     self.conf.path, dialog.selected
                 )
-                self.check_proc_end(clean, "Version Changed")
+                self.check_proc_end(reinstall, "Version Changed")
             else:
                 clean()
         except Exception as err:
@@ -767,7 +774,6 @@ def run():
     read_log_file()
 
     frame.check_launcher_enviroment()
-    frame.do_check_otree_update()
     root.mainloop()
 
 # =============================================================================

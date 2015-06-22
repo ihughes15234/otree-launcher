@@ -397,11 +397,13 @@ def change_otree_core_version(wrkpath, version):
     str_version = ".".join(version)
     requirements_path = os.path.join(wrkpath, cons.REQUIREMENTS_FNAME)
 
+    old_version = None
     lines = []
     with ctx.open(requirements_path, "r") as fp:
         logger.info("Retrieving '{}'...".format(requirements_path))
         for line in fp.readlines():
             if line.startswith("otree-core=="):
+                old_version = line.split("==", 1)[-1]
                 line = "otree-core=={}".format(str_version)
             lines.append(line)
 
@@ -412,7 +414,9 @@ def change_otree_core_version(wrkpath, version):
     with ctx.tempfile("commit", cons.SCRIPT_EXTENSION) as fpath:
         logger.info("Creating commit script...")
         with ctx.open(fpath, "w") as fp:
-            src = render(cons.GIT_COMMIT_REQUIREMENTS_CMDS_TEMPLATE, wrkpath)
+            src = render(
+                cons.GIT_COMMIT_REQUIREMENTS_CMDS_TEMPLATE, wrkpath,
+                old_version=old_version, new_version=str_version)
             fp.write(src)
         logger.info("Commiting...")
         return call([cons.INTERPRETER, fpath])
