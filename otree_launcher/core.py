@@ -382,6 +382,42 @@ def available_otree_core_versions():
     return versions
 
 
+def change_otree_core_version(wrkpath, version):
+    """Patch the otree requirements_base.txt replacing the existing
+
+    ``otree-core==OLD_VERSION``
+
+    for
+
+    ``otree-core==NEW_VERSION``
+
+    and after that executing git commit
+
+    """
+    str_version = ".".join(version)
+    requirements_path = os.path.join(wrkpath, cons.REQUIREMENTS_FNAME)
+
+    lines = []
+    with ctx.open(requirements_path, "r") as fp:
+        logger.info("Retrieving '{}'...".format(requirements_path))
+        for line in fp.readlines():
+            if line.startswith("otree-core=="):
+                line = "otree-core=={}".format(str_version)
+            lines.append(line)
+
+    with ctx.open(requirements_path, "w") as fp:
+        logger.info("Writing new '{}'...".format(requirements_path))
+        fp.writelines(lines)
+
+    with ctx.tempfile("commit", cons.SCRIPT_EXTENSION) as fpath:
+        logger.info("Creating commit script...")
+        with ctx.open(fpath, "w") as fp:
+            src = render(cons.GIT_COMMIT_REQUIREMENTS_CMDS_TEMPLATE, wrkpath)
+            fp.write(src)
+        logger.info("Commiting...")
+        return call([cons.INTERPRETER, fpath])
+
+
 def check_py_version():
     """Check if python version is ok for oTree-Launcher
 

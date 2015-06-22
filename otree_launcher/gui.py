@@ -491,32 +491,40 @@ class OTreeLauncherFrame(ttk.Frame):
     # =========================================================================
 
     def do_check_otree_update(self):
-        try:
+
+        def block():
             self.run_button.config(state=Tkinter.DISABLED)
             self.otree_core_selector_button.config(state=Tkinter.DISABLED)
             self.clear_button.config(state=Tkinter.DISABLED)
             self.opendirectory_button.config(state=Tkinter.DISABLED)
             self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
 
-            version = core.otree_core_version(self.conf.path)
-            available_versions = core.available_otree_core_versions()
-            dialog = OTreeCoreVersionDialog(
-                self.root, version, available_versions)
-            self.root.wait_window(dialog.top)
 
-        except Exception as err:
-            self.msgbox.showerror("Something gone wrong", unicode(err))
-        finally:
+        def clean():
             self.run_button.config(state=Tkinter.NORMAL)
             self.otree_core_selector_button.config(state=Tkinter.NORMAL)
             self.clear_button.config(state=Tkinter.NORMAL)
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
 
+        try:
+            block()
+            version = core.otree_core_version(self.conf.path)
+            available_versions = core.available_otree_core_versions()
+            dialog = OTreeCoreVersionDialog(
+                self.root, version, available_versions)
+            self.root.wait_window(dialog.top)
 
-
-        #~ dialog = MyDialog(self.root, self.valor, "Probando Dialogo", "Dame valor")
-        #~ root.wait_window(dialog.top)
+            if dialog.selected is not None and dialog.selected != version:
+                self.proc = core.change_otree_core_version(
+                    self.conf.path, dialog.selected
+                )
+                self.check_proc_end(clean, "Version Changed")
+            else:
+                clean()
+        except Exception as err:
+            self.msgbox.showerror("Something gone wrong", unicode(err))
+            clean()
 
     def do_open_terminal(self):
         try:
