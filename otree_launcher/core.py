@@ -364,8 +364,9 @@ def otree_core_version(wrkpath):
         proc = call([cons.INTERPRETER, fpath], stdout=subprocess.PIPE)
         out, _ = proc.communicate()
     for line in out.splitlines():
-        pkg, ver = line.split()
-        if pkg == "otree-core":
+        line = line.strip()
+        if line and line.startswith("otree-core"):
+            ver = line.split(" ", 1)[-1]
             clean = ver[1:-1]
             return tuple(clean.split("."))
 
