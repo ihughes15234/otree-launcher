@@ -39,15 +39,17 @@ try:
 except ImportError:
     import pickle
 
-from . import cons, ctx, db
+from . import cons, ctx, db, i18n
 from .libs import pypi, cache
 
 
 # =============================================================================
-# LOGGER
+# LOGGER and I18N
 # =============================================================================
 
 logger = cons.logger
+
+_ = i18n.gettext
 
 
 # =============================================================================
@@ -62,7 +64,7 @@ class InstallError(Exception):
     def __init__(self, code):
         self.code = code
         super(InstallError, self).__init__(
-            "Exit code with value '{}'".format(code)
+            _("Exit code with value '{}'").format(code)
         )
 
 
@@ -81,10 +83,10 @@ def check_connectivity(timeout=1):
             urllib2.urlopen(server, timeout=timeout)
         except urllib2.URLError:
             host = urlparse.urlsplit(server).netloc
-            errors.append("'{}' is unreachable".format(host))
+            errors.append(_("'{}' is unreachable").format(host))
     if errors:
         errors_joined = "\n  ".join(errors)
-        msg = "Check your internet connection\n  {}".format(errors_joined)
+        msg = _("Check your internet connection\n  {}").format(errors_joined)
         raise IOError(msg)
 
 
@@ -161,20 +163,20 @@ def create_virtualenv():
 
     reqpath = None
     with ctx.tempfile("requirements", "txt") as fpath:
-        logger.info("Downloading requirements file...")
+        logger.info(_("Downloading requirements file..."))
         with ctx.urlget(cons.VENV_REQUIREMENTS_URL) as response:
             with ctx.open(fpath, "w") as fp:
                 fp.write(response.read())
         reqpath = fpath
 
     with ctx.tempfile("venv_installer", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating virtualenv install script...")
+        logger.info(_("Creating virtualenv install script..."))
         with ctx.open(fpath, "w") as fp:
             src = render(cons.CREATE_VENV_CMDS_TEMPLATE,
                          cons.LAUNCHER_VENV_PATH, REQUIREMENTS_PATH=reqpath)
             fp.write(src)
-        logger.info("Creating venv, please wait"
-                    " (this may take a few minutes)...")
+        logger.info(_("Creating venv, please wait"
+                      " (this may take a few minutes)..."))
         return call([cons.INTERPRETER, fpath])
 
 
@@ -182,13 +184,13 @@ def clone(wrkpath):
     """Clone otree code into working dir
 
     """
-    logger.info("Cloning into '{}'...".format(wrkpath))
+    logger.info(_("Cloning into '{}'...").format(wrkpath))
     with ctx.tempfile("cloner", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating cloner script...")
+        logger.info(_("Creating cloner script..."))
         with ctx.open(fpath, "w") as fp:
             src = render(cons.CLONE_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Cloning...")
+        logger.info(_("Cloning..."))
         return call([cons.INTERPRETER, fpath])
 
 
@@ -197,15 +199,15 @@ def install_requirements(wrkpath):
 
     """
     logger.info(
-        "Installing requirements in '{}'...".format(cons.LAUNCHER_VENV_PATH)
+        _("Installing requirements in '{}'...").format(cons.LAUNCHER_VENV_PATH)
     )
     with ctx.tempfile("req_installer", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating requirements install script...")
+        logger.info(_("Creating requirements install script..."))
         with ctx.open(fpath, "w") as fp:
             src = render(cons.INSTALL_REQUIREMENTS_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Installing, please wait"
-                    "(this may take a few minutes)...")
+        logger.info(_("Installing, please wait"
+                      "(this may take a few minutes)..."))
         return call([cons.INTERPRETER, fpath])
 
 
@@ -213,13 +215,13 @@ def reset_db(wrkpath):
     """Reset the database of the oTree installation
 
     """
-    logger.info("Reset oTree in '{}'...".format(wrkpath))
+    logger.info(_("Reset oTree in '{}'...").format(wrkpath))
     with ctx.tempfile("reseter", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating reset script...")
+        logger.info(_("Creating reset script..."))
         with ctx.open(fpath, "w") as fp:
             src = render(cons.RESET_CMDS_TEMPLATE, wrkpath)
             fp.write(src)
-        logger.info("Resetting (please wait)...")
+        logger.info(_("Resetting (please wait)..."))
         return call([cons.INTERPRETER, fpath])
 
 
@@ -227,9 +229,9 @@ def runserver(wrkpath):
     """Run otree of the working path installation
 
     """
-    logger.info("Running oTree in '{}'...".format(wrkpath))
+    logger.info(_("Running oTree in '{}'...").format(wrkpath))
     with ctx.tempfile("runner", cons.SCRIPT_EXTENSION) as fpath:
-        logger.info("Creating runner script...")
+        logger.info(_("Creating runner script..."))
         with ctx.open(fpath, "w") as fp:
             src = render(cons.RUN_CMDS_TEMPLATE, wrkpath)
             fp.write(src)

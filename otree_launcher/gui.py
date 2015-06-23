@@ -31,7 +31,7 @@ import tkMessageBox
 import tkFileDialog
 import ttk
 
-from . import cons, core, res
+from . import cons, core, res, i18n
 from .libs import splash, tktooltip
 
 
@@ -39,8 +39,7 @@ from .libs import splash, tktooltip
 # PATCH
 # =============================================================================
 
-def _(string):
-    return string
+_ = i18n.gettext
 
 
 # =============================================================================
@@ -250,7 +249,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.deploy_menu.add_command(
             label="Exit", command=self.do_exit,
             compound=Tkinter.LEFT, image=self.icon_exit)
-        self.menu.add_cascade(label="Projects", menu=self.deploy_menu)
+        self.menu.add_cascade(label=_("Projects"), menu=self.deploy_menu)
 
         self.about_menu = Tkinter.Menu(self.menu)
         self.about_menu.add_command(
@@ -259,7 +258,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.about_menu.add_command(
             label="About oTree Launcher", command=self.do_about,
             compound=Tkinter.LEFT, image=self.icon_about)
-        self.menu.add_cascade(label="About", menu=self.about_menu)
+        self.menu.add_cascade(label=_("About"), menu=self.about_menu)
 
         # =====================================================================
         # DIRECTORY COMBO

@@ -1,0 +1,8 @@
+{
+    # core.py
+    "'{}' is unreachable": "No es posible conectar a '{}'",
+
+    # gui.py
+    "Projects": "Proyectos",
+    "About": "Acerca de"
+}
