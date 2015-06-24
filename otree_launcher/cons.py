@@ -28,7 +28,7 @@ import json
 import datetime
 
 from . import res
-from .libs import i18n
+from .libs import ji18n
 
 
 # =============================================================================
@@ -111,7 +111,7 @@ TODAY = datetime.date.today()
 
 OUR_PATH = os.path.abspath(os.path.dirname(__file__))
 
-I18N = i18n.I18N(os.path.join(OUR_PATH, "i18n"))
+I18N = ji18n.JI18N(os.path.join(OUR_PATH, "i18n"))
 
 CONF_DIRNAME = "otree-launcher"
 

@@ -1,8 +1,23 @@
 {
-    # core.py
-    "'{}' is unreachable": "No es posible conectar a '{}'",
-
-    # gui.py
-    "Projects": "Proyectos",
-    "About": "Acerca de"
+  "Installing, please wait(this may take a few minutes)...": "", 
+  "Creating requirements install script...": "", 
+  "About": "Acerca de", 
+  "Running oTree in '{}'...": "", 
+  "Creating virtualenv install script...": "", 
+  "The change of the oTree version only affect the current Project": "", 
+  "Creating venv, please wait (this may take a few minutes)...": "", 
+  "Exit code with value '{}'": "", 
+  "Creating cloner script...": "", 
+  "Creating runner script...": "", 
+  "Check your internet connection\n  {}": "", 
+  "Cloning into '{}'...": "", 
+  "Resetting (please wait)...": "", 
+  "Cloning...": "", 
+  "'{}' is unreachable": "", 
+  "Installing requirements in '{}'...": "", 
+  "Select otree-core version": "", 
+  "Downloading requirements file...": "", 
+  "Creating reset script...": "", 
+  "Projects": "Projectos", 
+  "Reset oTree in '{}'...": ""
 }
