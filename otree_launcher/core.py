@@ -39,7 +39,7 @@ try:
 except ImportError:
     import pickle
 
-from . import cons, ctx, db, i18n
+from . import cons, ctx, db
 from .libs import pypi, cache
 
 
@@ -49,7 +49,7 @@ from .libs import pypi, cache
 
 logger = cons.logger
 
-_ = i18n.gettext
+_ = cons.I18N.gettext
 
 
 # =============================================================================

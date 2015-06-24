@@ -31,7 +31,7 @@ import tkMessageBox
 import tkFileDialog
 import ttk
 
-from . import cons, core, res, i18n
+from . import cons, core, res
 from .libs import splash, tktooltip
 
 
@@ -39,7 +39,7 @@ from .libs import splash, tktooltip
 # PATCH
 # =============================================================================
 
-_ = i18n.gettext
+_ = cons.I18N.gettext
 
 
 # =============================================================================
