@@ -71,7 +71,7 @@ class JI18N(object):
             try:
                 with open(fpath) as fp:
                     translations[lang] = json.load(fp)
-            except Exception as err:
+            except:
                 print "Error on parsing language file '{}'".format(fpath)
         return translations
 
@@ -178,11 +178,10 @@ if __name__ == "__main__":
 
     mm_parser = subparsers.add_parser('makemessages')
     mm_parser.add_argument(
-        'prj', metavar='PATH',
-         help='Path of the python projec')
+        'prj', metavar='PATH', help='Path of the python projec')
     mm_parser.add_argument(
         'outdir', metavar='PATH',
-         help='Path for storage the JSON Based Internationalization')
+        help='Path for storage the JSON Based Internationalization')
     mm_parser.add_argument(
         'lang', metavar='LANGUAGE', help='Language code of the translation')
     mm_parser.set_defaults(func=lambda a: gen_lang(a.prj, a.outdir, a.lang))
@@ -190,14 +189,10 @@ if __name__ == "__main__":
     mm_parser = subparsers.add_parser('translate')
     mm_parser.add_argument(
         'outdir', metavar='PATH',
-         help='Path where the JSON dictionaries are stored')
+        help='Path where the JSON dictionaries are stored')
     mm_parser.add_argument(
         'string', metavar='STRING', help='string to translate')
     mm_parser.set_defaults(func=lambda a: translate(a.outdir, a.string))
 
-
     args = parser.parse_args()
     args.func(args)
-
-
-
