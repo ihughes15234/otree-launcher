@@ -617,8 +617,7 @@ class OTreeLauncherFrame(ttk.Frame):
             "oTree-Launcher\n"
             "A modern open platform for social science experiments\n"
             "Version: {version}"
-        ).format(version=cons.STR_VERSION
-        )
+        ).format(version=cons.STR_VERSION)
         self.msgbox.showinfo(title, body)
 
     def do_open_homepage(self):
@@ -714,8 +713,8 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.check_proc_end(
                         setdir,
                         _("Project done. Click the 'Run' button to start the "
-                         "server. Or, you can first modify the apps in your "
-                         "project directory."), popup=True)
+                          "server. Or, you can first modify the apps in your "
+                          "project directory."), popup=True)
 
                 def install():
                     block()
