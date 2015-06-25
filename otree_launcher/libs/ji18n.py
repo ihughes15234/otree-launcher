@@ -155,10 +155,10 @@ def gen_lang(prj, outdir, lang):
             translations.setdefault(string, "")
 
     with open(lang_path, "w") as fp:
-        json.dump(translations, fp, indent=2)
+        json.dump(translations, fp, indent=4)
 
     print(
-        "{} Language file for {} {} ({})".format(
+        "{} Language file for '{}' {} ({})".format(
             lang.upper(), prj, "updated" if exists else "created", lang_path))
 
 
@@ -178,9 +178,9 @@ if __name__ == "__main__":
 
     mm_parser = subparsers.add_parser('makemessages')
     mm_parser.add_argument(
-        'prj', metavar='PATH', help='Path of the python projec')
+        'prj', metavar='PRJ', help='Path of the python project')
     mm_parser.add_argument(
-        'outdir', metavar='PATH',
+        'outdir', metavar='OUTDIR',
         help='Path for storage the JSON Based Internationalization')
     mm_parser.add_argument(
         'lang', metavar='LANGUAGE', help='Language code of the translation')
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
     mm_parser = subparsers.add_parser('translate')
     mm_parser.add_argument(
-        'outdir', metavar='PATH',
+        'outdir', metavar='OUTDIR',
         help='Path where the JSON dictionaries are stored')
     mm_parser.add_argument(
         'string', metavar='STRING', help='string to translate')

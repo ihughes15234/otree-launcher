@@ -65,7 +65,7 @@ class MessageBox(object):
 
     def showerror(self, title, message, *args, **kwargs):
         tkMessageBox.showerror(title, message, *args, **kwargs)
-        msg = (
+        msg = _(
             "Do you want to create a file with information about your "
             "enviroment to report the problem?")
         response = self.askyesno(
@@ -75,16 +75,17 @@ class MessageBox(object):
                 "parent": self.parent,
                 "defaultextension": ".zip",
                 "initialdir": self.parent.conf.path or cons.HOME_DIR,
-                "filetypes": [('zip files', '.zip'), ('all files', '.*')],
-                'title': 'Save Error Information'
+                "filetypes": [
+                    (_('zip files'), '.zip'), (_('all files'), '.*')],
+                'title': _('Save Error Information')
             }
             fpath = tkFileDialog.asksaveasfilename(**options)
             if fpath:
                 core.zip_info(fpath)
-                message = (
+                message = _(
                     "Please attach '{}' and send email to '{}' report"
                 ).format(fpath, cons.EMAIL)
-                tkMessageBox.showinfo("Report ended", message)
+                tkMessageBox.showinfo(_("Report ended"), message)
 
 
 # =============================================================================
@@ -141,7 +142,7 @@ class OTreeCoreVersionDialog(object):
         self.top = Tkinter.Toplevel(parent)
         self.top.transient(parent)
         self.top.grab_set()
-        self.top.title(_("Select otree-core version"))
+        self.top.title(_("Select oTree version"))
 
         self.selected = None
 
@@ -243,20 +244,20 @@ class OTreeLauncherFrame(ttk.Frame):
 
         self.deploy_menu = Tkinter.Menu(self.menu)
         self.deploy_menu.add_command(
-            label="New Project", command=self.do_deploy,
+            label=_("New Project"), command=self.do_deploy,
             compound=Tkinter.LEFT, image=self.icon_new)
         self.deploy_menu.add_separator()
         self.deploy_menu.add_command(
-            label="Exit", command=self.do_exit,
+            label=_("Exit"), command=self.do_exit,
             compound=Tkinter.LEFT, image=self.icon_exit)
         self.menu.add_cascade(label=_("Projects"), menu=self.deploy_menu)
 
         self.about_menu = Tkinter.Menu(self.menu)
         self.about_menu.add_command(
-            label="oTree Homepage", command=self.do_open_homepage,
+            label=_("oTree Homepage"), command=self.do_open_homepage,
             compound=Tkinter.LEFT, image=self.icon_homepage)
         self.about_menu.add_command(
-            label="About oTree Launcher", command=self.do_about,
+            label=_("About oTree Launcher"), command=self.do_about,
             compound=Tkinter.LEFT, image=self.icon_about)
         self.menu.add_cascade(label=_("About"), menu=self.about_menu)
 
@@ -266,7 +267,7 @@ class OTreeLauncherFrame(ttk.Frame):
         directory_opts = {"side": Tkinter.LEFT, "padx": 2, "pady": 5}
         directory_init_opts = {"width": 1}
 
-        directory_frame = ttk.LabelFrame(self, text="Project Directory")
+        directory_frame = ttk.LabelFrame(self, text=_("Project Directory"))
         directory_frame.pack(fill=Tkinter.X)
 
         self.deploy_path = Tkinter.StringVar()
@@ -281,7 +282,8 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_opendir,
             **directory_init_opts)
         self.opendirectory_button.pack(**directory_opts)
-        tktooltip.create_tooltip(self.opendirectory_button, "Change project")
+        tktooltip.create_tooltip(
+            self.opendirectory_button, _("Change project"))
 
         self.filemanager_button = ttk.Button(
             directory_frame, text="", command=self.do_open_filemanager,
@@ -290,7 +292,7 @@ class OTreeLauncherFrame(ttk.Frame):
         self.filemanager_button.pack(**directory_opts)
         tktooltip.create_tooltip(
             self.filemanager_button,
-            "Open project directory with the file manager")
+            _("Open project directory with the file manager"))
 
         self.terminal_button = ttk.Button(
             directory_frame, text="", command=self.do_open_terminal,
@@ -298,7 +300,7 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts)
         self.terminal_button.pack(**directory_opts)
         tktooltip.create_tooltip(
-            self.terminal_button, "Open terminal with project enviroment")
+            self.terminal_button, _("Open terminal with project enviroment"))
 
         # =====================================================================
         # BUTTONS
@@ -309,40 +311,41 @@ class OTreeLauncherFrame(ttk.Frame):
         button_opt = {'side': Tkinter.LEFT, 'padx': 5, 'pady': 5}
 
         self.run_button = ttk.Button(
-            buttons_frame, text="Run", command=self.do_run,
+            buttons_frame, text=_("Run"), command=self.do_run,
             compound=Tkinter.LEFT, image=self.icon_run)
         self.run_button.pack(**button_opt)
         tktooltip.create_tooltip(
-            self.run_button, "Run the project server and open the webbrowser")
+            self.run_button,
+            _("Run the project server and open the webbrowser"))
 
         self.stop_button = ttk.Button(
-            buttons_frame, text="Stop", command=self.do_stop,
+            buttons_frame, text=_("Stop"), command=self.do_stop,
             compound=Tkinter.LEFT, image=self.icon_stop)
         self.stop_button.config(state=Tkinter.DISABLED)
         self.stop_button.pack(**button_opt)
-        tktooltip.create_tooltip(self.stop_button, "Stop the server")
+        tktooltip.create_tooltip(self.stop_button, _("Stop the server"))
 
         self.clear_button = ttk.Button(
-            buttons_frame, text="Clear Database", command=self.do_clear,
+            buttons_frame, text=_("Clear Database"), command=self.do_clear,
             compound=Tkinter.LEFT, image=self.icon_clear)
         self.clear_button.pack(**button_opt)
         tktooltip.create_tooltip(
-            self.clear_button, "Restore the database of current project")
+            self.clear_button, _("Restore the database of current project"))
 
         self.otree_core_selector_button = ttk.Button(
-            buttons_frame, text="Version Select",
+            buttons_frame, text=_("Version Select"),
             command=self.do_check_otree_update, compound=Tkinter.LEFT,
             image=self.icon_core_installer)
         self.otree_core_selector_button.pack(**button_opt)
         tktooltip.create_tooltip(
             self.otree_core_selector_button,
-            "Change the oTree version of the project")
+            _("Change the oTree version of the project"))
 
         # =====================================================================
         # CONSOLE
         # =====================================================================
 
-        self.log_display = LogDisplay(self, text="Console")
+        self.log_display = LogDisplay(self, text=_("Console"))
         self.log_display.pack(fill=Tkinter.BOTH, expand=True)
 
         self.refresh_deploy_path()
@@ -353,7 +356,7 @@ class OTreeLauncherFrame(ttk.Frame):
             logger.info("check_connectivity OK")
         except Exception as err:
             logger.error(err.message)
-            self.msgbox.showerror("Critical Error", err.message)
+            self.msgbox.showerror(_("Critical Error"), err.message)
             return False
         return True
 
@@ -364,42 +367,42 @@ class OTreeLauncherFrame(ttk.Frame):
         py_allowed, pyver_info, pyexe = core.check_py_version()
         logger.info("Python: {} ({})".format(pyver_info, pyexe))
         if not py_allowed:
-            msg = (
+            msg = _(
                 "The Python version {} ({}) "
                 "is not suitable to run oTree-Launcher"
             ).format(pyver_info, pyexe)
-            self.msgbox.showerror("Python Version Problem", msg)
+            self.msgbox.showerror(_("Python Version Problem"), msg)
             sys.exit(1)
 
         if self.check_connectivity():
             last_ver, is_new, mandatory = core.check_upgrade()
             if mandatory:
-                msg = (
+                msg = _(
                     "Your version of oTree-Launcher ({}) is obsolete\n"
                     "Do you want to download new {} version?"
                 ).format(cons.STR_VERSION, last_ver)
                 response = self.msgbox.askokcancel(
                     message=msg, icon='question',
-                    title='Version Obsolete'
+                    title=_('Version Obsolete')
                 )
                 if response:
                     webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
                 sys.exit(1)
 
             elif is_new:
-                msg = (
+                msg = _(
                     "A new version of oTree-Launcher is available ({})\n"
                     "Do you want to download it?"
                 ).format(last_ver)
                 response = self.msgbox.askyesno(
                     message=msg, icon='question',
-                    title='New Version Available'
+                    title=_('New Version Available')
                 )
                 if response:
                     webbrowser.open(cons.OTREE_LAUNCHER_ZIP_URL)
 
         if not core.check_our_path():
-            msg = (
+            msg = _(
                 "We found an space, unicode or invalid character in the path "
                 "where oTree-Launcher is located.\n"
                 "{}\n"
@@ -416,14 +419,14 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.conf.save()
                 self.refresh_deploy_path()
 
-            msg = (
+            msg = _(
                 "This is your first time running the oTree launcher.\n"
                 "Initial setup may take a few minutes.\n"
             )
-            self.msgbox.showinfo("First run setup", msg)
+            self.msgbox.showinfo(_("First run setup"), msg)
             self.proc = core.create_virtualenv()
 
-            setup_complete_msg = (
+            setup_complete_msg = _(
                 "Initial setup complete.\n"
                 "Click on the 'Projects' menu to create a new deploy."
             )
@@ -468,18 +471,18 @@ class OTreeLauncherFrame(ttk.Frame):
                 cleaner()
                 logger.info(msg)
                 if popup:
-                    self.msgbox.showinfo("Finished!", msg)
+                    self.msgbox.showinfo(_("Finished!"), msg)
             elif not exit_on_fail:
                 self.proc = None
                 cleaner()
-                msg = "Something gone wrong!!! Please check the console"
+                msg = _("Something gone wrong!!! Please check the console")
                 logger.critical(msg)
                 if popup:
-                    self.msgbox.showerror("Error", msg)
+                    self.msgbox.showerror(_("Error"), msg)
             else:
-                msg = "Critical Error!!!\nThe oTree-Launcher will be closed"
+                msg = _("Critical Error!!!\nThe oTree-Launcher will be closed")
                 logger.critical(msg)
-                self.msgbox.showerror("Critical Error", msg)
+                self.msgbox.showerror(_("Critical Error"), msg)
                 sys.exit(self.proc.returncode)
 
     # =========================================================================
@@ -508,7 +511,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.install_requirements(self.conf.path)
                 self.check_proc_end(clean, "New version installed")
             except:
-                self.msgbox.showerror("Something gone wrong", unicode(err))
+                self.msgbox.showerror(_("Something gone wrong"), unicode(err))
                 clean()
 
         try:
@@ -527,27 +530,27 @@ class OTreeLauncherFrame(ttk.Frame):
             else:
                 clean()
         except Exception as err:
-            self.msgbox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror(_("Something gone wrong"), unicode(err))
             clean()
 
     def do_open_terminal(self):
         try:
             core.open_terminal(self.conf.path)
         except Exception as err:
-            self.msgbox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror(_("Something gone wrong"), unicode(err))
 
     def do_open_filemanager(self):
         try:
             core.open_filemanager(self.conf.path)
         except Exception as err:
-            self.msgbox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror(_("Something gone wrong"), unicode(err))
 
     def do_clear(self):
-        msg = (
-            "Are you sure to you want to clear the"
+        msg = _(
+            "Are you sure to you want to clear the "
             "database for the project '{}'?"
         ).format(self.conf.path)
-        res = self.msgbox.askokcancel("Reset Project", msg)
+        res = self.msgbox.askokcancel(_("Reset Project"), msg)
         if res:
 
             def clean():
@@ -564,9 +567,10 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.opendirectory_button.config(state=Tkinter.DISABLED)
                 self.deploy_menu.entryconfig(0, state=Tkinter.DISABLED)
                 self.proc = core.reset_db(self.conf.path)
-                self.check_proc_end(clean, "Database Reset done", popup=True)
+                self.check_proc_end(
+                    clean, _("Database Reset done"), popup=True)
             except Exception as err:
-                self.msgbox.showerror("Something gone wrong", unicode(err))
+                self.msgbox.showerror(_("Something gone wrong"), unicode(err))
                 clean()
 
     def do_run(self):
@@ -584,7 +588,7 @@ class OTreeLauncherFrame(ttk.Frame):
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
             self.stop_button.config(state=Tkinter.DISABLED)
-            self.msgbox.showerror("Something gone wrong", unicode(err))
+            self.msgbox.showerror(_("Something gone wrong"), unicode(err))
         else:
             logger.info("Launching web browser...")
             self.root.after(
@@ -608,14 +612,12 @@ class OTreeLauncherFrame(ttk.Frame):
         self.stop_button.config(state=Tkinter.DISABLED)
 
     def do_about(self):
-        title = "About {} - v.{}".format(cons.PRJ, cons.STR_VERSION)
-        body = (
-            "{doc}\n"
+        title = _("About {} - v.{}").format(cons.PRJ, cons.STR_VERSION)
+        body = _(
+            "oTree-Launcher\n"
             "A modern open platform for social science experiments\n"
             "Version: {version}"
-        ).format(
-            prj=cons.PRJ, url=cons.URL, doc=cons.DOC,
-            version=cons.STR_VERSION
+        ).format(version=cons.STR_VERSION
         )
         self.msgbox.showinfo(title, body)
 
@@ -630,7 +632,7 @@ class OTreeLauncherFrame(ttk.Frame):
             'parent': self,
             'initialdir': self.conf.path or cons.HOME_DIR,
             'mustexist': True,
-            'title': 'Select oTree directory'
+            'title': _('Select oTree directory')
         }
         dpath = tkFileDialog.askdirectory(**options)
 
@@ -652,7 +654,7 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.proc = core.install_requirements(dpath)
                 self.check_proc_end(clean, "Virtualenv upgraded")
             except Exception as err:
-                self.msgbox.showerror("Something gone wrong", unicode(err))
+                self.msgbox.showerror(_("Something gone wrong"), unicode(err))
                 clean()
 
     def do_deploy(self):
@@ -661,7 +663,7 @@ class OTreeLauncherFrame(ttk.Frame):
             'parent': self,
             'initialdir': cons.HOME_DIR,
             'mustexist': False,
-            'title': 'Select an empty folder for your oTree project files.'
+            'title': _('Select an empty folder for your oTree project files.')
         }
         wrkpath = None
         while True:
@@ -670,8 +672,8 @@ class OTreeLauncherFrame(ttk.Frame):
                 return None
             if os.path.isdir(dpath) and len(os.listdir(dpath)):
                 options["initialdir"] = dpath
-                msg = "Please select an empty directory"
-                self.msgbox.showwarning("Directory is not empty", msg)
+                msg = _("Please select an empty directory")
+                self.msgbox.showwarning(_("Directory is not empty"), msg)
             else:
                 wrkpath = dpath
                 break
@@ -711,7 +713,7 @@ class OTreeLauncherFrame(ttk.Frame):
                     self.proc = core.reset_db(wrkpath)
                     self.check_proc_end(
                         setdir,
-                        ("Project done. Click the 'Run' button to start the "
+                        _("Project done. Click the 'Run' button to start the "
                          "server. Or, you can first modify the apps in your "
                          "project directory."), popup=True)
 
@@ -762,7 +764,7 @@ def run():
         if not frame.conf.virtualenv and not frame.check_connectivity():
             sys.exit(1)
 
-        logger.info("The oTree Launcher says 'Hello'")
+        logger.info(_("The oTree Launcher says 'Hello'"))
 
     def read_log_file():
         line = logfile_fp.readline()
