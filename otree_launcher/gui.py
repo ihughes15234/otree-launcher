@@ -517,11 +517,22 @@ class OTreeLauncherFrame(ttk.Frame):
             self.opendirectory_button.config(state=Tkinter.NORMAL)
             self.deploy_menu.entryconfig(0, state=Tkinter.NORMAL)
 
+        def reset():
+            try:
+                block()
+                self.proc = core.reset_db(self.conf.path)
+                self.check_proc_end(
+                    clean, _("New version installed"), popup=True)
+            except:
+                self.msgbox.showerror(_("Something gone wrong"), unicode(err))
+                clean()
+
+
         def reinstall():
             try:
                 block()
                 self.proc = core.install_requirements(self.conf.path)
-                self.check_proc_end(clean, "New version installed")
+                self.check_proc_end(reset, "Install done")
             except:
                 self.msgbox.showerror(_("Something gone wrong"), unicode(err))
                 clean()
