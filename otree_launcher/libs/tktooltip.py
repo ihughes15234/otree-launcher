@@ -11,7 +11,7 @@ class ToolTip(object):
     def __init__(self, widget, text, disable_text=None):
         self.widget = widget
         self.text = text
-        self.disable_text = None
+        self.disable_text = disable_text or text
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
@@ -23,7 +23,8 @@ class ToolTip(object):
 
     def showtip(self, event=None):
         "Display text in tooltip window"
-        text = self.text
+        disabled = (self.widget.cget("state").string == DISABLED)
+        text = self.disable_text if disabled else self.text
         if self.tipwindow or not text:
             return
         x, y, cx, cy = self.widget.bbox("insert")

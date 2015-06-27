@@ -123,7 +123,6 @@ class LogDisplay(ttk.LabelFrame):
         ttk.LabelFrame.__init__(self, root, **options)
         self.console = Tkinter.Text(self, height=10)
         self.console.configure(state=Tkinter.DISABLED)
-        import ipdb; ipdb.set_trace()
         self.console.configure(bg="#222222", fg="#dddddd")
         self.console.pack(fill=Tkinter.BOTH, expand=True)
 
@@ -284,7 +283,9 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts)
         self.opendirectory_button.pack(**directory_opts)
         tktooltip.ToolTip(
-            self.opendirectory_button, _("Change project"))
+            self.opendirectory_button,
+            _("Change project"),
+            _("Some operations are currently running"))
 
         self.filemanager_button = ttk.Button(
             directory_frame, text="", command=self.do_open_filemanager,
@@ -293,7 +294,8 @@ class OTreeLauncherFrame(ttk.Frame):
         self.filemanager_button.pack(**directory_opts)
         tktooltip.ToolTip(
             self.filemanager_button,
-            _("Open project directory with the file manager"))
+            _("Open project directory with the file manager"),
+            _("You need to open or create a project"))
 
         self.terminal_button = ttk.Button(
             directory_frame, text="", command=self.do_open_terminal,
@@ -301,7 +303,9 @@ class OTreeLauncherFrame(ttk.Frame):
             **directory_init_opts)
         self.terminal_button.pack(**directory_opts)
         tktooltip.ToolTip(
-            self.terminal_button, _("Open terminal with project enviroment"))
+            self.terminal_button,
+            _("Open terminal with project enviroment"),
+            _("You need to open or create a project"))
 
         # =====================================================================
         # BUTTONS
@@ -317,21 +321,27 @@ class OTreeLauncherFrame(ttk.Frame):
         self.run_button.pack(**button_opt)
         tktooltip.ToolTip(
             self.run_button,
-            _("Run the project server and open the webbrowser"))
+            _("Run the project server and open the webbrowser"),
+            _("Some operations are currently running"))
 
         self.stop_button = ttk.Button(
             buttons_frame, text=_("Stop"), command=self.do_stop,
             compound=Tkinter.LEFT, image=self.icon_stop)
         self.stop_button.config(state=Tkinter.DISABLED)
         self.stop_button.pack(**button_opt)
-        tktooltip.ToolTip(self.stop_button, _("Stop the server"))
+        tktooltip.ToolTip(
+            self.stop_button,
+            _("Stop the server"),
+            _("The server is not running"))
 
         self.clear_button = ttk.Button(
             buttons_frame, text=_("Clear Database"), command=self.do_clear,
             compound=Tkinter.LEFT, image=self.icon_clear)
         self.clear_button.pack(**button_opt)
         tktooltip.ToolTip(
-            self.clear_button, _("Restore the database of current project"))
+            self.clear_button,
+            _("Restore the database of current project"),
+            _("Some operations are currently running"))
 
         self.otree_core_selector_button = ttk.Button(
             buttons_frame, text=_("Version Select"),
@@ -340,7 +350,8 @@ class OTreeLauncherFrame(ttk.Frame):
         self.otree_core_selector_button.pack(**button_opt)
         tktooltip.ToolTip(
             self.otree_core_selector_button,
-            _("Change the oTree version of the project"))
+            _("Change the oTree version of the project"),
+            _("Some operations are currently running"))
 
         # =====================================================================
         # CONSOLE
