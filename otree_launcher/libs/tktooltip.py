@@ -8,16 +8,23 @@ from Tkinter import *
 
 class ToolTip(object):
 
-    def __init__(self, widget):
+    def __init__(self, widget, text, disable_text=None):
         self.widget = widget
+        self.text = text
+        self.disable_text = None
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
 
-    def showtip(self, text):
+        # bind
+        widget.bind('<Enter>', self.showtip)
+        widget.bind('<Leave>', self.hidetip)
+
+
+    def showtip(self, event=None):
         "Display text in tooltip window"
-        self.text = text
-        if self.tipwindow or not self.text:
+        text = self.text
+        if self.tipwindow or not text:
             return
         x, y, cx, cy = self.widget.bbox("insert")
         x = x + self.widget.winfo_rootx() + 27
@@ -32,22 +39,13 @@ class ToolTip(object):
                        "help", "noActivates")
         except TclError:
             pass
-        label = Label(tw, text=self.text, justify=LEFT,
+        label = Label(tw, text=text, justify=LEFT,
                       background="#ffffe0", relief=SOLID, borderwidth=1,
                       font=("tahoma", "8", "normal"))
         label.pack(ipadx=1)
 
-    def hidetip(self):
+    def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
-
-def create_tooltip(widget, text):
-    toolTip = ToolTip(widget)
-    def enter(event):
-        toolTip.showtip(text)
-    def leave(event):
-        toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)

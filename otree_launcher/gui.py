@@ -282,7 +282,7 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_opendir,
             **directory_init_opts)
         self.opendirectory_button.pack(**directory_opts)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.opendirectory_button, _("Change project"))
 
         self.filemanager_button = ttk.Button(
@@ -290,7 +290,7 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_filemanager,
             **directory_init_opts)
         self.filemanager_button.pack(**directory_opts)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.filemanager_button,
             _("Open project directory with the file manager"))
 
@@ -299,7 +299,7 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_terminal,
             **directory_init_opts)
         self.terminal_button.pack(**directory_opts)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.terminal_button, _("Open terminal with project enviroment"))
 
         # =====================================================================
@@ -314,7 +314,7 @@ class OTreeLauncherFrame(ttk.Frame):
             buttons_frame, text=_("Run"), command=self.do_run,
             compound=Tkinter.LEFT, image=self.icon_run)
         self.run_button.pack(**button_opt)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.run_button,
             _("Run the project server and open the webbrowser"))
 
@@ -323,13 +323,13 @@ class OTreeLauncherFrame(ttk.Frame):
             compound=Tkinter.LEFT, image=self.icon_stop)
         self.stop_button.config(state=Tkinter.DISABLED)
         self.stop_button.pack(**button_opt)
-        tktooltip.create_tooltip(self.stop_button, _("Stop the server"))
+        tktooltip.ToolTip(self.stop_button, _("Stop the server"))
 
         self.clear_button = ttk.Button(
             buttons_frame, text=_("Clear Database"), command=self.do_clear,
             compound=Tkinter.LEFT, image=self.icon_clear)
         self.clear_button.pack(**button_opt)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.clear_button, _("Restore the database of current project"))
 
         self.otree_core_selector_button = ttk.Button(
@@ -337,7 +337,7 @@ class OTreeLauncherFrame(ttk.Frame):
             command=self.do_check_otree_update, compound=Tkinter.LEFT,
             image=self.icon_core_installer)
         self.otree_core_selector_button.pack(**button_opt)
-        tktooltip.create_tooltip(
+        tktooltip.ToolTip(
             self.otree_core_selector_button,
             _("Change the oTree version of the project"))
 
