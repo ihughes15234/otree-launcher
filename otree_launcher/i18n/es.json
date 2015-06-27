@@ -13,16 +13,18 @@
         "Borrar Datos",
     "Stop":
         "Detener",
-    "Critical Error":
-        "Error cr\u00edtico",
+    "If you change the oTree version the project database will be erased\nDo you want to continue?":
+        "Si cambia la versión de oTree los datos del proyecto serán borrados\n¿Desea continuar?",
+    "Do you want to create a file with information about your enviroment to report the problem?":
+        "\u00bfDesea crear un archivo con informaci\u00f3n de contexto para reportar el problema?",
     "zip files":
         "archivos zip",
     "Exit":
         "Salir",
     "We found an space, unicode or invalid character in the path where oTree-Launcher is located.\n{}\noTree-Launcher can't run from here due limitations of Python itself. Please move oTree-Launcher to a valid path":
         "Encontramos un espacio o un caracter invalido (unicode) en el path donde se encuentra oTree-Launcher.\n{}\noTree-Launcher no puede ejecutarse por limitaciones del mismo Python. Por favor mueva oTree-Launcher a un directorio v\u00e1lido",
-    "Critical Error!!!\nThe oTree-Launcher will be closed":
-        "\u00a1\u00a1\u00a1Error Cr\u00edtico!!!\n",
+    "Project done. Click the 'Run' button to start the server. Or, you can first modify the apps in your project directory.":
+        "Su proyecto est\u00e1 listo. Haga click en el bot\u00f3n 'Ejecutar' para iniciar el servidor. O tambi\u00e9n puede primero modificar las aplicaciones en el directorio del proyecto",
     "oTree-Launcher\nA modern open platform for social science experiments\nVersion: {version}":
         "oTree-Launcher\nUna plataforma moderna para experimentos de ciencias sociales\nVersi\u00f3n: {version}",
     "Save Error Information":
@@ -50,7 +52,7 @@
     "Projects":
         "Proyectos",
     "The server is not running":
-        "El servidor no está funcionando",
+        "El servidor no est\u00e1 funcionando",
     "Please select an empty directory":
         "Por favor seleccione un directorio vac\u00edo",
     "About":
@@ -69,8 +71,8 @@
         "Seleccione la version de oTree",
     "The oTree Launcher says 'Hello'":
         "oTree Launcher dice 'Hola'",
-    "Project done. Click the 'Run' button to start the server. Or, you can first modify the apps in your project directory.":
-        "Su proyecto est\u00e1 listo. Haga click en el bot\u00f3n 'Ejecutar' para iniciar el servidor. O tambi\u00e9n puede primero modificar las aplicaciones en el directorio del proyecto",
+    "Stop the server":
+        "Detener el servidor",
     "Error":
         "Error",
     "This is your first time running the oTree launcher.\nInitial setup may take a few minutes.\n":
@@ -81,26 +83,28 @@
         "Necesias abrir o crear un proyecto",
     "Change project":
         "Cambiar de proyecto",
-    "Open project directory with the file manager":
-        "Abrir el diretorio del proyecto con el explorador de archivos",
     "Something gone wrong!!! Please check the console":
         "\u00a1Algo fue mal! Por favor verifica la consola",
+    "Open project directory with the file manager":
+        "Abrir el diretorio del proyecto con el explorador de archivos",
+    "The change of the oTree version only affect the current Project":
+        "El cambio de la versi\u00f3n de oTree solo afectar\u00e1 al proyecto actual",
     "Your version of oTree-Launcher ({}) is obsolete\nDo you want to download new {} version?":
         "Su versi\u00f3n de oTree-Launcher ({}) es obsolete\n\u00bfDesea descargar la nueva versi\u00f3n {}?",
     "Please attach '{}' and send email to '{}' report":
         "Por favor adjunte '{}' y envie un email a '{}' para reportar el error",
-    "The change of the oTree version only affect the current Project":
-        "El cambio de la versi\u00f3n de oTree solo afectar\u00e1 al proyecto actual",
-    "Do you want to create a file with information about your enviroment to report the problem?":
-        "\u00bfDesea crear un archivo con informaci\u00f3n de contexto para reportar el problema?",
-    "Reset Project":
-        "Restaurar datos del proyecto",
+    "Critical Error":
+        "Error cr\u00edtico",
     "New version installed":
         "Nueva version instalada",
+    "Reset Project":
+        "Restaurar datos del proyecto",
     "Change the oTree version of the project":
         "Cambiar la version de oTree del proyecto",
     "Run the project server and open the webbrowser":
         "Ejecutar el servidor del proyecto y abrir el navegador web",
+    "Warning":
+        "Cuidado",
     "Select oTree directory":
         "Seleccione un directorio de oTree",
     "all files":
@@ -113,6 +117,6 @@
         "Algunas operaciones estan en curso",
     "The Python version {} ({}) is not suitable to run oTree-Launcher":
         "La version {} de Python ({}) no sirve para ejecutar oTree-Launcher",
-    "Stop the server":
-        "Detener el servidor"
+    "Critical Error!!!\nThe oTree-Launcher will be closed":
+        "\u00a1\u00a1\u00a1Error Cr\u00edtico!!!\n"
 }

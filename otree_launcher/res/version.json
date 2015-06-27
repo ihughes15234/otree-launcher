@@ -1,5 +1,5 @@
 {
-    "version":  ["0", "7", "rc2"],
+    "version":  ["0", "7", "rc3"],
     "mandatory": {
         "condition": "<",
         "value": ["0", "6", "1"]

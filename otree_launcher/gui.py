@@ -163,10 +163,10 @@ class OTreeCoreVersionDialog(object):
         # COMBO WIDGETS
         pack_opts = {"padx": 15, "pady": 5}
 
-        self.versions_combo_label = Tkinter.Label(
+        self.message_label = Tkinter.Label(
             self.top, text=_("The change of the oTree version only affect the "
                              "current Project"))
-        self.versions_combo_label.pack(**pack_opts)
+        self.message_label.pack(**pack_opts)
 
         self._selected_version = Tkinter.StringVar()
         self.versions_combo = ttk.Combobox(
@@ -433,15 +433,13 @@ class OTreeLauncherFrame(ttk.Frame):
 
             msg = _(
                 "This is your first time running the oTree launcher.\n"
-                "Initial setup may take a few minutes.\n"
-            )
+                "Initial setup may take a few minutes.\n")
             self.msgbox.showinfo(_("First run setup"), msg)
             self.proc = core.create_virtualenv()
 
             setup_complete_msg = _(
                 "Initial setup complete.\n"
-                "Click on the 'Projects' menu to create a new deploy."
-            )
+                "Click on the 'Projects' menu to create a new deploy.")
 
             self.check_proc_end(clean, setup_complete_msg,
                                 popup=True, exit_on_fail=True)
@@ -545,13 +543,27 @@ class OTreeLauncherFrame(ttk.Frame):
                 self.root, version, available_versions)
             self.root.wait_window(dialog.top)
 
-            if dialog.selected is not None and dialog.selected != version:
-                self.proc = core.change_otree_core_version(
-                    self.conf.path, dialog.selected
-                )
-                self.check_proc_end(reinstall, "Version Changed")
-            else:
+            if dialog.selected is None or dialog.selected == version:
+                # if the dialog is closed or select the same version
                 clean()
+                return
+
+            msg = _(
+                "If you change the oTree version the project database will be "
+                "erased\n"
+                "Do you want to continue?")
+            response = self.msgbox.askyesno(
+                message=msg, icon='warning', title=_('Warning'))
+            if not response:
+                # if user don't want to loose their data
+                clean()
+                return
+
+            self.proc = core.change_otree_core_version(
+                self.conf.path, dialog.selected
+            )
+            self.check_proc_end(reinstall, "Version Changed")
+
         except Exception as err:
             self.msgbox.showerror(_("Something gone wrong"), unicode(err))
             clean()
