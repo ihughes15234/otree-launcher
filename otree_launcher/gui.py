@@ -123,6 +123,7 @@ class LogDisplay(ttk.LabelFrame):
         ttk.LabelFrame.__init__(self, root, **options)
         self.console = Tkinter.Text(self, height=10)
         self.console.configure(state=Tkinter.DISABLED)
+        import ipdb; ipdb.set_trace()
         self.console.configure(bg="#222222", fg="#dddddd")
         self.console.pack(fill=Tkinter.BOTH, expand=True)
 
